@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WEB VIII B</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=IBM+Plex+Mono:wght@400;700&family=Noto+Sans:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ===== ANIMATED GRID BACKGROUND ===== -->
+<canvas id="grid-canvas"></canvas>
+
+<!-- ===== MUSIC NOTES CONTAINER ===== -->
+<div id="music-notes-container"></div>
+
+<!-- ===== BACKGROUND MUSIC ===== -->
+<audio id="bg-music" loop>
+  <source src="assets/almusic.mp3" type="audio/mpeg" />
+</audio>
+<audio id="bg-music" loop>
+  <source src="https://files.catbox.moe/til5wh.mp3" type="audio/mpeg" />
+</audio>
+
+<!-- ===== FAB MENU (kanan bawah) ===== -->
+<div class="fab-wrap" id="fab-wrap">
+  <div class="fab-sub" id="fab-sub-music">
+    <button class="fab-btn" id="music-btn" onclick="toggleMusic()" title="Play / Pause Music">
+      <i class="fa-solid fa-music" id="music-icon"></i>
+      <span class="bar-icon" aria-hidden="true">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+      </span>
+    </button>
+  </div>
+  <div class="fab-sub" id="fab-sub-theme">
+    <button class="fab-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle Dark Mode">
+      <i class="fa-solid fa-moon"></i>
+    </button>
+  </div>
+  <button class="fab-main" id="fab-main" onclick="toggleFab()" title="Menu">
+    <i class="fa-solid fa-sliders"></i>
+  </button>
+</div>
+
+<!-- ===== HERO BANNER ===== -->
+<div class="hero">
+  <video 
+    id="hero-video" 
+    autoplay 
+    muted 
+    loop 
+    playsinline 
+    preload="auto"
+    poster="assets/banner.jpg">
+    <source src="assets/alvideo.mp4" type="video/mp4" />
+  </video>
+  <img class="hero-img" id="hero-img" src="assets/alvideo.jpg" alt="Banner" style="display:none;" />
+  <div class="hero-overlay"></div>
+</div>
+
+<!-- ===== MAIN CONTENT ===== -->
+<div class="container">
+
+  <div class="avatar-wrap">
+    <div class="avatar-ring"></div>
+    <div class="avatar-frame">
+      <img id="avatar-img” src=”https://img2.pixhost.to/images/7245/715856589_alip-1776432416213.jpg" alt="Profile Photo" />
+    </div>
+  </div>
+
+  <div class="name-block">
+    <h1>VIII B</h1>
+    <p class="subtitle">Stay calm &amp; Stay consistent</p>
+  </div>
+
+  <div class="socials">
+    <a class="social-btn" href="https://wa.me/628980702410" target="_blank" rel="noopener" title="WhatsApp">
+      <i class="fa-brands fa-whatsapp"></i>
+    </a>
+    <a class="social-btn" href="https://www.instagram.com/class8bright_star?igsh=cXYwb3Y0YnNyOGhk&utm_source=qr" target="_blank" rel="noopener" title="Instagram">
+      <i class="fa-brands fa-instagram"></i>
+    </a>
+    <a class="social-btn" href="https://whatsapp.com/channel/0029VbBKBD9F6smwoAydKr3x" target="_blank" rel="noopener" title="channel">
+      <i class="fa-solid fa-bullhorn"></i>
+    </a>
+    <a class="social-btn" href="https://www.tiktok.com/@class8brightstar?_r=1&_t=ZS-968K7USAJUL" target="_blank" rel="noopener" title="TikTok">
+      <i class="fa-brands fa-tiktok"></i>
+    </a>
+  </div>
+
+  <div class="section-sep"><span>Info</span></div>
+
+  <div class="card">
+    <div class="card-title">
+      <i class="fa-solid fa-book-open-reader"></i> Quotes 
+    </div>
+    <p class="about-text">
+      "menjadi lebih baik agar menjadi yang terbaik"
+    </p>
+    <span class="wm-signature">— THE VIII B</span>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <i class="fa-solid fa-id-card"></i> Personal Information
+    </div>
+    <div class="tags">
+      <span class="tag"><i class="fa-solid fa-globe"></i> Indonesia</span>
+      <span class="tag"><i class="fa-solid fa-door-closed"></i> Nolep</span>
+      <span class="tag"><i class="fa-solid fa-cat"></i> Cat Lovers</span>
+      <span class="tag"><i class="fa-solid fa-cake-candles"></i> 2 years</span>
+      <span class="tag"><i class="fa-solid fa-wallet"></i> kumaha bendahara</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <i class="fa-solid fa-fingerprint"></i> Online Identity
+    </div>
+    </div>
+    <div class="wali-row">
+      <div class="wali-avatar">👩‍🏫</div>
+      <div class="wali-info">
+        <div class="wali-name"> Bapak Didin Tahyudin</div>
+        <div class="wali-role">WALI KELAS · VII B</div>
+        <a class="wali-wa" href="https://wa.me/6283805790033" target="_blank">
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <i class="fa-solid fa-list"></i> LIFESTYLE
+    </div>
+
+<footer>
+  <i class="fa-solid fa-circle" style="opacity:0.35;margin-right:8px;"></i>
+  PROFILE • IDENTITY • ARCHIVE
+  <i class="fa-solid fa-circle" style="opacity:0.35;margin-left:8px;"></i>
+</footer>
+
+<script>
+// ─── ANIMATED GRID CANVAS ─────────────────────────
+const canvas = document.getElementById('grid-canvas');
+const ctx = canvas.getContext('2d');
+let gridOffset = 0;
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+function drawGrid() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const size = 38;
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  ctx.strokeStyle = isDark ? 'rgba(180,175,168,0.055)' : 'rgba(30,28,26,0.06)';
+  ctx.lineWidth = 1;
+  const offset = gridOffset % size;
+  for (let x = -size + offset; x < canvas.width + size; x += size) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+  }
+  for (let y = -size + offset; y < canvas.height + size; y += size) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+  }
+  gridOffset += 0.18;
+  requestAnimationFrame(drawGrid);
+}
+drawGrid();
+
+// ─── VIDEO FALLBACK ───────────────────────────────
+const heroVideo = document.getElementById('hero-video');
+const heroImg   = document.getElementById('hero-img');
+if (heroVideo) {
+  heroVideo.addEventListener('error', () => { heroVideo.style.display='none'; heroImg.style.display='block'; });
+  setTimeout(() => {
+    if (heroVideo.readyState === 0) { heroVideo.style.display='none'; heroImg.style.display='block'; }
+  }, 2000);
+}
+
+// ─── AVATAR FALLBACK ──────────────────────────────
+const avatarImg = document.getElementById('avatar-img');
+if (avatarImg) {
+  avatarImg.addEventListener('error', () => {
+    avatarImg.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='110' height='110' viewBox='0 0 110 110'%3E%3Crect width='110' height='110' fill='%23e4e2dc'/%3E%3Ccircle cx='55' cy='40' r='18' fill='%23aaa'/%3E%3Cellipse cx='55' cy='86' rx='28' ry='20' fill='%23aaa'/%3E%3C/svg%3E";
+  });
+}
+
+// ─── MUSIC NOTES ──────────────────────────────────
+const notesContainer = document.getElementById('music-notes-container');
+let noteInterval = null;
+const noteSymbols = ['♩','♪','♫','♬'];
+
+function spawnNote() {
+  const note = document.createElement('span');
+  note.className = 'music-note-fall';
+  note.textContent = noteSymbols[Math.floor(Math.random() * noteSymbols.length)];
+  note.style.left = (Math.random() * 92 + 2) + 'vw';
+  note.style.fontSize = (Math.random() * 12 + 10) + 'px';
+  note.style.animationDuration = (Math.random() * 4 + 5) + 's';
+  note.style.opacity = (Math.random() * 0.2 + 0.08).toFixed(2);
+  notesContainer.appendChild(note);
+  setTimeout(() => note.remove(), 10000);
+}
+
+// ─── MUSIC TOGGLE ─────────────────────────────────
+const audio    = document.getElementById('bg-music');
+const musicBtn = document.getElementById('music-btn');
+let isPlaying  = false;
+
+function toggleMusic() {
+  if (isPlaying) {
+    audio.pause();
+    musicBtn.classList.remove('playing');
+    isPlaying = false;
+    clearInterval(noteInterval);
+    noteInterval = null;
+  } else {
+    audio.play()
+      .then(() => {
+        musicBtn.classList.add('playing');
+        isPlaying = true;
+        noteInterval = setInterval(spawnNote, 700);
+      })
+      .catch(err => console.warn('Audio play blocked:', err));
+  }
+}
+
+// ─── DARK MODE TOGGLE ─────────────────────────────
+const html     = document.documentElement;
+const themeBtn = document.getElementById('theme-btn');
+const savedTheme = localStorage.getItem('meg-theme') || 'light';
+html.setAttribute('data-theme', savedTheme);
+updateThemeIcon(savedTheme);
+
+function toggleTheme() {
+  const current = html.getAttribute('data-theme');
+  const next    = current === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  localStorage.setItem('meg-theme', next);
+  updateThemeIcon(next);
+}
+
+function updateThemeIcon(theme) {
+  const icon = themeBtn.querySelector('i');
+  icon.className = theme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+}
+
+// ─── FAB TOGGLE ───────────────────────────────────
+const fabWrap = document.getElementById('fab-wrap');
+let fabOpen = false;
+
+function toggleFab() {
+  fabOpen = !fabOpen;
+  fabWrap.classList.toggle('open', fabOpen);
+}
+
+document.addEventListener('click', (e) => {
+  if (fabOpen && !fabWrap.contains(e.target)) {
+    fabOpen = false;
+    fabWrap.classList.remove('open');
+  }
+});
+
+// ─── SCROLL FADE-IN FOR CARDS ─────────────────────
+const cards = document.querySelectorAll('.card');
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
+  });
+}, { threshold: 0.08 });
+cards.forEach((c, i) => { c.style.transitionDelay = `${i * 0.07}s`; io.observe(c); });
+</script>
+
+</body>
+</html>
