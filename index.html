@@ -1,556 +1,1056 @@
 <!DOCTYPE html>
-<html lang="id" data-theme="dark">
-
+<html lang="id" data-theme="light" data-lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VIIIB — SMPIT ALAMY</title>
 
-<title>VIII B • SMPIT ALAMY</title>
-
-<link rel="stylesheet" href="style.css">
-
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=IBM+Plex+Mono:wght@400;700&family=Noto+Sans:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
 
-<!-- ================= BACKGROUND ================= -->
-
+<!-- ─── ANIMATED GRID CANVAS ─── -->
 <canvas id="grid-canvas"></canvas>
 
-<!-- ================= MUSIC ================= -->
+<!-- ─── MUSIC NOTES LAYER ─── -->
+<div id="music-notes-container"></div>
 
+<!-- ─── BACKGROUND MUSIC ─── -->
 <audio id="bg-music" loop>
-<source src="YOUR-MUSIC-LINK.mp3" type="audio/mpeg">
+  <source id="music-src" src="" type="audio/mpeg" />
 </audio>
 
-<!-- ================= HERO ================= -->
-
-<div class="hero">
-
-<video autoplay muted loop playsinline>
-<source src="YOUR-VIDEO-LINK.mp4" type="video/mp4">
-</video>
-
-<div class="hero-overlay"></div>
-
+<!-- ═══════════════════════════════════════
+     FAB MENU  (kanan bawah)
+═══════════════════════════════════════ -->
+<div class="fab-wrap" id="fab-wrap">
+  <!-- Sub: Bahasa -->
+  <div class="fab-sub" id="fab-sub-lang">
+    <button class="fab-btn fab-btn--lang" id="lang-btn" onclick="cycleLang()" title="Ganti Bahasa">
+      <span id="lang-indicator">ID</span>
+    </button>
+  </div>
+  <!-- Sub: Musik -->
+  <div class="fab-sub" id="fab-sub-music">
+    <button class="fab-btn" id="music-btn" onclick="toggleMusic()" title="Play / Pause Music">
+      <i class="fa-solid fa-music" id="music-icon"></i>
+      <span class="bar-icon" aria-hidden="true">
+        <span class="bar"></span><span class="bar"></span>
+        <span class="bar"></span><span class="bar"></span>
+      </span>
+    </button>
+  </div>
+  <!-- Sub: Tema -->
+  <div class="fab-sub" id="fab-sub-theme">
+    <button class="fab-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle Dark Mode">
+      <i class="fa-solid fa-moon"></i>
+    </button>
+  </div>
+  <!-- Tombol utama -->
+  <button class="fab-main" id="fab-main" onclick="toggleFab()" title="Menu">
+    <i class="fa-solid fa-sliders"></i>
+  </button>
 </div>
 
-<!-- ================= CONTAINER ================= -->
-
-<div class="container">
-
-<!-- ================= AVATAR ================= -->
-
-<div class="avatar-wrap">
-
-<div class="avatar-ring"></div>
-
-<div class="avatar-frame">
-<img src="YOUR-LOGO.jpg">
+<!-- ═══════════════════════════════════════
+     PAGE NAV  (3 titik, kiri bawah)
+═══════════════════════════════════════ -->
+<div class="page-nav-wrap" id="pageNavWrap">
+  <div class="page-nav-menu" id="pageNavMenu">
+    <button class="nav-item active" onclick="goPage('home')" id="nav-btn-home">
+      <i class="fa-solid fa-house"></i>
+      <span data-i18n="nav_home">Beranda</span>
+    </button>
+    <button class="nav-item" onclick="goPage('students')" id="nav-btn-students">
+      <i class="fa-solid fa-list-ol"></i>
+      <span data-i18n="nav_students">Absensi</span>
+    </button>
+    <button class="nav-item" onclick="goPage('memories')" id="nav-btn-memories">
+      <i class="fa-solid fa-camera-retro"></i>
+      <span data-i18n="nav_memories">Kenangan</span>
+    </button>
+  </div>
+  <button class="page-nav-btn" onclick="togglePageNav()" title="Navigasi Halaman">
+    <i class="fa-solid fa-ellipsis-vertical"></i>
+  </button>
 </div>
 
+<!-- ─── PAGE INDICATOR DOTS ─── -->
+<div class="page-dots" id="pageDots">
+  <span class="dot active" onclick="goPage('home')" title="Beranda"></span>
+  <span class="dot" onclick="goPage('students')" title="Absensi"></span>
+  <span class="dot" onclick="goPage('memories')" title="Kenangan"></span>
 </div>
 
-<!-- ================= TITLE ================= -->
+<!-- ═══════════════════════════════════════
+     HALAMAN 1 — BERANDA
+═══════════════════════════════════════ -->
+<div class="page active" id="page-home">
 
-<div class="name-block">
+  <!-- HERO BANNER -->
+  <div class="hero">
+    <video id="hero-video" autoplay muted loop playsinline preload="auto">
+      <source id="hero-video-src" src="" type="video/mp4" />
+    </video>
+    <img class="hero-img" id="hero-img" src="" alt="Banner" style="display:none;" />
+    <div class="hero-overlay"></div>
+  </div>
 
-<h1>VIII B</h1>
+  <!-- MAIN CONTENT -->
+  <div class="container">
 
-<p class="subtitle">
-SMPIT ALAMY • ANGKATAN 12
-</p>
+    <!-- AVATAR -->
+    <div class="avatar-wrap">
+      <div class="avatar-ring"></div>
+      <div class="avatar-frame">
+        <img id="avatar-img" src="" alt="Kelas VIIIB" />
+      </div>
+    </div>
 
+    <!-- NAMA KELAS -->
+    <div class="name-block">
+      <h1 data-i18n="title">KELAS VIIIB</h1>
+      <p class="subtitle">SMPIT ALAMY</p>
+      <p class="subtitle-small">
+        <span data-i18n="label_angkatan">Angkatan</span> 12
+        &nbsp;·&nbsp;
+        <span data-i18n="label_walas">Walas:</span> Pa Didin Tahyudin
+      </p>
+    </div>
+
+    <!-- SOCIAL BUTTONS (tanpa Telegram) -->
+    <div class="socials">
+      <a class="social-btn" id="link-wa" href="https://wa.me/6283805790033" target="_blank" rel="noopener" title="WhatsApp Group">
+        <i class="fa-brands fa-whatsapp"></i>
+      </a>
+      <a class="social-btn" id="link-ig" href="https://www.instagram.com/class8bright_star?igsh=cXYwb3Y0YnNyOGhk&utm_source=qr" target="_blank" rel="noopener" title="Instagram">
+        <i class="fa-brands fa-instagram"></i>
+      </a>
+      <a class="social-btn" id="link-tiktok" href="https://www.tiktok.com/@class8brightstar?_r=1&_t=ZS-968K7USAJUL" target="_blank" rel="noopener" title="TikTok">
+        <i class="fa-brands fa-tiktok"></i>
+      </a>
+      <a class="social-btn" id="link-channel" href="https://whatsapp.com/channel/0029VbBKBD9F6smwoAydKr3x" target="_blank" rel="noopener" title="Channel WA">
+        <i class="fa-solid fa-bullhorn"></i>
+      </a>
+      <a class="social-btn" id="link-group" href="https://chat.whatsapp.com/DEX62QPp12nE86mGyS3grg" target="_blank" rel="noopener" title="Grup WA">
+        <i class="fa-solid fa-people-group"></i>
+      </a>
+    </div>
+
+    <div class="section-sep"><span data-i18n="label_info">Info</span></div>
+
+    <!-- QUOTES -->
+    <div class="card">
+      <div class="card-title">
+        <i class="fa-solid fa-book-open-reader"></i>
+        <span data-i18n="card_quotes">Quotes</span>
+      </div>
+      <p class="about-text" data-i18n="quote_text">
+        "Tuntutlah ilmu dari buaian hingga liang lahat —<br>
+        karena ilmu adalah cahaya,<br>
+        dan cahaya tak pernah padam."
+      </p>
+      <span class="wm-signature">— VIIIB · SMPIT ALAMY · Angkatan 12</span>
+    </div>
+
+    <!-- INFO KELAS -->
+    <div class="card">
+      <div class="card-title">
+        <i class="fa-solid fa-id-card"></i>
+        <span data-i18n="card_info">Informasi Kelas</span>
+      </div>
+      <div class="tags">
+        <span class="tag"><i class="fa-solid fa-school"></i> <span data-i18n="tag_sekolah">SMPIT ALAMY</span></span>
+        <span class="tag"><i class="fa-solid fa-chalkboard"></i> <span data-i18n="tag_kelas">Kelas VIIIB</span></span>
+        <span class="tag"><i class="fa-solid fa-layer-group"></i> <span data-i18n="tag_angkatan">Angkatan 12</span></span>
+        <span class="tag"><i class="fa-solid fa-calendar-days"></i> <span data-i18n="tag_tahun">2024/2027</span></span>
+        <span class="tag"><i class="fa-solid fa-users"></i> <span data-i18n="tag_siswa">32 Siswa</span></span>
+        <span class="tag"><i class="fa-solid fa-globe"></i> Indonesia</span>
+      </div>
+    </div>
+
+    <!-- WALI KELAS -->
+    <div class="card">
+      <div class="card-title">
+        <i class="fa-solid fa-person-chalkboard"></i>
+        <span data-i18n="card_wali">Wali Kelas</span>
+      </div>
+      <div class="wali-info">
+        <div class="wali-avatar">
+          <img id="wali-img" src="" alt="Wali Kelas"
+            onerror="this.style.display='none';document.getElementById('wali-ph').style.display='flex';" />
+          <div class="wali-avatar-placeholder" id="wali-ph">
+            <i class="fa-solid fa-user-tie"></i>
+          </div>
+        </div>
+        <div class="wali-detail">
+          <div class="wali-name">Pa Didin Tahyudin</div>
+          <div class="wali-meta"><span data-i18n="wali_label">Wali Kelas</span> · VIIIB</div>
+          <a class="wali-contact" id="link-wali-wa" href="https://wa.me/6283805790033" target="_blank" rel="noopener">
+            <i class="fa-brands fa-whatsapp"></i>
+            <span data-i18n="wali_contact">Hubungi Walas</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- LIFESTYLE -->
+    <div class="card">
+      <div class="card-title">
+        <i class="fa-solid fa-list"></i>
+        <span data-i18n="card_lifestyle">Keseharian</span>
+      </div>
+      <div class="tags">
+        <span class="skill-tag"><i class="fa-solid fa-users"></i> <span data-i18n="ls_kompak">Kompak</span></span>
+        <span class="skill-tag"><i class="fa-solid fa-book"></i> <span data-i18n="ls_belajar">Belajar</span></span>
+        <span class="skill-tag"><i class="fa-solid fa-futbol"></i> <span data-i18n="ls_olahraga">Olahraga</span></span>
+        <span class="skill-tag"><i class="fa-solid fa-music"></i> <span data-i18n="ls_musik">Musik</span></span>
+        <span class="skill-tag"><i class="fa-solid fa-gamepad"></i> <span data-i18n="ls_gaming">Gaming</span></span>
+      </div>
+    </div>
+
+  </div><!-- /container -->
+
+  <footer>
+    <i class="fa-solid fa-circle" style="opacity:0.35;margin-right:8px;"></i>
+    SMPIT ALAMY · KELAS VIIIB · ANGKATAN 12
+    <i class="fa-solid fa-circle" style="opacity:0.35;margin-left:8px;"></i>
+    <br>
+    <a href="https://alstecu24.vercel.app" target="_blank" class="dev-link" rel="noopener">
+      <i class="fa-solid fa-code"></i> developer
+    </a>
+  </footer>
+
+</div><!-- /page-home -->
+
+
+<!-- ═══════════════════════════════════════
+     HALAMAN 2 — DAFTAR SISWA
+═══════════════════════════════════════ -->
+<div class="page" id="page-students">
+
+  <div class="page-header">
+    <h2 class="page-title" data-i18n="student_title">Daftar Absensi</h2>
+    <p class="page-subtitle">VIIIB · SMPIT ALAMY · <span data-i18n="tag_angkatan">Angkatan 12</span></p>
+  </div>
+
+  <div class="container" style="padding-top:24px;">
+    <div class="student-list" id="student-list"></div>
+  </div>
+
+  <footer>
+    <i class="fa-solid fa-circle" style="opacity:0.35;margin-right:8px;"></i>
+    SMPIT ALAMY · VIIIB · 32 SISWA
+    <i class="fa-solid fa-circle" style="opacity:0.35;margin-left:8px;"></i>
+    <br>
+    <a href="https://alstecu24.vercel.app" target="_blank" class="dev-link" rel="noopener">
+      <i class="fa-solid fa-code"></i> developer
+    </a>
+  </footer>
+
+</div><!-- /page-students -->
+
+
+<!-- ═══════════════════════════════════════
+     HALAMAN 3 — KENANGAN
+═══════════════════════════════════════ -->
+<div class="page" id="page-memories">
+
+  <div class="page-header">
+    <h2 class="page-title" data-i18n="memories_title">Kenangan Indah</h2>
+    <p class="page-subtitle">VIIIB · SMPIT ALAMY</p>
+  </div>
+
+  <div class="container" style="padding-top:24px;">
+
+    <!-- VIDEO KENANGAN -->
+    <div class="memories-video-wrap">
+      <video id="memories-video" autoplay muted loop playsinline>
+        <source id="memories-video-src" src="" type="video/mp4" />
+      </video>
+      <div class="memories-video-placeholder" id="mem-placeholder">
+        <i class="fa-solid fa-film"></i>
+        <span data-i18n="mem_video_placeholder">Video Kenangan</span>
+      </div>
+      <div class="memories-video-overlay">
+        <span data-i18n="memories_title">Kenangan Indah</span>
+      </div>
+    </div>
+
+    <!-- GALERI FOTO -->
+    <div class="section-sep" style="margin-top:22px;">
+      <span data-i18n="label_gallery">Galeri Foto</span>
+    </div>
+
+    <div class="photo-grid" id="photo-grid"></div>
+
+    <!-- CAPTION KENANGAN -->
+    <div class="card" style="margin-top:16px;">
+      <div class="card-title">
+        <i class="fa-solid fa-heart"></i>
+        <span data-i18n="memories_caption_title">Momen Berharga</span>
+      </div>
+      <p class="about-text" data-i18n="memories_caption">
+        "Setiap momen bersama adalah kenangan yang tak tergantikan.
+        Terima kasih sudah menjadi bagian dari cerita ini."
+      </p>
+      <span class="wm-signature">— VIIIB · SMPIT ALAMY · Angkatan 12</span>
+    </div>
+
+  </div>
+
+  <footer>
+    <i class="fa-solid fa-circle" style="opacity:0.35;margin-right:8px;"></i>
+    SMPIT ALAMY · VIIIB · ANGKATAN 12
+    <i class="fa-solid fa-circle" style="opacity:0.35;margin-left:8px;"></i>
+    <br>
+    <a href="https://alstecu24.vercel.app" target="_blank" class="dev-link" rel="noopener">
+      <i class="fa-solid fa-code"></i> developer
+    </a>
+  </footer>
+
+</div><!-- /page-memories -->
+
+<!-- ════════════════════════════════════════════════════════════════
+     LIGHTBOX (photo viewer)
+════════════════════════════════════════════════════════════════ -->
+<div id="lightbox" class="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">
+    <i class="fa-solid fa-xmark"></i>
+  </button>
+  <img id="lightbox-img" src="" alt="Foto" />
 </div>
 
-<!-- ================= SOCIAL ================= -->
-
-<div class="socials">
-
-<a class="social-btn" href="https://wa.me/62812">
-<i class="fa-brands fa-whatsapp"></i>
-</a>
-
-<a class="social-btn" href="https://instagram.com">
-<i class="fa-brands fa-instagram"></i>
-</a>
-
-<a class="social-btn" href="https://tiktok.com">
-<i class="fa-brands fa-tiktok"></i>
-</a>
-
-<a class="social-btn" href="https://whatsapp.com/channel">
-<i class="fa-solid fa-bullhorn"></i>
-</a>
-
+<!-- ════════════════════════════════════════════════════════════════
+     STUDENT MESSAGE MODAL
+════════════════════════════════════════════════════════════════ -->
+<div id="student-modal" class="student-modal" onclick="closeStudentModal(event)">
+  <div class="student-modal-box">
+    <button class="student-modal-close" onclick="closeStudentModal()">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+    <div class="student-modal-no" id="modal-no">01</div>
+    <div class="student-modal-name" id="modal-name">NAMA SISWA</div>
+    <div class="student-modal-divider"></div>
+    <div class="student-modal-quote">
+      <i class="fa-solid fa-quote-left student-modal-qmark"></i>
+      <p id="modal-msg">Pesan siswa tampil di sini.</p>
+      <i class="fa-solid fa-quote-right student-modal-qmark student-modal-qmark--right"></i>
+    </div>
+    <div class="student-modal-footer">VIIIB · SMPIT ALAMY</div>
+  </div>
 </div>
 
-<!-- ================= INFO ================= -->
-
-<div class="section-sep">
-<span>Info</span>
-</div>
-
-<!-- ================= QUOTES ================= -->
-
-<div class="card">
-
-<div class="card-title">
-<i class="fa-solid fa-quote-left"></i>
-Quotes Kelas
-</div>
-
-<p class="about-text">
-"Kami bukan yang tercepat,
-bukan yang terpintar,
-tapi kami yang paling keras berusaha."
-</p>
-
-</div>
-
-<!-- ================= INFO KELAS ================= -->
-
-<div class="card">
-
-<div class="card-title">
-<i class="fa-solid fa-users"></i>
-Info Kelas
-</div>
-
-<div class="tags">
-
-<span class="tag">🏫 SMPIT ALAMY</span>
-
-<span class="tag">💻 VIII B</span>
-
-<span class="tag">👥 32 Murid</span>
-
-<span class="tag">📅 Angkatan 12</span>
-
-<span class="tag">☕ Matcha & Code</span>
-
-</div>
-
-</div>
-
-<!-- ================= WALAS ================= -->
-
-<div class="card">
-
-<div class="card-title">
-<i class="fa-solid fa-chalkboard-user"></i>
-Wali Kelas
-</div>
-
-<center>
-
-<img
-src="YOUR-WALAS.jpg"
-style="
-width:90px;
-height:90px;
-border-radius:50%;
-object-fit:cover;
-border:2px solid var(--border);
-margin-bottom:15px;
-">
-
-<h2 style="
-font-family:var(--font-display);
-letter-spacing:3px;
-font-size:2rem;
-">
-PA DIDIN TAHYUDIN
-</h2>
-
-<p style="
-font-family:var(--font-mono);
-font-size:0.7rem;
-color:var(--muted);
-margin-bottom:15px;
-">
-WALI KELAS • VIII B
-</p>
-
-<a href="https://wa.me/62812"
-style="
-display:inline-block;
-padding:10px 16px;
-background:#123b28;
-border:2px solid #1b8f55;
-color:#67ffaf;
-border-radius:10px;
-text-decoration:none;
-font-family:var(--font-mono);
-">
-
-<i class="fa-brands fa-whatsapp"></i>
-Hubungi Wali Kelas
-
-</a>
-
-</center>
-
-</div>
-
-<!-- ================= TITLE SISWA ================= -->
-
-<div class="section-title">
-
-<span>32 MURID</span>
-
-<p>VIII B • SMPIT ALAMY</p>
-
-</div>
-
-<!-- ================= STUDENT GRID ================= -->
-
-<div class="student-grid">
-
-<!-- 01 -->
-<div class="student-card">
-<span class="student-number">01</span>
-<img class="student-photo" src="foto1.jpg">
-<h3>ADHYASTA NARARYA AL JAZALI</h3>
-<p>"Tenang bukan berarti lemah."</p>
-</div>
-
-<!-- 02 -->
-<div class="student-card">
-<span class="student-number">02</span>
-<img class="student-photo" src="foto2.jpg">
-<h3>AGUNG MAULANA IBRAHIM</h3>
-<p>"Proses gak pernah bohong."</p>
-</div>
-
-<!-- 03 -->
-<div class="student-card">
-<span class="student-number">03</span>
-<img class="student-photo" src="foto3.jpg">
-<h3>ARFA HAIDAR RAISSA</h3>
-<p>"Diam sambil berkembang."</p>
-</div>
-
-<!-- 04 -->
-<div class="student-card">
-<span class="student-number">04</span>
-<img class="student-photo" src="foto4.jpg">
-<h3>DAFIN AZKA</h3>
-<p>"Mimpi besar dimulai kecil."</p>
-</div>
-
-<!-- 05 -->
-<div class="student-card">
-<span class="student-number">05</span>
-<img class="student-photo" src="foto5.jpg">
-<h3>DHEVANO ARKA PUTRA PRATAMA</h3>
-<p>"Fokus dulu, pamer nanti."</p>
-</div>
-
-<!-- 06 -->
-<div class="student-card">
-<span class="student-number">06</span>
-<img class="student-photo" src="foto6.jpg">
-<h3>FAHREZA MAULANA</h3>
-<p>"Belajar pelan asal jalan."</p>
-</div>
-
-<!-- 07 -->
-<div class="student-card">
-<span class="student-number">07</span>
-<img class="student-photo" src="foto7.jpg">
-<h3>FAUZAN KHODHI LATIF</h3>
-<p>"Error hari ini, jago besok."</p>
-</div>
-
-<!-- 08 -->
-<div class="student-card">
-<span class="student-number">08</span>
-<img class="student-photo" src="foto8.jpg">
-<h3>HAFIZ FATIHUL AHZA</h3>
-<p>"Santai tapi tetap gas."</p>
-</div>
-
-<!-- 09 -->
-<div class="student-card">
-<span class="student-number">09</span>
-<img class="student-photo" src="foto9.jpg">
-<h3>HAFIZH MALIK SOPIYAN</h3>
-<p>"Konsisten lebih penting."</p>
-</div>
-
-<!-- 10 -->
-<div class="student-card">
-<span class="student-number">10</span>
-<img class="student-photo" src="foto10.jpg">
-<h3>HAIDAR ALI RASYIDI</h3>
-<p>"Belajar sambil bertahan hidup."</p>
-</div>
-
-<!-- 11 -->
-<div class="student-card">
-<span class="student-number">11</span>
-<img class="student-photo" src="foto11.jpg">
-<h3>KENNY JULIAN NAKAJIMA</h3>
-<p>"Santai bukan berarti malas."</p>
-</div>
-
-<!-- 12 -->
-<div class="student-card">
-<span class="student-number">12</span>
-<img class="student-photo" src="foto12.jpg">
-<h3>KEVIN FAEYZA GUNAWAN</h3>
-<p>"Pelan-pelan jadi legenda."</p>
-</div>
-
-<!-- 13 -->
-<div class="student-card">
-<span class="student-number">13</span>
-<img class="student-photo" src="foto13.jpg">
-<h3>MAHER ADEWAN SUHARTA</h3>
-<p>"Upgrade diri tiap hari."</p>
-</div>
-
-<!-- 14 -->
-<div class="student-card">
-<span class="student-number">14</span>
-<img class="student-photo" src="foto14.jpg">
-<h3>MUHAMMAD ADNAN GHOFARANA</h3>
-<p>"Mikir dulu baru bergerak."</p>
-</div>
-
-<!-- 15 -->
-<div class="student-card">
-<span class="student-number">15</span>
-<img class="student-photo" src="foto15.jpg">
-<h3>MUHAMMAD AKHDAAN NUR'AIMAN</h3>
-<p>"Capek wajar, nyerah jangan."</p>
-</div>
-
-<!-- 16 -->
-<div class="student-card">
-<span class="student-number">16</span>
-<img class="student-photo" src="foto16.jpg">
-<h3>MUHAMMAD DZAKI PURWANDRA S</h3>
-<p>"Belajar coding sambil healing 😭"</p>
-</div>
-
-<!-- 17 -->
-<div class="student-card">
-<span class="student-number">17</span>
-<img class="student-photo" src="foto17.jpg">
-<h3>MUHAMMAD FAKHRI</h3>
-<p>"Ngoding dulu galau nanti."</p>
-</div>
-
-<!-- 18 -->
-<div class="student-card">
-<span class="student-number">18</span>
-<img class="student-photo" src="foto18.jpg">
-<h3>MUHAMMAD FAWWAAZ SAPUTRA</h3>
-<p>"Jangan takut mulai."</p>
-</div>
-
-<!-- 19 -->
-<div class="student-card">
-<span class="student-number">19</span>
-<img class="student-photo" src="foto19.jpg">
-<h3>MUHAMMAD RAFIF ALAUNA</h3>
-<p>"Tetap hidup walau tugas brutal."</p>
-</div>
-
-<!-- 20 -->
-<div class="student-card">
-<span class="student-number">20</span>
-<img class="student-photo" src="foto20.jpg">
-<h3>MUHAMMAD RIZQY ALFARIDZ</h3>
-<p>"Biasa aja tapi bahaya."</p>
-</div>
-
-<!-- 21 -->
-<div class="student-card">
-<span class="student-number">21</span>
-<img class="student-photo" src="foto21.jpg">
-<h3>MUHAMMAD WAFIQ ZIHNI</h3>
-<p>"Kecil-kecil isi kepala rame."</p>
-</div>
-
-<!-- 22 -->
-<div class="student-card">
-<span class="student-number">22</span>
-<img class="student-photo" src="foto22.jpg">
-<h3>MUHAMMAD WILDAN ALJINAN</h3>
-<p>"Fokus ke tujuan."</p>
-</div>
-
-<!-- 23 -->
-<div class="student-card">
-<span class="student-number">23</span>
-<img class="student-photo" src="foto23.jpg">
-<h3>NIZAM ABYAN FAEZYA</h3>
-<p>"Jangan berhenti berkembang."</p>
-</div>
-
-<!-- 24 -->
-<div class="student-card">
-<span class="student-number">24</span>
-<img class="student-photo" src="foto24.jpg">
-<h3>QOULAN TSAQIILA RIZALUSYIIFA</h3>
-<p>"Belajar pelan asal konsisten."</p>
-</div>
-
-<!-- 25 -->
-<div class="student-card">
-<span class="student-number">25</span>
-<img class="student-photo" src="foto25.jpg">
-<h3>RADINAL AKBAR RUSDANA</h3>
-<p>"Kopi, tugas, tidur repeat."</p>
-</div>
-
-<!-- 26 -->
-<div class="student-card">
-<span class="student-number">26</span>
-<img class="student-photo" src="foto26.jpg">
-<h3>RADITYO DZAKWAN EFFENDI</h3>
-<p>"Banyak diam banyak mikir."</p>
-</div>
-
-<!-- 27 -->
-<div class="student-card">
-<span class="student-number">27</span>
-<img class="student-photo" src="foto27.jpg">
-<h3>RAFASHA ERLANDIKA</h3>
-<p>"Santuy tapi serius."</p>
-</div>
-
-<!-- 28 -->
-<div class="student-card">
-<span class="student-number">28</span>
-<img class="student-photo" src="foto28.jpg">
-<h3>RAKA TSAQIF AZZAMY</h3>
-<p>"Rebahan juga strategi."</p>
-</div>
-
-<!-- 29 -->
-<div class="student-card">
-<span class="student-number">29</span>
-<img class="student-photo" src="foto29.jpg">
-<h3>RHEKSYA MUHAMAD SYAHROZAQ</h3>
-<p>"Pusing boleh berhenti jangan."</p>
-</div>
-
-<!-- 30 -->
-<div class="student-card">
-<span class="student-number">30</span>
-<img class="student-photo" src="foto30.jpg">
-<h3>SADAD FAIRUZ YUSUP JAMALUDIN</h3>
-<p>"Belajar sambil survive."</p>
-</div>
-
-<!-- 31 -->
-<div class="student-card">
-<span class="student-number">31</span>
-<img class="student-photo" src="foto31.jpg">
-<h3>SAYID HUSEIN SYAMIL</h3>
-<p>"Niat dulu skill nyusul."</p>
-</div>
-
-<!-- 32 -->
-<div class="student-card">
-<span class="student-number">32</span>
-<img class="student-photo" src="foto32.jpg">
-<h3>SYAKIB ASSAKYA</h3>
-<p>"Masih belajar jadi manusia."</p>
-</div>
-
-</div>
-
-<!-- ================= DEVELOPER ================= -->
-
-<a href="https://alstecu24.vercel.app"
-target="_blank"
-class="developer-btn">
-
-WEBSITE DEVELOPER
-
-</a>
-
-</div>
-
-<!-- ================= SCRIPT ================= -->
-
+<!-- ════════════════════════════════════════════════════════════════
+
+  ██╗███╗   ██╗██████╗ ███████╗██╗  ██╗    ██╗  ██╗███╗   ███╗██╗
+  ██║████╗  ██║██╔══██╗██╔════╝╚██╗██╔╝    ██║  ██║████╗ ████║██║
+  ██║██╔██╗ ██║██║  ██║█████╗   ╚███╔╝     ███████║██╔████╔██║██║
+  ██║██║╚██╗██║██║  ██║██╔══╝   ██╔██╗     ██╔══██║██║╚██╔╝██║██║
+  ██║██║ ╚████║██████╔╝███████╗██╔╝ ██╗    ██║  ██║██║ ╚═╝ ██║███████╗
+  ╚═╝╚═╝  ╚═══╝╚═════╝ ╚══════╝╚═╝  ╚═╝   ╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
+
+════════════════════════════════════════════════════════════════ -->
 <script>
 
-const canvas =
-document.getElementById('grid-canvas');
+/* ╔══════════════════════════════════════════════════════════════╗
+   ║            ★  KONFIGURASI — EDIT BAGIAN INI  ★             ║
+   ║   Ganti semua nilai kosong "" dengan link URL yang benar    ║
+   ╚══════════════════════════════════════════════════════════════╝ */
 
-const ctx =
-canvas.getContext('2d');
+const CONFIG = {
 
-function resizeCanvas(){
+  /* ── MEDIA HERO ─────────────────────────────────────────────────
+     Isi dengan URL langsung ke file video/gambar/musik Anda.
+     Contoh link Catbox: "https://files.catbox.moe/abc123.mp4"    */
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+  heroVideo   : "https://l.top4top.io/m_3779fe6uv1.mp4",   // ← link video banner (format .mp4)
+  heroPoster  : "",   // ← thumbnail video saat belum diputar (.jpg/.png)
+  heroBanner  : "",   // ← gambar fallback jika video gagal load (.jpg/.png)
+  avatarImg   : "https://img2.pixhost.to/images/7724/723457563_alip-1778154031488.jpg",   // ← foto/logo kelas — tampil bulat (.jpg/.png)
+  bgMusic     : "https://files.catbox.moe/til5wh.mp3",   // ← musik background kelas (.mp3)
 
+  /* ── FOTO WALI KELAS ──────────────────────────────────────────── */
+
+  waliImg     : "",   // ← foto Pa Didin Tahyudin (.jpg/.png)
+
+  /* ── LINK SOSIAL ─────────────────────────────────────────────── */
+
+  waGroup     : "",   // ← link WA grup kelas    "https://chat.whatsapp.com/..."
+  igClass     : "",   // ← Instagram kelas        "https://instagram.com/..."
+  nglLink     : "",   // ← NGL anonim             "https://ngl.link/..."
+  tiktokClass : "",   // ← TikTok kelas           "https://tiktok.com/@..."
+  waChannel   : "",   // ← Channel WhatsApp       "https://whatsapp.com/channel/..."
+  waliWa      : "",   // ← WA Pa Didin            "https://wa.me/62..."
+
+  /* ── HALAMAN KENANGAN ─────────────────────────────────────────── */
+
+  memoriesVideo  : "", // ← video kenangan kelas (.mp4)
+
+  memoriesPhotos : [   // ← daftar foto kenangan, tambah sesuai kebutuhan
+    "https://img2.pixhost.to/images/7724/723458876_alip-1778154364652.jpg",                //   foto 1
+    "https://img2.pixhost.to/images/7725/723470697_alip-1778157365322.jpg",                //   foto 2
+    "",                //   foto 3
+    "",                //   foto 4
+    "",                //   foto 5
+    "",                //   foto 6
+    // tambahkan: "",  //   foto 7, dst...
+  ],
+};
+
+/* ╔══════════════════════════════════════════════════════════════╗
+   ║         JANGAN EDIT DI BAWAH INI (kecuali paham JS)        ║
+   ╚══════════════════════════════════════════════════════════════╝ */
+
+/* ╔══════════════════════════════════════════════════════════════════╗
+   ║           DAFTAR SISWA — ISI FOTO & PESAN TIAP MURID           ║
+   ║  photo : link URL foto (.jpg/.png) — kosongkan jika belum ada  ║
+   ║  msg   : pesan / quote singkat dari murid tersebut             ║
+   ╚══════════════════════════════════════════════════════════════════╝ */
+const STUDENTS = [
+    {
+    name  : "PA DIDIN TAHYUDIN",
+    photo : "",   // ← ganti dengan link foto
+    msg   : "Hanya allah yang tau."
+  },
+  {
+    name  : "ADHYASTA NARARYA AL JAZALI",
+    photo : "",   // ← ganti dengan link foto
+    msg   : "kegagalan adalah proses menuju keberhasilan."
+  },
+  {
+    name  : "AGUNG MAULANA IBRAHIM",
+    photo : "",
+    msg   : "Proses tidak akan pernah mengkhianati hasil."
+  },
+  {
+    name  : "ARFA HAIDAR RAISSA",
+    photo : "",
+    msg   : "Diam bukan berarti kalah, tapi sedang menyimpan tenaga."
+  },
+  {
+    name  : "DAFIN AZKA",
+    photo : "",
+    msg   : "Ilmu adalah cahaya, bawa ia ke mana pun kamu pergi."
+  },
+  {
+    name  : "DHEVANO ARKA PUTRA PRATAMA",
+    photo : "",
+    msg   : "Setiap hari adalah kesempatan untuk jadi lebih baik."
+  },
+  {
+    name  : "FAHREZA MAULANA",
+    photo : "",
+    msg   : "Kerja keras hari ini adalah cerita sukses esok hari."
+  },
+  {
+    name  : "FAUZAN KHODHI LATIF",
+    photo : "",
+    msg   : "Yang penting bukan seberapa cepat, tapi seberapa kuat."
+  },
+  {
+    name  : "HAFIZ FATIHUL AHZA",
+    photo : "",
+    msg   : "Mimpi besar dimulai dari langkah kecil yang konsisten."
+  },
+  {
+    name  : "HAFIZH MALIK SOPIYAN",
+    photo : "",
+    msg   : "Belajar tanpa batas, tumbuh tanpa henti."
+  },
+  {
+    name  : "HAIDAR ALI RASYIDI",
+    photo : "",
+    msg   : "Jadilah versi terbaik dirimu, bukan orang lain."
+  },
+  {
+    name  : "KENNY JULIAN NAKAJIMA",
+    photo : "",
+    msg   : "Hidup terlalu singkat untuk tidak bermimpi besar."
+  },
+  {
+    name  : "KEVIN FAEYZA GUNAWAN",
+    photo : "",
+    msg   : "Sukses bukan tentang tujuan, tapi perjalanannya."
+  },
+  {
+    name  : "MAHER ADEWAN SUHARTA",
+    photo : "",
+    msg   : "Tak ada yang mustahil bagi orang yang mau berusaha."
+  },
+  {
+    name  : "MUHAMMAD ADNAN GHOFARANA",
+    photo : "",
+    msg   : "Kesabaran adalah kunci yang membuka pintu keberhasilan."
+  },
+  {
+    name  : "MUHAMMAD AKHDAAN NUR'AIMAN",
+    photo : "",
+    msg   : "Jangan berhenti ketika lelah, berhentilah ketika selesai."
+  },
+  {
+    name  : "MUHAMMAD DZAKI PURWANDRA S",
+    photo : "",
+    msg   : "Setiap tetes keringat adalah benih kesuksesan."
+  },
+  {
+    name  : "MUHAMMAD FAKHRI",
+    photo : "",
+    msg   : "Rendah hati dalam belajar, tinggi semangat dalam berkarya."
+  },
+  {
+    name  : "MUHAMMAD FAWWAAZ SAPUTRA",
+    photo : "",
+    msg   : "Ilmu tanpa amal seperti pohon tanpa buah."
+  },
+  {
+    name  : "MUHAMMAD RAFIF ALAUNA",
+    photo : "",
+    msg   : "Hari ini lebih baik dari kemarin, besok lebih baik dari hari ini."
+  },
+  {
+    name  : "MUHAMMAD RIZQY ALFARIDZ",
+    photo : "",
+    msg   : "mengapa aku berubah?."
+  },
+  {
+    name  : "MUHAMMAD WAFIQ ZIHNI",
+    photo : "",
+    msg   : "Pikiran yang positif menghasilkan hidup yang luar biasa."
+  },
+  {
+    name  : "MUHAMMAD WILDAN ALJINAN",
+    photo : "",
+    msg   : "Bersyukur atas yang ada, berusaha untuk yang lebih baik."
+  },
+  {
+    name  : "NIZAM ABYAN FAEZYA",
+    photo : "",
+    msg   : "Fokus pada tujuan, bukan pada rintangan."
+  },
+  {
+    name  : "QOULAN TSAQIILA RIZALUSYIIFA",
+    photo : "",
+    msg   : "Jangan bergerak tanpa sepengetahuan Tuhan."
+  },
+  {
+    name  : "RADINAL AKBAR RUSDANA",
+    photo : "",
+    msg   : "Berani bermimpi, lebih berani lagi mewujudkannya."
+  },
+  {
+    name  : "RADITYO DZAKWAN EFFENDI",
+    photo : "",
+    msg   : "Disiplin adalah jembatan antara tujuan dan pencapaian."
+  },
+  {
+    name  : "RAFASHA ERLANDIKA",
+    photo : "",
+    msg   : "Jadikan setiap momen sebagai pelajaran berharga."
+  },
+  {
+    name  : "RAKA TSAQIF AZZAMY",
+    photo : "",
+    msg   : "Kuat bukan berarti tidak pernah jatuh, tapi selalu bangkit."
+  },
+  {
+    name  : "RHEKSYA MUHAMAD SYAHROZAQ",
+    photo : "",
+    msg   : "Karakter yang baik adalah harta yang paling berharga."
+  },
+  {
+    name  : "SADAD FAIRUZ YUSUP JAMALUDIN",
+    photo : "",
+    msg   : "Kejujuran adalah fondasi dari segala keberhasilan."
+  },
+  {
+    name  : "SAYID HUSEIN SYAMIL",
+    photo : "",
+    msg   : "Teruslah belajar, karena ilmu tidak pernah habis."
+  },
+  {
+    name  : "SYAKIB ASSAKYA",
+    photo : "",
+    msg   : "Akhiri setiap hari dengan rasa syukur dan tekad baru."
+  },
+];
+
+/* ── TERJEMAHAN BAHASA ─────────────────────────────────────────── */
+const LANG = {
+  id: {
+    lang_name: "ID",
+    title: "KELAS VIIIB",
+    nav_home: "Beranda", nav_students: "Absensi", nav_memories: "Kenangan",
+    label_info: "Info", label_gallery: "Galeri Foto",
+    label_angkatan: "Angkatan", label_walas: "Walas:",
+    card_quotes: "Quotes",
+    quote_text: "\"Tuntutlah ilmu dari buaian hingga liang lahat —<br>karena ilmu adalah cahaya,<br>dan cahaya tak pernah padam.\"",
+    card_info: "Informasi Kelas", card_wali: "Wali Kelas", card_lifestyle: "Keseharian",
+    wali_label: "Wali Kelas", wali_contact: "Hubungi Walas",
+    tag_sekolah: "SMPIT ALAMY", tag_kelas: "Kelas VIIIB", tag_angkatan: "Angkatan 12",
+    tag_tahun: "2024/2025", tag_siswa: "32 Siswa",
+    ls_kompak: "Kompak", ls_belajar: "Belajar", ls_olahraga: "Olahraga",
+    ls_ngoding: "Ngoding", ls_musik: "Musik", ls_gaming: "Gaming",
+    student_title: "Daftar Absensi",
+    memories_title: "Kenangan Indah",
+    memories_caption_title: "Momen Berharga",
+    memories_caption: "\"Setiap momen bersama adalah kenangan yang tak tergantikan.<br>Terima kasih sudah menjadi bagian dari cerita ini.\"",
+    mem_video_placeholder: "Video Kenangan",
+  },
+  en: {
+    lang_name: "EN",
+    title: "CLASS VIIIB",
+    nav_home: "Home", nav_students: "Students", nav_memories: "Memories",
+    label_info: "Info", label_gallery: "Photo Gallery",
+    label_angkatan: "Generation", label_walas: "Teacher:",
+    card_quotes: "Quotes",
+    quote_text: "\"Seek knowledge from the cradle to the grave —<br>because knowledge is light,<br>and light never fades.\"",
+    card_info: "Class Information", card_wali: "Homeroom Teacher", card_lifestyle: "Lifestyle",
+    wali_label: "Homeroom Teacher", wali_contact: "Contact Teacher",
+    tag_sekolah: "SMPIT ALAMY", tag_kelas: "Class VIIIB", tag_angkatan: "Generation 12",
+    tag_tahun: "2024/2025", tag_siswa: "32 Students",
+    ls_kompak: "Solid", ls_belajar: "Study", ls_olahraga: "Sports",
+    ls_ngoding: "Coding", ls_musik: "Music", ls_gaming: "Gaming",
+    student_title: "Student List",
+    memories_title: "Beautiful Memories",
+    memories_caption_title: "Precious Moments",
+    memories_caption: "\"Every moment together is a memory that cannot be replaced.<br>Thank you for being part of this story.\"",
+    mem_video_placeholder: "Memories Video",
+  },
+  su: {
+    lang_name: "SU",
+    title: "KELAS VIIIB",
+    nav_home: "Imah", nav_students: "Daptar Murid", nav_memories: "Kenangan",
+    label_info: "Inpo", label_gallery: "Galeri Foto",
+    label_angkatan: "Angkatan", label_walas: "Guru Wali:",
+    card_quotes: "Kutipan",
+    quote_text: "\"Teangan élmu ti orok nepi ka paéh —<br>lantaran élmu téh cahaya,<br>jeung cahaya moal pernah pareum.\"",
+    card_info: "Inpo Kelas", card_wali: "Guru Wali", card_lifestyle: "Kagiatan",
+    wali_label: "Guru Wali", wali_contact: "Hubungi Guru",
+    tag_sekolah: "SMPIT ALAMY", tag_kelas: "Kelas VIIIB", tag_angkatan: "Angkatan 12",
+    tag_tahun: "2024/2025", tag_siswa: "32 Murid",
+    ls_kompak: "Kompak", ls_belajar: "Diajar", ls_olahraga: "Olahraga",
+    ls_ngoding: "Ngoding", ls_musik: "Musik", ls_gaming: "Maén",
+    student_title: "Daptar Absen",
+    memories_title: "Kenangan Anu Endah",
+    memories_caption_title: "Momen Berharga",
+    memories_caption: "\"Unggal momen babarengan téh kenangan anu teu bisa kaganti.<br>Hatur nuhun geus jadi bagian tina carita ieu.\"",
+    mem_video_placeholder: "Video Kenangan",
+  },
+  jv: {
+    lang_name: "JV",
+    title: "KELAS VIIIB",
+    nav_home: "Ngarep", nav_students: "Daftar Murid", nav_memories: "Kenangan",
+    label_info: "Info", label_gallery: "Galeri Foto",
+    label_angkatan: "Angkatan", label_walas: "Guru Wali:",
+    card_quotes: "Kutipan",
+    quote_text: "\"Goleka ilmu wiwit cilik nganti mati —<br>merga ilmu iku cahya,<br>lan cahya ora bakal mati.\"",
+    card_info: "Info Kelas", card_wali: "Guru Wali", card_lifestyle: "Keseharian",
+    wali_label: "Guru Wali", wali_contact: "Hubungi Guru",
+    tag_sekolah: "SMPIT ALAMY", tag_kelas: "Kelas VIIIB", tag_angkatan: "Angkatan 12",
+    tag_tahun: "2024/2025", tag_siswa: "32 Murid",
+    ls_kompak: "Kompak", ls_belajar: "Sinau", ls_olahraga: "Olahraga",
+    ls_ngoding: "Ngoding", ls_musik: "Musik", ls_gaming: "Main",
+    student_title: "Daftar Absen",
+    memories_title: "Kenangan Sing Endah",
+    memories_caption_title: "Momen Berharga",
+    memories_caption: "\"Saben momen bebarengan iku kenangan sing ora bisa diganti.<br>Matur nuwun wis dadi bagian saka crita iki.\"",
+    mem_video_placeholder: "Video Kenangan",
+  },
+  btw: {
+    lang_name: "BTW",
+    title: "KELAS VIIIB",
+    nav_home: "Rumah", nav_students: "Dafter Murid", nav_memories: "Kenangan",
+    label_info: "Info", label_gallery: "Galeri Foto",
+    label_angkatan: "Angkatan", label_walas: "Guru Wali:",
+    card_quotes: "Kutipan",
+    quote_text: "\"Cari ilmu dari kecil sampe mati —<br>soalnye ilmu itu cahaya,<br>dan cahaya kagak bakal mati.\"",
+    card_info: "Info Kelas", card_wali: "Guru Wali", card_lifestyle: "Keseharian",
+    wali_label: "Guru Wali", wali_contact: "Hubungi Guru",
+    tag_sekolah: "SMPIT ALAMY", tag_kelas: "Kelas VIIIB", tag_angkatan: "Angkatan 12",
+    tag_tahun: "2024/2025", tag_siswa: "32 Murid",
+    ls_kompak: "Kompak", ls_belajar: "Belajar", ls_olahraga: "Olahraga",
+    ls_ngoding: "Ngoding", ls_musik: "Musik", ls_gaming: "Gaming",
+    student_title: "Dafter Absen",
+    memories_title: "Kenangan yang Bagus",
+    memories_caption_title: "Momen Berharga",
+    memories_caption: "\"Tiap momen bareng itu kenangan yang kagak bisa diganti.<br>Makasih ude jadi bagian dari cerite ini.\"",
+    mem_video_placeholder: "Video Kenangan",
+  },
+};
+
+/* ─── APPLY CONFIG ─────────────────────────────────────────────── */
+function applyConfig() {
+  const set = (id, prop, val) => {
+    if (!val) return;
+    const el = document.getElementById(id);
+    if (el) el[prop] = val;
+  };
+
+  // Hero video
+  if (CONFIG.heroVideo) {
+    set('hero-video-src', 'src', CONFIG.heroVideo);
+    const hv = document.getElementById('hero-video');
+    if (hv) { hv.poster = CONFIG.heroPoster || ''; hv.load(); }
+  }
+  set('hero-img', 'src', CONFIG.heroBanner);
+  set('avatar-img', 'src', CONFIG.avatarImg);
+
+  // Music
+  if (CONFIG.bgMusic) {
+    set('music-src', 'src', CONFIG.bgMusic);
+    const aud = document.getElementById('bg-music');
+    if (aud) aud.load();
+  }
+
+  // Wali
+  if (CONFIG.waliImg) {
+    set('wali-img', 'src', CONFIG.waliImg);
+    const ph = document.getElementById('wali-ph');
+    if (ph) ph.style.display = 'none';
+  }
+
+  // Social links
+  const links = {
+    'link-wa':       CONFIG.waGroup,
+    'link-ig':       CONFIG.igClass,
+    'link-ngl':      CONFIG.nglLink,
+    'link-tiktok':   CONFIG.tiktokClass,
+    'link-channel':  CONFIG.waChannel,
+    'link-group':    CONFIG.waGroup,
+    'link-wali-wa':  CONFIG.waliWa,
+  };
+  Object.entries(links).forEach(([id, url]) => {
+    if (url) { const el = document.getElementById(id); if (el) el.href = url; }
+  });
+
+  // Memories video
+  const mv = document.getElementById('memories-video');
+  const mp = document.getElementById('mem-placeholder');
+  if (CONFIG.memoriesVideo) {
+    set('memories-video-src', 'src', CONFIG.memoriesVideo);
+    if (mv) { mv.load(); mv.style.display = 'block'; }
+    if (mp) mp.style.display = 'none';
+  } else {
+    if (mv) mv.style.display = 'none';
+    if (mp) mp.style.display = 'flex';
+  }
 }
 
+/* ─── BUILD STUDENT LIST ───────────────────────────────────────── */
+function buildStudentList() {
+  const list = document.getElementById('student-list');
+  if (!list || list.children.length > 0) return;
+  list.innerHTML = '';
+
+  STUDENTS.forEach((s, i) => {
+    const item = document.createElement('div');
+    item.className = 'student-item';
+    item.style.transitionDelay = `${i * 0.04}s`;
+    item.setAttribute('title', 'Klik untuk lihat pesan');
+    item.innerHTML = `
+      <div class="student-no">${String(i + 1).padStart(2, '0')}</div>
+      <div class="student-name">${s.name}</div>
+      <div class="student-tap-hint"><i class="fa-solid fa-comment-dots"></i></div>
+    `;
+    item.addEventListener('click', () => openStudentModal(i));
+    list.appendChild(item);
+  });
+
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.04 });
+  list.querySelectorAll('.student-item').forEach(el => io.observe(el));
+}
+
+/* ─── STUDENT MESSAGE MODAL ─────────────────────────────────────── */
+function openStudentModal(idx) {
+  const s   = STUDENTS[idx];
+  const modal = document.getElementById('student-modal');
+  document.getElementById('modal-no').textContent   = String(idx + 1).padStart(2, '0');
+  document.getElementById('modal-name').textContent = s.name;
+  document.getElementById('modal-msg').textContent  = s.msg;
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeStudentModal(e) {
+  if (e && e.target !== document.getElementById('student-modal') &&
+      !e.target.classList.contains('student-modal-close') &&
+      !e.target.closest('.student-modal-close')) return;
+  document.getElementById('student-modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.getElementById('student-modal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+});
+
+/* ─── BUILD PHOTO GRID ─────────────────────────────────────────── */
+function buildPhotoGrid() {
+  const grid = document.getElementById('photo-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  const photos = (CONFIG.memoriesPhotos || []).filter(p => p && p.trim() !== '');
+
+  if (photos.length === 0) {
+    for (let i = 0; i < 6; i++) {
+      const slot = document.createElement('div');
+      slot.className = 'photo-item';
+      slot.innerHTML = `<div class="photo-item-placeholder"><i class="fa-solid fa-image"></i></div>`;
+      grid.appendChild(slot);
+    }
+    return;
+  }
+
+  photos.forEach((url, i) => {
+    const item = document.createElement('div');
+    item.className = 'photo-item';
+    const img = document.createElement('img');
+    img.src = url;
+    img.alt = `Foto kenangan ${i + 1}`;
+    img.loading = 'lazy';
+    item.appendChild(img);
+    item.addEventListener('click', () => openLightbox(url));
+    grid.appendChild(item);
+  });
+}
+
+/* ─── LIGHTBOX ──────────────────────────────────────────────────── */
+function openLightbox(src) {
+  const lb = document.getElementById('lightbox');
+  const img = document.getElementById('lightbox-img');
+  if (!lb || !img) return;
+  img.src = src;
+  lb.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+  const lb = document.getElementById('lightbox');
+  if (lb) lb.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+/* ─── ANIMATED GRID CANVAS ─────────────────────────────────────── */
+const canvas = document.getElementById('grid-canvas');
+const ctx    = canvas.getContext('2d');
+let gridOffset = 0;
+
+function resizeCanvas() {
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
 resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
 
-window.addEventListener(
-'resize',
-resizeCanvas
-);
-
-function drawGrid(){
-
-ctx.clearRect(
-0,
-0,
-canvas.width,
-canvas.height
-);
-
-const size = 40;
-
-ctx.strokeStyle =
-'rgba(255,255,255,0.05)';
-
-for(
-let x = 0;
-x < canvas.width;
-x += size
-){
-
-ctx.beginPath();
-ctx.moveTo(x,0);
-ctx.lineTo(x,canvas.height);
-ctx.stroke();
-
+function drawGrid() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const size   = 38;
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  ctx.strokeStyle = isDark ? 'rgba(180,175,168,0.055)' : 'rgba(30,28,26,0.06)';
+  ctx.lineWidth = 1;
+  const offset = gridOffset % size;
+  for (let x = -size + offset; x < canvas.width + size; x += size) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+  }
+  for (let y = -size + offset; y < canvas.height + size; y += size) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+  }
+  gridOffset += 0.18;
+  requestAnimationFrame(drawGrid);
 }
-
-for(
-let y = 0;
-y < canvas.height;
-y += size
-){
-
-ctx.beginPath();
-ctx.moveTo(0,y);
-ctx.lineTo(canvas.width,y);
-ctx.stroke();
-
-}
-
-requestAnimationFrame(drawGrid);
-
-}
-
 drawGrid();
 
-</script>
+/* ─── VIDEO FALLBACK ────────────────────────────────────────────── */
+const heroVideo = document.getElementById('hero-video');
+const heroImg   = document.getElementById('hero-img');
+if (heroVideo) {
+  heroVideo.addEventListener('error', () => {
+    heroVideo.style.display = 'none';
+    if (heroImg) heroImg.style.display = 'block';
+  });
+  setTimeout(() => {
+    if (heroVideo.readyState === 0) {
+      heroVideo.style.display = 'none';
+      if (heroImg) heroImg.style.display = 'block';
+    }
+  }, 3000);
+}
 
+/* ─── AVATAR FALLBACK ───────────────────────────────────────────── */
+const avatarImg = document.getElementById('avatar-img');
+if (avatarImg) {
+  avatarImg.addEventListener('error', () => {
+    avatarImg.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='110' height='110' viewBox='0 0 110 110'%3E%3Crect width='110' height='110' fill='%23e4e2dc'/%3E%3Ccircle cx='55' cy='40' r='18' fill='%23aaa'/%3E%3Cellipse cx='55' cy='86' rx='28' ry='20' fill='%23aaa'/%3E%3C/svg%3E";
+  });
+}
+
+/* ─── MUSIC NOTES ───────────────────────────────────────────────── */
+const notesContainer = document.getElementById('music-notes-container');
+let noteInterval     = null;
+const noteSymbols    = ['♩','♪','♫','♬'];
+
+function spawnNote() {
+  const note = document.createElement('span');
+  note.className = 'music-note-fall';
+  note.textContent = noteSymbols[Math.floor(Math.random() * noteSymbols.length)];
+  note.style.left             = (Math.random() * 92 + 2) + 'vw';
+  note.style.fontSize         = (Math.random() * 12 + 10) + 'px';
+  note.style.animationDuration= (Math.random() * 4 + 5) + 's';
+  note.style.opacity          = (Math.random() * 0.2 + 0.07).toFixed(2);
+  notesContainer.appendChild(note);
+  setTimeout(() => note.remove(), 10000);
+}
+
+/* ─── MUSIC TOGGLE ──────────────────────────────────────────────── */
+const audio    = document.getElementById('bg-music');
+const musicBtn = document.getElementById('music-btn');
+let isPlaying  = false;
+
+function toggleMusic() {
+  if (isPlaying) {
+    audio.pause();
+    musicBtn.classList.remove('playing');
+    isPlaying = false;
+    clearInterval(noteInterval);
+    noteInterval = null;
+  } else {
+    audio.play()
+      .then(() => {
+        musicBtn.classList.add('playing');
+        isPlaying = true;
+        noteInterval = setInterval(spawnNote, 700);
+      })
+      .catch(err => console.warn('Audio blocked:', err));
+  }
+}
+
+/* ─── DARK MODE TOGGLE ──────────────────────────────────────────── */
+const html       = document.documentElement;
+const themeBtn   = document.getElementById('theme-btn');
+const savedTheme = localStorage.getItem('viiib-theme') || 'light';
+html.setAttribute('data-theme', savedTheme);
+updateThemeIcon(savedTheme);
+
+function toggleTheme() {
+  const current = html.getAttribute('data-theme');
+  const next    = current === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  localStorage.setItem('viiib-theme', next);
+  updateThemeIcon(next);
+}
+
+function updateThemeIcon(theme) {
+  const icon = themeBtn.querySelector('i');
+  icon.className = theme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+}
+
+/* ─── FAB TOGGLE ────────────────────────────────────────────────── */
+const fabWrap = document.getElementById('fab-wrap');
+let fabOpen   = false;
+
+function toggleFab() {
+  fabOpen = !fabOpen;
+  fabWrap.classList.toggle('open', fabOpen);
+}
+
+document.addEventListener('click', e => {
+  if (fabOpen && !fabWrap.contains(e.target)) {
+    fabOpen = false;
+    fabWrap.classList.remove('open');
+  }
+});
+
+/* ─── PAGE NAVIGATION ───────────────────────────────────────────── */
+const pageNavWrap  = document.getElementById('pageNavWrap');
+let pageNavOpen    = false;
+let currentPage    = 'home';
+const PAGE_ORDER   = ['home','students','memories'];
+
+function togglePageNav() {
+  pageNavOpen = !pageNavOpen;
+  pageNavWrap.classList.toggle('open', pageNavOpen);
+}
+
+document.addEventListener('click', e => {
+  if (pageNavOpen && !pageNavWrap.contains(e.target)) {
+    pageNavOpen = false;
+    pageNavWrap.classList.remove('open');
+  }
+});
+
+function goPage(pageId) {
+  if (pageId === currentPage) {
+    pageNavOpen = false; pageNavWrap.classList.remove('open'); return;
+  }
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const target = document.getElementById('page-' + pageId);
+  if (target) { target.classList.add('active'); window.scrollTo(0, 0); }
+
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  const activeBtn = document.getElementById('nav-btn-' + pageId);
+  if (activeBtn) activeBtn.classList.add('active');
+
+  const dots = document.querySelectorAll('.dot');
+  dots.forEach((d, i) => d.classList.toggle('active', PAGE_ORDER[i] === pageId));
+
+  pageNavOpen = false; pageNavWrap.classList.remove('open');
+  currentPage = pageId;
+
+  if (pageId === 'students') buildStudentList();
+  if (pageId === 'memories') buildPhotoGrid();
+}
+
+/* ─── LANGUAGE SYSTEM ───────────────────────────────────────────── */
+const LANG_ORDER  = ['id','en','su','jv','btw'];
+let   currentLang = localStorage.getItem('viiib-lang') || 'id';
+
+function cycleLang() {
+  const idx    = LANG_ORDER.indexOf(currentLang);
+  currentLang  = LANG_ORDER[(idx + 1) % LANG_ORDER.length];
+  localStorage.setItem('viiib-lang', currentLang);
+  applyLang();
+}
+
+function applyLang() {
+  const t = LANG[currentLang];
+  if (!t) return;
+  document.getElementById('lang-indicator').textContent = t.lang_name;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (t[key] !== undefined) el.innerHTML = t[key];
+  });
+}
+
+/* ─── SCROLL FADE-IN (cards) ────────────────────────────────────── */
+function initCardObserver() {
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.card').forEach((c, i) => {
+    c.style.transitionDelay = `${i * 0.07}s`;
+    io.observe(c);
+  });
+}
+
+/* ─── INIT ──────────────────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', () => {
+  applyConfig();
+  applyLang();
+  initCardObserver();
+  buildStudentList(); // pre-render
+});
+
+</script>
 </body>
 </html>
