@@ -1,0 +1,131 @@
+/* ============================================
+   HALAMAN STRUKTUR KELAS (SEATING PLAN)
+   seating.css
+   ============================================ */
+
+#page-seating .page-header {
+  margin-bottom: 0;
+}
+
+.seating-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px 16px 80px;
+  position: relative;
+}
+
+/* ── Ruang Kelas (Blueprint) ── */
+.classroom {
+  background: var(--bg2);
+  border: 2px solid var(--border);
+  position: relative;
+  margin: 0 auto;
+  min-height: 500px;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  background-image: 
+    linear-gradient(var(--border) 0.5px, transparent 0.5px),
+    linear-gradient(90deg, var(--border) 0.5px, transparent 0.5px);
+  background-size: 40px 40px;
+  background-position: center center;
+}
+
+/* ── Papan Tulis ── */
+.whiteboard {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  max-width: 300px;
+  height: 30px;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  letter-spacing: 3px;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+/* ── Meja (draggable) ── */
+.desk {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text);
+  box-shadow: var(--shadow);
+  transition: box-shadow 0.15s, transform 0.1s;
+  will-change: left, top;
+}
+
+.desk:active {
+  cursor: grabbing;
+}
+
+.desk.dragging {
+  opacity: 0.85;
+  box-shadow: var(--shadow-lg);
+  z-index: 10;
+}
+
+.desk .desk-no {
+  pointer-events: none;
+}
+
+.desk::after {
+  content: attr(data-student-name);
+  position: absolute;
+  bottom: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-family: var(--font-body);
+  font-size: 0.55rem;
+  color: var(--accent);
+  letter-spacing: 0.5px;
+  pointer-events: none;
+  opacity: 0.75;
+}
+
+.seating-notice {
+  text-align: center;
+  margin-top: 12px;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--muted);
+}
+
+.seating-reset-btn {
+  display: block;
+  margin: 16px auto 0;
+  padding: 6px 14px;
+  border: 1.5px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: 0.15s;
+}
+
+.seating-reset-btn:hover {
+  background: var(--accent);
+  color: #fff;
+}
