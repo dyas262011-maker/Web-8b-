@@ -9,6 +9,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=IBM+Plex+Mono:wght@400;700&family=Noto+Sans:wght@400;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
+
+  <!-- Stylesheet khusus halaman Struktur Kelas -->
+  <link rel="stylesheet" href="seating.css" />
+  <!-- Script khusus halaman Struktur Kelas (defer agar tidak blocking) -->
+  <script src="seating.js" defer></script>
 </head>
 <body>
 
@@ -72,6 +77,11 @@
       <i class="fa-solid fa-camera-retro"></i>
       <span data-i18n="nav_memories">Kenangan</span>
     </button>
+    <!-- ✨ Navigasi baru: Struktur Kelas -->
+    <button class="nav-item" onclick="goPage('seating')" id="nav-btn-seating">
+      <i class="fa-solid fa-chair"></i>
+      <span data-i18n="nav_seating">Struktur</span>
+    </button>
   </div>
   <button class="page-nav-btn" onclick="togglePageNav()" title="Navigasi Halaman">
     <i class="fa-solid fa-ellipsis-vertical"></i>
@@ -83,6 +93,8 @@
   <span class="dot active" onclick="goPage('home')" title="Beranda"></span>
   <span class="dot" onclick="goPage('students')" title="Absensi"></span>
   <span class="dot" onclick="goPage('memories')" title="Kenangan"></span>
+  <!-- ✨ Dot baru: Struktur Kelas -->
+  <span class="dot" onclick="goPage('seating')" title="Struktur"></span>
 </div>
 
 <!-- ═══════════════════════════════════════
@@ -314,6 +326,43 @@
 
 </div><!-- /page-memories -->
 
+
+<!-- ═══════════════════════════════════════
+     HALAMAN 4 — STRUKTUR KELAS (BARU)
+═══════════════════════════════════════ -->
+<div class="page" id="page-seating">
+
+  <div class="page-header">
+    <h2 class="page-title" data-i18n="seating_title">Struktur Kelas</h2>
+    <p class="page-subtitle">Drag meja untuk mengatur posisi duduk · VIIIB · SMPIT ALAMY</p>
+  </div>
+
+  <div class="seating-container">
+    <div class="classroom" id="classroom">
+      <div class="whiteboard">Papan Tulis</div>
+      <!-- meja akan di-generate oleh JS -->
+    </div>
+    <p class="seating-notice">
+      ⚡ Posisi tersimpan otomatis & tampil live di semua device.
+      <br>(Butuh koneksi internet & JSONBin aktif)
+    </p>
+    <button class="seating-reset-btn" id="reset-seating-btn">
+      <i class="fa-solid fa-rotate-left"></i> Reset Posisi
+    </button>
+  </div>
+
+  <footer>
+    <i class="fa-solid fa-circle" style="opacity:0.35;margin-right:8px;"></i>
+    SMPIT ALAMY · VIIIB · ANGKATAN 12
+    <i class="fa-solid fa-circle" style="opacity:0.35;margin-left:8px;"></i>
+    <br>
+    <a href="https://alstecu24.vercel.app" target="_blank" class="dev-link" rel="noopener">
+      <i class="fa-solid fa-code"></i> developer
+    </a>
+  </footer>
+
+</div><!-- /page-seating -->
+
 <!-- ════════════════════════════════════════════════════════════════
      LIGHTBOX (photo viewer)
 ════════════════════════════════════════════════════════════════ -->
@@ -345,14 +394,7 @@
 </div>
 
 <!-- ════════════════════════════════════════════════════════════════
-
-  ██╗███╗   ██╗██████╗ ███████╗██╗  ██╗    ██╗  ██╗███╗   ███╗██╗
-  ██║████╗  ██║██╔══██╗██╔════╝╚██╗██╔╝    ██║  ██║████╗ ████║██║
-  ██║██╔██╗ ██║██║  ██║█████╗   ╚███╔╝     ███████║██╔████╔██║██║
-  ██║██║╚██╗██║██║  ██║██╔══╝   ██╔██╗     ██╔══██║██║╚██╔╝██║██║
-  ██║██║ ╚████║██████╔╝███████╗██╔╝ ██╗    ██║  ██║██║ ╚═╝ ██║███████╗
-  ╚═╝╚═╝  ╚═══╝╚═════╝ ╚══════╝╚═╝  ╚═╝   ╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
-
+  SCRIPT UTAMA
 ════════════════════════════════════════════════════════════════ -->
 <script>
 
@@ -584,6 +626,8 @@ const LANG = {
     lang_name: "ID",
     title: "KELAS VIIIB",
     nav_home: "Beranda", nav_students: "Absensi", nav_memories: "Kenangan",
+    nav_seating: "Struktur",
+    seating_title: "Struktur Kelas",
     label_info: "Info", label_gallery: "Galeri Foto",
     label_angkatan: "Angkatan", label_walas: "Walas:",
     card_quotes: "Quotes",
@@ -604,6 +648,8 @@ const LANG = {
     lang_name: "EN",
     title: "CLASS VIIIB",
     nav_home: "Home", nav_students: "Students", nav_memories: "Memories",
+    nav_seating: "Seating",
+    seating_title: "Seating Plan",
     label_info: "Info", label_gallery: "Photo Gallery",
     label_angkatan: "Generation", label_walas: "Teacher:",
     card_quotes: "Quotes",
@@ -624,6 +670,8 @@ const LANG = {
     lang_name: "SU",
     title: "KELAS VIIIB",
     nav_home: "Imah", nav_students: "Daptar Murid", nav_memories: "Kenangan",
+    nav_seating: "Struktur",
+    seating_title: "Struktur Kelas",
     label_info: "Inpo", label_gallery: "Galeri Foto",
     label_angkatan: "Angkatan", label_walas: "Guru Wali:",
     card_quotes: "Kutipan",
@@ -644,6 +692,8 @@ const LANG = {
     lang_name: "JV",
     title: "KELAS VIIIB",
     nav_home: "Ngarep", nav_students: "Daftar Murid", nav_memories: "Kenangan",
+    nav_seating: "Struktur",
+    seating_title: "Struktur Kelas",
     label_info: "Info", label_gallery: "Galeri Foto",
     label_angkatan: "Angkatan", label_walas: "Guru Wali:",
     card_quotes: "Kutipan",
@@ -664,6 +714,8 @@ const LANG = {
     lang_name: "BTW",
     title: "KELAS VIIIB",
     nav_home: "Rumah", nav_students: "Dafter Murid", nav_memories: "Kenangan",
+    nav_seating: "Struktur",
+    seating_title: "Struktur Kelas",
     label_info: "Info", label_gallery: "Galeri Foto",
     label_angkatan: "Angkatan", label_walas: "Guru Wali:",
     card_quotes: "Kutipan",
@@ -973,7 +1025,7 @@ document.addEventListener('click', e => {
 const pageNavWrap  = document.getElementById('pageNavWrap');
 let pageNavOpen    = false;
 let currentPage    = 'home';
-const PAGE_ORDER   = ['home','students','memories'];
+const PAGE_ORDER   = ['home','students','memories','seating'];
 
 function togglePageNav() {
   pageNavOpen = !pageNavOpen;
@@ -1048,7 +1100,7 @@ document.addEventListener('DOMContentLoaded', () => {
   applyConfig();
   applyLang();
   initCardObserver();
-  buildStudentList(); // pre-render
+  buildStudentList();
 });
 
 </script>
