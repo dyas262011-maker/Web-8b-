@@ -273,6 +273,7 @@
      HALAMAN 4 — STRUKTUR KELAS
 ═══════════════════════════════════════ -->
 <div class="page" id="page-seating">
+
   <div class="page-header">
     <h2 class="page-title">Struktur Kelas</h2>
     <p class="page-subtitle">VIIIB · SMPIT ALAMY</p>
@@ -345,11 +346,18 @@
     </div>
 
     <div class="classroom" id="classroom">
-      <div class="whiteboard">Papan Tulis</div>
+      <div class="whiteboard">🎓 Papan Tulis</div>
+      <!-- meja guru & siswa akan di-generate oleh JS -->
+    </div>
+
+    <div class="seating-legend">
+      <span><span class="legend-dot legend-dot--teacher"></span> Meja Guru</span>
+      <span><span class="legend-dot legend-dot--student"></span> Meja Siswa</span>
     </div>
 
     <p class="seating-notice">
       ⚡ Posisi tersimpan otomatis & tampil live di semua device.
+      <br><small>Geser meja untuk mengatur posisi duduk</small>
     </p>
 
     <button class="seating-reset-btn" id="reset-seating-btn">
@@ -367,8 +375,8 @@
       <i class="fa-solid fa-code"></i> developer
     </a>
   </footer>
-</div>
 
+</div><!-- /page-seating -->
 <!-- ═══════════════════════════════════════
      LIGHTBOX
 ═══════════════════════════════════════ -->
