@@ -1,5 +1,5 @@
 /* ============================================
-   HALAMAN STRUKTUR KELAS (SEATING PLAN)
+   HALAMAN STRUKTUR KELAS
    seating.css
    ============================================ */
 
@@ -14,23 +14,123 @@
   position: relative;
 }
 
-/* ── Ruang Kelas (Blueprint) ── */
+/* ═══ STRUKTUR ORGANISASI ═══ */
+.org-section {
+  margin-bottom: 10px;
+}
+
+.org-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text, #0d2137);
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--border, #1a3a5c);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.org-title i {
+  color: var(--accent, #1a6fcf);
+  font-size: 14px;
+}
+
+.org-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 8px;
+}
+
+.org-card {
+  background: var(--surface, #f8fbff);
+  border: 2px solid var(--border, #1a3a5c);
+  padding: 14px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+  box-shadow: 3px 3px 0px var(--border, #1a3a5c);
+  transition: all 0.15s;
+  position: relative;
+  overflow: hidden;
+}
+
+.org-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+}
+
+.org-card--wali::before      { background: #4da3ff; }
+.org-card--leader::before    { background: #fbbf24; }
+.org-card--vice::before      { background: #a78bfa; }
+.org-card--sec1::before      { background: #34d399; }
+.org-card--sec2::before      { background: #34d399; }
+.org-card--bendahara::before { background: #f472b6; }
+.org-card--bersih::before    { background: #60a5fa; }
+.org-card--agama::before     { background: #38bdf8; }
+
+.org-card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 5px 0px var(--border, #1a3a5c);
+}
+
+.org-role-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 2px solid var(--border, #1a3a5c);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  background: var(--bg, #f0f4f8);
+  color: var(--accent, #1a6fcf);
+  margin-bottom: 2px;
+}
+
+.org-role-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted, #4a6d8c);
+}
+
+.org-role-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--text, #0d2137);
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+/* ═══ DENAH MEJA ═══ */
 .classroom {
-  background: var(--bg2);
-  border: 2px solid var(--border);
+  background: var(--bg2, #dce8f5);
+  border: 2px solid var(--border, #1a3a5c);
   position: relative;
   margin: 0 auto;
   min-height: 500px;
-  box-shadow: var(--shadow-lg);
+  box-shadow: 5px 5px 0px var(--border, #1a3a5c);
   overflow: hidden;
   background-image: 
-    linear-gradient(var(--border) 0.5px, transparent 0.5px),
-    linear-gradient(90deg, var(--border) 0.5px, transparent 0.5px);
+    linear-gradient(var(--border, #1a3a5c) 0.5px, transparent 0.5px),
+    linear-gradient(90deg, var(--border, #1a3a5c) 0.5px, transparent 0.5px);
   background-size: 40px 40px;
   background-position: center center;
 }
 
-/* ── Papan Tulis ── */
 .whiteboard {
   position: absolute;
   top: 10px;
@@ -39,53 +139,47 @@
   width: 60%;
   max-width: 300px;
   height: 30px;
-  background: var(--surface);
-  border: 2px solid var(--border);
+  background: var(--surface, #f8fbff);
+  border: 2px solid var(--border, #1a3a5c);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--font-display);
+  font-family: 'Barlow Condensed', sans-serif;
   font-size: 0.7rem;
   letter-spacing: 3px;
-  color: var(--muted);
+  color: var(--muted, #4a6d8c);
   text-transform: uppercase;
 }
 
-/* ── Meja (draggable) ── */
 .desk {
   position: absolute;
   width: 60px;
   height: 60px;
-  background: var(--surface);
-  border: 2px solid var(--border);
+  background: var(--surface, #f8fbff);
+  border: 2px solid var(--border, #1a3a5c);
   cursor: grab;
   user-select: none;
   touch-action: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--font-mono);
+  font-family: 'IBM Plex Mono', monospace;
   font-size: 0.7rem;
   font-weight: 700;
-  color: var(--text);
-  box-shadow: var(--shadow);
-  transition: box-shadow 0.15s, transform 0.1s;
+  color: var(--text, #0d2137);
+  box-shadow: 3px 3px 0px var(--border, #1a3a5c);
   will-change: left, top;
 }
 
-.desk:active {
-  cursor: grabbing;
-}
+.desk:active { cursor: grabbing; }
 
 .desk.dragging {
   opacity: 0.85;
-  box-shadow: var(--shadow-lg);
+  box-shadow: 5px 5px 0px var(--border, #1a3a5c);
   z-index: 10;
 }
 
-.desk .desk-no {
-  pointer-events: none;
-}
+.desk .desk-no { pointer-events: none; }
 
 .desk::after {
   content: attr(data-student-name);
@@ -94,9 +188,9 @@
   left: 50%;
   transform: translateX(-50%);
   white-space: nowrap;
-  font-family: var(--font-body);
+  font-family: 'Noto Sans', sans-serif;
   font-size: 0.55rem;
-  color: var(--accent);
+  color: var(--accent, #1a6fcf);
   letter-spacing: 0.5px;
   pointer-events: none;
   opacity: 0.75;
@@ -105,19 +199,19 @@
 .seating-notice {
   text-align: center;
   margin-top: 12px;
-  font-family: var(--font-mono);
+  font-family: 'IBM Plex Mono', monospace;
   font-size: 0.6rem;
-  color: var(--muted);
+  color: var(--muted, #4a6d8c);
 }
 
 .seating-reset-btn {
   display: block;
   margin: 16px auto 0;
   padding: 6px 14px;
-  border: 1.5px solid var(--accent);
+  border: 1.5px solid var(--accent, #1a6fcf);
   background: transparent;
-  color: var(--accent);
-  font-family: var(--font-mono);
+  color: var(--accent, #1a6fcf);
+  font-family: 'IBM Plex Mono', monospace;
   font-size: 0.65rem;
   letter-spacing: 2px;
   text-transform: uppercase;
@@ -126,6 +220,10 @@
 }
 
 .seating-reset-btn:hover {
-  background: var(--accent);
+  background: var(--accent, #1a6fcf);
   color: #fff;
+}
+
+@media (max-width: 500px) {
+  .org-grid { grid-template-columns: repeat(2, 1fr); }
 }
