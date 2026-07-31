@@ -170,7 +170,7 @@ function goPage(pageId){if(pageId===currentPage){pageNavOpen=false;pageNavWrap.c
 function initCardObserver(){const io=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');io.unobserve(e.target);}});},{threshold:0.08});document.querySelectorAll('.card').forEach((c,i)=>{c.style.transitionDelay=`${i*0.07}s`;io.observe(c);});}
 
 // ═══════════════════════════════════════════════════
-// REMINDER HARIAN — password gate + form + JSONBin sync
+// REMINDER HARIAN — password gate + per-hari + JSONBin sync
 // ═══════════════════════════════════════════════════
 //
 // [PENTING] Ganti kata sandi admin:
@@ -182,10 +182,9 @@ function initCardObserver(){const io=new IntersectionObserver(entries=>{entries.
 const REMINDER_CONFIG = {
   adminPasswordHash: "e56c044b95298b8b03323c6765ee31eb546ff0f16ad0624329fec6c17eb3a847",
   jsonbinApiKey: "$2a$10$0XA/Bap/CiGTnq9yVVCVq.gXRScb.ycMrrQ2.2uKaScStP/rtx.Um",
-  // [PENTING] Setelah pertama kali menyimpan reminder, buka console (F12) —
-  // akan muncul ID bin baru. Copy ID itu ke sini supaya datanya permanen
-  // dan tersambung di semua device (kalau dibiarkan kosong, bin baru akan
-  // dibuat ulang tiap kali dan datanya TIDAK akan nyambung antar device).
+  // Bin ID juga bisa diisi langsung di kode di sini, TAPI cara paling gampang
+  // adalah lewat kolom "Bin ID" yang ada di halaman Reminder (tersimpan otomatis
+  // di browser). Lihat penjelasan cara cari Bin ID di kolom itu.
   jsonbinBinId: "",
 };
 
@@ -195,13 +194,47 @@ async function sha256Hex(str) {
 }
 window.generatePasswordHash = (pw) => sha256Hex(pw).then(h => { console.log('Hash baru:', h); return h; });
 
+// ═══════ HARI ═══════
+// Mau tambah/kurangi hari? Tinggal edit array ini.
+const DAYS = [
+  { key: 'senin',  label: 'Senin' },
+  { key: 'selasa', label: 'Selasa' },
+  { key: 'rabu',   label: 'Rabu' },
+  { key: 'kamis',  label: 'Kamis' },
+  { key: 'jumat',  label: 'Jumat' },
+  { key: 'sabtu',  label: 'Sabtu' },
+];
 const REMINDER_SECTIONS = ['seragam', 'mapel', 'tugas', 'piket', 'catatan'];
-let reminderData = { tanggal: '', seragam: [''], mapel: [''], tugas: [''], piket: [''], catatan: [''] };
+
+function emptyDayData() {
+  return { tanggal: '', seragam: [''], mapel: [''], tugas: [''], piket: [''], catatan: [''] };
+}
+function emptyAllDaysData() {
+  const obj = {};
+  DAYS.forEach(d => { obj[d.key] = emptyDayData(); });
+  return obj;
+}
+
+let reminderData = emptyAllDaysData();
+let currentDay = DAYS[0].key;
 let reminderInitialized = false;
 let reminderSyncTimer = null;
 
 function escapeHtml(s) { return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
 
+// ═══════ BIN ID (tersimpan di browser, tidak perlu edit kode) ═══════
+function getStoredBinId() {
+  return localStorage.getItem('viiib-reminder-binid') || REMINDER_CONFIG.jsonbinBinId || '';
+}
+function setStoredBinId(id) {
+  REMINDER_CONFIG.jsonbinBinId = id || '';
+  if (id) localStorage.setItem('viiib-reminder-binid', id);
+  else localStorage.removeItem('viiib-reminder-binid');
+  const input = document.getElementById('reminder-binid-input');
+  if (input) input.value = id || '';
+}
+
+// ═══════ GATE PASSWORD ═══════
 function initReminderPage() {
   const authed = sessionStorage.getItem('viiib-reminder-auth') === '1';
   document.getElementById('reminder-gate').style.display = authed ? 'none' : 'flex';
@@ -210,17 +243,47 @@ function initReminderPage() {
 }
 
 function setupReminderApp() {
-  REMINDER_SECTIONS.forEach(renderReminderList);
-  document.getElementById('rf-tanggal').value = reminderData.tanggal;
-  updateReminderPreview();
+  REMINDER_CONFIG.jsonbinBinId = getStoredBinId();
+  const binInput = document.getElementById('reminder-binid-input');
+  if (binInput) binInput.value = REMINDER_CONFIG.jsonbinBinId;
+  renderDayTabs();
+  selectDay(currentDay);
   loadReminderFromBin();
 }
 
+// ═══════ TAB HARI ═══════
+function renderDayTabs() {
+  const wrap = document.getElementById('reminder-day-tabs');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  DAYS.forEach(d => {
+    const btn = document.createElement('button');
+    btn.className = 'reminder-day-tab' + (d.key === currentDay ? ' active' : '');
+    btn.dataset.day = d.key;
+    btn.textContent = d.label;
+    wrap.appendChild(btn);
+  });
+}
+
+function selectDay(dayKey) {
+  currentDay = dayKey;
+  document.querySelectorAll('.reminder-day-tab').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.day === dayKey);
+  });
+  const dayLabel = document.getElementById('reminder-day-label');
+  const d = DAYS.find(x => x.key === dayKey);
+  if (dayLabel && d) dayLabel.textContent = d.label;
+  REMINDER_SECTIONS.forEach(renderReminderList);
+  document.getElementById('rf-tanggal').value = reminderData[currentDay].tanggal;
+  updateReminderPreview();
+}
+
+// ═══════ LIST DINAMIS (per hari) ═══════
 function renderReminderList(key) {
   const wrap = document.getElementById('list-' + key);
   if (!wrap) return;
   wrap.innerHTML = '';
-  reminderData[key].forEach((val, idx) => {
+  reminderData[currentDay][key].forEach((val, idx) => {
     const row = document.createElement('div');
     row.className = 'reminder-row';
     row.innerHTML = `<input type="text" class="reminder-input reminder-row-input" data-key="${key}" data-idx="${idx}" value="${escapeHtml(val)}" placeholder="Isi baris..." /><button class="reminder-row-del" data-key="${key}" data-idx="${idx}" title="Hapus"><i class="fa-solid fa-xmark"></i></button>`;
@@ -229,20 +292,21 @@ function renderReminderList(key) {
 }
 
 function buildReminderMessage() {
+  const day = reminderData[currentDay];
   const lines = [];
   lines.push('📢 REMINDER', '');
   lines.push('📅 Hari/Tanggal :');
-  lines.push(reminderData.tanggal.trim() || '-', '');
+  lines.push(day.tanggal.trim() || '-', '');
   lines.push('👔 SERAGAM');
-  reminderData.seragam.filter(x => x.trim()).forEach(x => lines.push('• ' + x));
+  day.seragam.filter(x => x.trim()).forEach(x => lines.push('• ' + x));
   lines.push('', '📚 MAPEL');
-  reminderData.mapel.filter(x => x.trim()).forEach(x => lines.push('• ' + x));
+  day.mapel.filter(x => x.trim()).forEach(x => lines.push('• ' + x));
   lines.push('', '📝 TUGAS');
-  reminderData.tugas.filter(x => x.trim()).forEach(x => lines.push('• ' + x));
+  day.tugas.filter(x => x.trim()).forEach(x => lines.push('• ' + x));
   lines.push('', '🧹 PIKET');
-  reminderData.piket.filter(x => x.trim()).forEach(x => lines.push('• ' + x));
+  day.piket.filter(x => x.trim()).forEach(x => lines.push('• ' + x));
   lines.push('', '💬 CATATAN');
-  reminderData.catatan.filter(x => x.trim()).forEach(x => lines.push('• ' + x));
+  day.catatan.filter(x => x.trim()).forEach(x => lines.push('• ' + x));
   return lines.join('\n');
 }
 
@@ -261,27 +325,38 @@ function copyReminderMessage() {
   }).catch(() => alert('Gagal menyalin otomatis. Silakan salin manual dari kotak preview.'));
 }
 
+// ═══════ JSONBIN SYNC (semua hari disimpan dalam satu bin) ═══════
 function jsonbinHeaders() {
   return { 'Content-Type': 'application/json', 'X-Master-Key': REMINDER_CONFIG.jsonbinApiKey };
+}
+
+function normalizeRecord(record) {
+  // Migrasi otomatis kalau bin masih pakai format lama (satu reminder tanpa hari)
+  if (record && record.tanggal !== undefined && record.seragam !== undefined && !record.senin) {
+    const merged = emptyAllDaysData();
+    merged[DAYS[0].key] = Object.assign(emptyDayData(), record);
+    return merged;
+  }
+  const merged = emptyAllDaysData();
+  DAYS.forEach(d => { merged[d.key] = Object.assign(emptyDayData(), (record && record[d.key]) || {}); });
+  return merged;
 }
 
 async function loadReminderFromBin() {
   const statusEl = document.getElementById('reminder-sync-status');
   if (!REMINDER_CONFIG.jsonbinBinId) {
-    if (statusEl) statusEl.textContent = 'Status sinkronisasi: belum ada Bin ID (akan dibuat otomatis saat pertama disimpan).';
+    if (statusEl) statusEl.textContent = 'Status sinkronisasi: belum ada Bin ID (isi kolom Bin ID di atas, atau simpan sekali untuk membuat bin baru otomatis).';
     return;
   }
   try {
     if (statusEl) statusEl.textContent = 'Status sinkronisasi: memuat...';
     const res = await fetch(`https://api.jsonbin.io/v3/b/${REMINDER_CONFIG.jsonbinBinId}/latest`, { headers: jsonbinHeaders() });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
     const json = await res.json();
-    if (json && json.record) {
-      reminderData = Object.assign({ tanggal: '', seragam: [''], mapel: [''], tugas: [''], piket: [''], catatan: [''] }, json.record);
-      REMINDER_SECTIONS.forEach(renderReminderList);
-      document.getElementById('rf-tanggal').value = reminderData.tanggal;
-      updateReminderPreview();
-    }
-    if (statusEl) statusEl.textContent = 'Status sinkronisasi: tersambung.';
+    reminderData = normalizeRecord(json && json.record);
+    renderDayTabs();
+    selectDay(currentDay);
+    if (statusEl) statusEl.textContent = 'Status sinkronisasi: tersambung · Bin ID: ' + REMINDER_CONFIG.jsonbinBinId;
   } catch (err) {
     console.warn('JSONBin load error:', err);
     if (statusEl) statusEl.textContent = 'Status sinkronisasi: gagal memuat (cek Bin ID / koneksi).';
@@ -304,9 +379,10 @@ async function saveReminderToBin() {
         body: JSON.stringify(reminderData),
       });
       const json = await res.json();
-      REMINDER_CONFIG.jsonbinBinId = (json && json.metadata && json.metadata.id) || '';
-      console.log('%cBIN BARU DIBUAT — copy ID ini ke REMINDER_CONFIG.jsonbinBinId di kode:', 'font-weight:bold;color:#1a6fcf;', REMINDER_CONFIG.jsonbinBinId);
-      if (statusEl) statusEl.textContent = 'Status sinkronisasi: bin baru dibuat, lihat console (F12) lalu copy ID ke kode.';
+      const newId = (json && json.metadata && json.metadata.id) || '';
+      setStoredBinId(newId);
+      console.log('%cBIN BARU DIBUAT — Bin ID:', 'font-weight:bold;color:#1a6fcf;', newId, '\nID ini sudah otomatis tersimpan di browser ini. Untuk device lain, paste ID ini ke kolom "Bin ID" di halaman Reminder.');
+      if (statusEl) statusEl.textContent = 'Status sinkronisasi: bin baru dibuat · Bin ID: ' + newId;
       return;
     }
     await fetch(`https://api.jsonbin.io/v3/b/${REMINDER_CONFIG.jsonbinBinId}`, {
@@ -314,7 +390,7 @@ async function saveReminderToBin() {
       headers: jsonbinHeaders(),
       body: JSON.stringify(reminderData),
     });
-    if (statusEl) statusEl.textContent = 'Status sinkronisasi: tersimpan · ' + new Date().toLocaleTimeString('id-ID');
+    if (statusEl) statusEl.textContent = 'Status sinkronisasi: tersimpan · ' + new Date().toLocaleTimeString('id-ID') + ' · Bin ID: ' + REMINDER_CONFIG.jsonbinBinId;
   } catch (err) {
     console.warn('JSONBin save error:', err);
     if (statusEl) statusEl.textContent = 'Status sinkronisasi: gagal menyimpan.';
@@ -339,13 +415,17 @@ document.addEventListener('click', async (e) => {
     }
     return;
   }
+
   const logoutBtn = e.target.closest && e.target.closest('#reminder-logout-btn');
   if (logoutBtn) { sessionStorage.removeItem('viiib-reminder-auth'); reminderInitialized = false; initReminderPage(); return; }
+
+  const dayTab = e.target.closest && e.target.closest('.reminder-day-tab');
+  if (dayTab) { selectDay(dayTab.dataset.day); return; }
 
   const addBtn = e.target.closest && e.target.closest('.reminder-add-btn');
   if (addBtn) {
     const key = addBtn.dataset.target;
-    reminderData[key].push('');
+    reminderData[currentDay][key].push('');
     renderReminderList(key);
     updateReminderPreview();
     scheduleReminderSync();
@@ -355,8 +435,8 @@ document.addEventListener('click', async (e) => {
   const delBtn = e.target.closest && e.target.closest('.reminder-row-del');
   if (delBtn) {
     const key = delBtn.dataset.key, idx = +delBtn.dataset.idx;
-    reminderData[key].splice(idx, 1);
-    if (reminderData[key].length === 0) reminderData[key].push('');
+    reminderData[currentDay][key].splice(idx, 1);
+    if (reminderData[currentDay][key].length === 0) reminderData[currentDay][key].push('');
     renderReminderList(key);
     updateReminderPreview();
     scheduleReminderSync();
@@ -367,18 +447,26 @@ document.addEventListener('click', async (e) => {
 
   const openGroupBtn = e.target.closest && e.target.closest('#btn-open-group');
   if (openGroupBtn) { window.open(CONFIG.waGroup, '_blank'); return; }
+
+  const binSaveBtn = e.target.closest && e.target.closest('#reminder-binid-save');
+  if (binSaveBtn) {
+    const val = document.getElementById('reminder-binid-input').value.trim();
+    setStoredBinId(val);
+    loadReminderFromBin();
+    return;
+  }
 });
 
 // ─── Event delegation: input (ketik) ───
 document.addEventListener('input', (e) => {
   if (e.target && e.target.id === 'rf-tanggal') {
-    reminderData.tanggal = e.target.value;
+    reminderData[currentDay].tanggal = e.target.value;
     updateReminderPreview();
     scheduleReminderSync();
   }
   if (e.target && e.target.classList.contains('reminder-row-input')) {
     const key = e.target.dataset.key, idx = +e.target.dataset.idx;
-    reminderData[key][idx] = e.target.value;
+    reminderData[currentDay][key][idx] = e.target.value;
     updateReminderPreview();
     scheduleReminderSync();
   }
