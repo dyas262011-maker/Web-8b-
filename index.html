@@ -7,17 +7,13 @@
 
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  
+
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=IBM+Plex+Mono:wght@400;700&family=Noto+Sans:wght@400;700&display=swap" rel="stylesheet" />
-  
+
   <!-- Stylesheet -->
   <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet" href="seating.css" />
-  
-  <!-- Script -->
-  <script src="seating.js" defer></script>
 </head>
 <body>
 
@@ -77,9 +73,9 @@
       <i class="fa-solid fa-camera-retro"></i>
       <span>Kenangan</span>
     </button>
-    <button class="nav-item" onclick="goPage('seating')" id="nav-btn-seating">
-      <i class="fa-solid fa-chair"></i>
-      <span>Struktur</span>
+    <button class="nav-item" onclick="goPage('reminder')" id="nav-btn-reminder">
+      <i class="fa-solid fa-bullhorn"></i>
+      <span>Reminder</span>
     </button>
   </div>
   <button class="page-nav-btn" onclick="togglePageNav()" title="Navigasi Halaman">
@@ -92,7 +88,7 @@
   <span class="dot active" onclick="goPage('home')" title="Beranda"></span>
   <span class="dot" onclick="goPage('students')" title="Absensi"></span>
   <span class="dot" onclick="goPage('memories')" title="Kenangan"></span>
-  <span class="dot" onclick="goPage('seating')" title="Struktur"></span>
+  <span class="dot" onclick="goPage('reminder')" title="Reminder"></span>
 </div>
 
 <!-- ═══════════════════════════════════════
@@ -119,24 +115,24 @@
       <h1>KELAS VIIIB</h1>
       <p class="subtitle">SMPIT ALAMY</p>
       <p class="subtitle-small">
-        Angkatan 12 &nbsp;·&nbsp; Walas: Pa Didin Tahyudin
+        Angkatan 12 &nbsp;·&nbsp; Walas: Bapak Dwiki Aprianto
       </p>
     </div>
 
     <div class="socials">
-      <a class="social-btn" href="https://wa.me/6283805790033" target="_blank" rel="noopener" title="WhatsApp">
+      <a class="social-btn" id="link-wali-wa" href="https://wa.me/6285159145010" target="_blank" rel="noopener" title="WhatsApp">
         <i class="fa-brands fa-whatsapp"></i>
       </a>
-      <a class="social-btn" href="https://www.instagram.com/class8bright_star" target="_blank" rel="noopener" title="Instagram">
+      <a class="social-btn" id="link-ig" href="https://www.instagram.com/class8bright_star" target="_blank" rel="noopener" title="Instagram">
         <i class="fa-brands fa-instagram"></i>
       </a>
-      <a class="social-btn" href="https://www.tiktok.com/@class8brightstar" target="_blank" rel="noopener" title="TikTok">
+      <a class="social-btn" id="link-tiktok" href="https://www.tiktok.com/@class8brightstar" target="_blank" rel="noopener" title="TikTok">
         <i class="fa-brands fa-tiktok"></i>
       </a>
-      <a class="social-btn" href="https://whatsapp.com/channel/0029VbBKBD9F6smwoAydKr3x" target="_blank" rel="noopener" title="Channel WA">
+      <a class="social-btn" id="link-channel" href="https://whatsapp.com/channel/0029VbBKBD9F6smwoAydKr3x" target="_blank" rel="noopener" title="Channel WA">
         <i class="fa-solid fa-bullhorn"></i>
       </a>
-      <a class="social-btn" href="https://chat.whatsapp.com/DEX62QPp12nE86mGyS3grg" target="_blank" rel="noopener" title="Grup WA">
+      <a class="social-btn" id="link-group" href="https://chat.whatsapp.com/DEX62QPp12nE86mGyS3grg?s=cl&p=a&ilr=0&amv=3" target="_blank" rel="noopener" title="Grup WA">
         <i class="fa-solid fa-people-group"></i>
       </a>
     </div>
@@ -174,9 +170,9 @@
           </div>
         </div>
         <div class="wali-detail">
-          <div class="wali-name">Pa Didin Tahyudin</div>
+          <div class="wali-name">Bapak Dwiki Aprianto</div>
           <div class="wali-meta">Wali Kelas · VIIIB</div>
-          <a class="wali-contact" href="https://wa.me/6283805790033" target="_blank" rel="noopener">
+          <a class="wali-contact" href="https://wa.me/6285159145010" target="_blank" rel="noopener">
             <i class="fa-brands fa-whatsapp"></i> Hubungi Walas
           </a>
         </div>
@@ -270,99 +266,86 @@
 </div>
 
 <!-- ═══════════════════════════════════════
-     HALAMAN 4 — STRUKTUR KELAS
+     HALAMAN 4 — REMINDER HARIAN (khusus admin)
 ═══════════════════════════════════════ -->
-<div class="page" id="page-seating">
+<div class="page" id="page-reminder">
 
   <div class="page-header">
-    <h2 class="page-title">Struktur Kelas</h2>
-    <p class="page-subtitle">VIIIB · SMPIT ALAMY</p>
+    <h2 class="page-title">Reminder Harian</h2>
+    <p class="page-subtitle">VIIIB · SMPIT ALAMY · Khusus Admin</p>
   </div>
 
-  <div class="seating-container">
+  <div class="container" style="padding-top:24px;">
 
-    <!-- ═══ STRUKTUR ORGANISASI ═══ -->
-    <div class="org-section">
-      <div class="org-title">
-        <i class="fa-solid fa-sitemap"></i> Struktur Organisasi
-      </div>
-      <div class="org-grid">
-
-        <div class="org-card org-card--wali">
-          <div class="org-role-icon"><i class="fa-solid fa-user-tie"></i></div>
-          <div class="org-role-label">Wali Kelas</div>
-          <div class="org-role-name">Pa Didin Tahyudin</div>
-        </div>
-
-        <div class="org-card org-card--leader">
-          <div class="org-role-icon"><i class="fa-solid fa-crown"></i></div>
-          <div class="org-role-label">Ketua Kelas</div>
-          <div class="org-role-name">(Nama Ketua)</div>
-        </div>
-
-        <div class="org-card org-card--vice">
-          <div class="org-role-icon"><i class="fa-solid fa-medal"></i></div>
-          <div class="org-role-label">Wakil Ketua</div>
-          <div class="org-role-name">(Nama Wakil)</div>
-        </div>
-
-        <div class="org-card org-card--sec1">
-          <div class="org-role-icon"><i class="fa-solid fa-pen-to-square"></i></div>
-          <div class="org-role-label">Sekretaris 1</div>
-          <div class="org-role-name">(Nama Sekre 1)</div>
-        </div>
-
-        <div class="org-card org-card--sec2">
-          <div class="org-role-icon"><i class="fa-solid fa-pen-clip"></i></div>
-          <div class="org-role-label">Sekretaris 2</div>
-          <div class="org-role-name">(Nama Sekre 2)</div>
-        </div>
-
-        <div class="org-card org-card--bendahara">
-          <div class="org-role-icon"><i class="fa-solid fa-coins"></i></div>
-          <div class="org-role-label">Bendahara</div>
-          <div class="org-role-name">(Nama Bendahara)</div>
-        </div>
-
-        <div class="org-card org-card--bersih">
-          <div class="org-role-icon"><i class="fa-solid fa-broom"></i></div>
-          <div class="org-role-label">Kebersihan</div>
-          <div class="org-role-name">(Nama Anggota)</div>
-        </div>
-
-        <div class="org-card org-card--agama">
-          <div class="org-role-icon"><i class="fa-solid fa-mosque"></i></div>
-          <div class="org-role-label">Keagamaan</div>
-          <div class="org-role-name">(Nama Anggota)</div>
-        </div>
-
+    <!-- GATE PASSWORD -->
+    <div class="reminder-gate" id="reminder-gate">
+      <div class="reminder-gate-box">
+        <i class="fa-solid fa-lock reminder-gate-icon"></i>
+        <div class="reminder-gate-title">Akses Terbatas</div>
+        <p class="reminder-gate-text">Halaman ini hanya untuk admin kelas. Masukkan kata sandi untuk melanjutkan.</p>
+        <input type="password" id="reminder-pw-input" class="reminder-pw-input" placeholder="KATA SANDI" autocomplete="off" />
+        <button class="reminder-pw-btn" id="reminder-pw-submit">
+          <i class="fa-solid fa-right-to-bracket"></i> Masuk
+        </button>
+        <p class="reminder-pw-error" id="reminder-pw-error"></p>
       </div>
     </div>
 
-    <!-- ═══ DENAH MEJA ═══ -->
-    <div class="org-title" style="margin-top: 28px;">
-      <i class="fa-solid fa-chair"></i> Denah Meja
-      <span style="font-size:0.55rem;font-weight:400;margin-left:auto;opacity:0.6;">drag meja →</span>
+    <!-- FORM (tampil setelah login) -->
+    <div class="reminder-app" id="reminder-app" style="display:none;">
+
+      <div class="card">
+        <div class="card-title"><i class="fa-solid fa-calendar-day"></i> Hari / Tanggal</div>
+        <input type="text" id="rf-tanggal" class="reminder-input" placeholder="cth: Senin, 4 Agustus 2026" />
+      </div>
+
+      <div class="card" data-section="seragam">
+        <div class="card-title"><i class="fa-solid fa-shirt"></i> Seragam</div>
+        <div class="reminder-list" id="list-seragam"></div>
+        <button class="reminder-add-btn" data-target="seragam"><i class="fa-solid fa-plus"></i> Tambah Baris</button>
+      </div>
+
+      <div class="card" data-section="mapel">
+        <div class="card-title"><i class="fa-solid fa-book-open"></i> Mata Pelajaran</div>
+        <div class="reminder-list" id="list-mapel"></div>
+        <button class="reminder-add-btn" data-target="mapel"><i class="fa-solid fa-plus"></i> Tambah Baris</button>
+      </div>
+
+      <div class="card" data-section="tugas">
+        <div class="card-title"><i class="fa-solid fa-pen"></i> Tugas</div>
+        <div class="reminder-list" id="list-tugas"></div>
+        <button class="reminder-add-btn" data-target="tugas"><i class="fa-solid fa-plus"></i> Tambah Baris</button>
+      </div>
+
+      <div class="card" data-section="piket">
+        <div class="card-title"><i class="fa-solid fa-broom"></i> Piket</div>
+        <div class="reminder-list" id="list-piket"></div>
+        <button class="reminder-add-btn" data-target="piket"><i class="fa-solid fa-plus"></i> Tambah Baris</button>
+      </div>
+
+      <div class="card" data-section="catatan">
+        <div class="card-title"><i class="fa-solid fa-comment-dots"></i> Catatan</div>
+        <div class="reminder-list" id="list-catatan"></div>
+        <button class="reminder-add-btn" data-target="catatan"><i class="fa-solid fa-plus"></i> Tambah Baris</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><i class="fa-solid fa-eye"></i> Preview Pesan</div>
+        <pre class="reminder-preview" id="reminder-preview">—</pre>
+        <div class="reminder-action-row">
+          <button class="reminder-action-btn" id="btn-copy-pesan"><i class="fa-solid fa-copy"></i> Salin Pesan</button>
+          <button class="reminder-action-btn reminder-action-btn--accent" id="btn-open-group"><i class="fa-brands fa-whatsapp"></i> Buka Grup WA</button>
+        </div>
+        <p class="reminder-hint">
+          <i class="fa-solid fa-circle-info"></i>
+          WhatsApp tidak mengizinkan pengiriman otomatis ke grup. Salin pesan, lalu tempel &amp; kirim manual di grup yang terbuka.
+        </p>
+        <p class="reminder-sync-status" id="reminder-sync-status">Status sinkronisasi: -</p>
+      </div>
+
+      <button class="reminder-logout-btn" id="reminder-logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Keluar</button>
+
     </div>
-
-    <div class="classroom" id="classroom">
-      <div class="whiteboard">🎓 Papan Tulis</div>
-      <!-- meja guru & siswa akan di-generate oleh JS -->
-    </div>
-
-    <div class="seating-legend">
-      <span><span class="legend-dot legend-dot--teacher"></span> Meja Guru</span>
-      <span><span class="legend-dot legend-dot--student"></span> Meja Siswa</span>
-    </div>
-
-    <p class="seating-notice">
-      ⚡ Posisi tersimpan otomatis & tampil live di semua device.
-      <br><small>Geser meja untuk mengatur posisi duduk</small>
-    </p>
-
-    <button class="seating-reset-btn" id="reset-seating-btn">
-      <i class="fa-solid fa-rotate-left"></i> Reset Posisi
-    </button>
 
   </div>
 
@@ -376,7 +359,8 @@
     </a>
   </footer>
 
-</div><!-- /page-seating -->
+</div><!-- /page-reminder -->
+
 <!-- ═══════════════════════════════════════
      LIGHTBOX
 ═══════════════════════════════════════ -->
@@ -415,12 +399,12 @@ const CONFIG = {
   avatarImg   : "https://img2.pixhost.to/images/7724/723457563_alip-1778154031488.jpg",
   bgMusic     : "https://files.catbox.moe/til5wh.mp3",
   waliImg     : "",
-  waGroup     : "https://chat.whatsapp.com/DEX62QPp12nE86mGyS3grg",
+  waGroup     : "https://chat.whatsapp.com/DEX62QPp12nE86mGyS3grg?s=cl&p=a&ilr=0&amv=3",
   igClass     : "https://www.instagram.com/class8bright_star",
   nglLink     : "",
   tiktokClass : "https://www.tiktok.com/@class8brightstar",
   waChannel   : "https://whatsapp.com/channel/0029VbBKBD9F6smwoAydKr3x",
-  waliWa      : "https://wa.me/6283805790033",
+  waliWa      : "https://wa.me/6285159145010",
   memoriesVideo  : "",
   memoriesPhotos : [
     "https://img2.pixhost.to/images/7724/723458876_alip-1778154364652.jpg",
@@ -479,10 +463,12 @@ function applyConfig() {
   if (CONFIG.bgMusic) { set('music-src', 'src', CONFIG.bgMusic); const aud = document.getElementById('bg-music'); if (aud) aud.load(); }
   if (CONFIG.waliImg) { set('wali-img', 'src', CONFIG.waliImg); const ph = document.getElementById('wali-ph'); if (ph) ph.style.display = 'none'; }
   const links = {
-    'link-wa': CONFIG.waGroup, 'link-ig': CONFIG.igClass, 'link-tiktok': CONFIG.tiktokClass,
-    'link-channel': CONFIG.waChannel, 'link-group': CONFIG.waGroup, 'link-wali-wa': CONFIG.waliWa,
+    'link-wali-wa': CONFIG.waliWa, 'link-ig': CONFIG.igClass, 'link-tiktok': CONFIG.tiktokClass,
+    'link-channel': CONFIG.waChannel, 'link-group': CONFIG.waGroup,
   };
   Object.entries(links).forEach(([id, url]) => { if (url) { const el = document.getElementById(id); if (el) el.href = url; } });
+  const wc = document.querySelector('.wali-contact');
+  if (wc && CONFIG.waliWa) wc.href = CONFIG.waliWa;
   const mv = document.getElementById('memories-video');
   const mp = document.getElementById('mem-placeholder');
   if (CONFIG.memoriesVideo) { set('memories-video-src', 'src', CONFIG.memoriesVideo); if (mv) { mv.load(); mv.style.display = 'block'; } if (mp) mp.style.display = 'none'; }
@@ -568,13 +554,235 @@ function toggleFab(){fabOpen=!fabOpen;fabWrap.classList.toggle('open',fabOpen);}
 document.addEventListener('click',e=>{if(fabOpen&&!fabWrap.contains(e.target)){fabOpen=false;fabWrap.classList.remove('open');}});
 
 // ═══════ PAGE NAVIGATION ═══════
-const pageNavWrap=document.getElementById('pageNavWrap');let pageNavOpen=false;let currentPage='home';const PAGE_ORDER=['home','students','memories','seating'];
+const pageNavWrap=document.getElementById('pageNavWrap');let pageNavOpen=false;let currentPage='home';const PAGE_ORDER=['home','students','memories','reminder'];
 function togglePageNav(){pageNavOpen=!pageNavOpen;pageNavWrap.classList.toggle('open',pageNavOpen);}
 document.addEventListener('click',e=>{if(pageNavOpen&&!pageNavWrap.contains(e.target)){pageNavOpen=false;pageNavWrap.classList.remove('open');}});
-function goPage(pageId){if(pageId===currentPage){pageNavOpen=false;pageNavWrap.classList.remove('open');return;}document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));const target=document.getElementById('page-'+pageId);if(target){target.classList.add('active');window.scrollTo(0,0);}document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));const activeBtn=document.getElementById('nav-btn-'+pageId);if(activeBtn)activeBtn.classList.add('active');const dots=document.querySelectorAll('.dot');dots.forEach((d,i)=>d.classList.toggle('active',PAGE_ORDER[i]===pageId));pageNavOpen=false;pageNavWrap.classList.remove('open');currentPage=pageId;if(pageId==='students')buildStudentList();if(pageId==='memories')buildPhotoGrid();}
+function goPage(pageId){if(pageId===currentPage){pageNavOpen=false;pageNavWrap.classList.remove('open');return;}document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));const target=document.getElementById('page-'+pageId);if(target){target.classList.add('active');window.scrollTo(0,0);}document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));const activeBtn=document.getElementById('nav-btn-'+pageId);if(activeBtn)activeBtn.classList.add('active');const dots=document.querySelectorAll('.dot');dots.forEach((d,i)=>d.classList.toggle('active',PAGE_ORDER[i]===pageId));pageNavOpen=false;pageNavWrap.classList.remove('open');currentPage=pageId;if(pageId==='students')buildStudentList();if(pageId==='memories')buildPhotoGrid();if(pageId==='reminder')initReminderPage();}
 
 // ═══════ CARD OBSERVER ═══════
 function initCardObserver(){const io=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');io.unobserve(e.target);}});},{threshold:0.08});document.querySelectorAll('.card').forEach((c,i)=>{c.style.transitionDelay=`${i*0.07}s`;io.observe(c);});}
+
+// ═══════════════════════════════════════════════════
+// REMINDER HARIAN — password gate + form + JSONBin sync
+// ═══════════════════════════════════════════════════
+//
+// [PENTING] Ganti kata sandi admin:
+//   1. Buka halaman ini di browser, tekan F12 (console).
+//   2. Ketik: generatePasswordHash('kata-sandi-baru-kamu').then(h => console.log(h))
+//   3. Copy hasil hash yang muncul, tempel ke REMINDER_CONFIG.adminPasswordHash di bawah.
+//   Kata sandi default saat ini: viiib-admin-2026  (SEGERA GANTI sebelum dipakai beneran)
+//
+const REMINDER_CONFIG = {
+  adminPasswordHash: "e56c044b95298b8b03323c6765ee31eb546ff0f16ad0624329fec6c17eb3a847",
+  jsonbinApiKey: "$2a$10$0XA/Bap/CiGTnq9yVVCVq.gXRScb.ycMrrQ2.2uKaScStP/rtx.Um",
+  // [PENTING] Setelah pertama kali menyimpan reminder, buka console (F12) —
+  // akan muncul ID bin baru. Copy ID itu ke sini supaya datanya permanen
+  // dan tersambung di semua device (kalau dibiarkan kosong, bin baru akan
+  // dibuat ulang tiap kali dan datanya TIDAK akan nyambung antar device).
+  jsonbinBinId: "",
+};
+
+async function sha256Hex(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+window.generatePasswordHash = (pw) => sha256Hex(pw).then(h => { console.log('Hash baru:', h); return h; });
+
+const REMINDER_SECTIONS = ['seragam', 'mapel', 'tugas', 'piket', 'catatan'];
+let reminderData = { tanggal: '', seragam: [''], mapel: [''], tugas: [''], piket: [''], catatan: [''] };
+let reminderInitialized = false;
+let reminderSyncTimer = null;
+
+function escapeHtml(s) { return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+
+function initReminderPage() {
+  const authed = sessionStorage.getItem('viiib-reminder-auth') === '1';
+  document.getElementById('reminder-gate').style.display = authed ? 'none' : 'flex';
+  document.getElementById('reminder-app').style.display = authed ? 'block' : 'none';
+  if (authed && !reminderInitialized) { reminderInitialized = true; setupReminderApp(); }
+}
+
+function setupReminderApp() {
+  REMINDER_SECTIONS.forEach(renderReminderList);
+  document.getElementById('rf-tanggal').value = reminderData.tanggal;
+  updateReminderPreview();
+  loadReminderFromBin();
+}
+
+function renderReminderList(key) {
+  const wrap = document.getElementById('list-' + key);
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  reminderData[key].forEach((val, idx) => {
+    const row = document.createElement('div');
+    row.className = 'reminder-row';
+    row.innerHTML = `<input type="text" class="reminder-input reminder-row-input" data-key="${key}" data-idx="${idx}" value="${escapeHtml(val)}" placeholder="Isi baris..." /><button class="reminder-row-del" data-key="${key}" data-idx="${idx}" title="Hapus"><i class="fa-solid fa-xmark"></i></button>`;
+    wrap.appendChild(row);
+  });
+}
+
+function buildReminderMessage() {
+  const lines = [];
+  lines.push('📢 REMINDER', '');
+  lines.push('📅 Hari/Tanggal :');
+  lines.push(reminderData.tanggal.trim() || '-', '');
+  lines.push('👔 SERAGAM');
+  reminderData.seragam.filter(x => x.trim()).forEach(x => lines.push('• ' + x));
+  lines.push('', '📚 MAPEL');
+  reminderData.mapel.filter(x => x.trim()).forEach(x => lines.push('• ' + x));
+  lines.push('', '📝 TUGAS');
+  reminderData.tugas.filter(x => x.trim()).forEach(x => lines.push('• ' + x));
+  lines.push('', '🧹 PIKET');
+  reminderData.piket.filter(x => x.trim()).forEach(x => lines.push('• ' + x));
+  lines.push('', '💬 CATATAN');
+  reminderData.catatan.filter(x => x.trim()).forEach(x => lines.push('• ' + x));
+  return lines.join('\n');
+}
+
+function updateReminderPreview() {
+  const el = document.getElementById('reminder-preview');
+  if (el) el.textContent = buildReminderMessage();
+}
+
+function copyReminderMessage() {
+  const text = buildReminderMessage();
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('btn-copy-pesan');
+    const old = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-check"></i> Tersalin!';
+    setTimeout(() => { btn.innerHTML = old; }, 1600);
+  }).catch(() => alert('Gagal menyalin otomatis. Silakan salin manual dari kotak preview.'));
+}
+
+function jsonbinHeaders() {
+  return { 'Content-Type': 'application/json', 'X-Master-Key': REMINDER_CONFIG.jsonbinApiKey };
+}
+
+async function loadReminderFromBin() {
+  const statusEl = document.getElementById('reminder-sync-status');
+  if (!REMINDER_CONFIG.jsonbinBinId) {
+    if (statusEl) statusEl.textContent = 'Status sinkronisasi: belum ada Bin ID (akan dibuat otomatis saat pertama disimpan).';
+    return;
+  }
+  try {
+    if (statusEl) statusEl.textContent = 'Status sinkronisasi: memuat...';
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${REMINDER_CONFIG.jsonbinBinId}/latest`, { headers: jsonbinHeaders() });
+    const json = await res.json();
+    if (json && json.record) {
+      reminderData = Object.assign({ tanggal: '', seragam: [''], mapel: [''], tugas: [''], piket: [''], catatan: [''] }, json.record);
+      REMINDER_SECTIONS.forEach(renderReminderList);
+      document.getElementById('rf-tanggal').value = reminderData.tanggal;
+      updateReminderPreview();
+    }
+    if (statusEl) statusEl.textContent = 'Status sinkronisasi: tersambung.';
+  } catch (err) {
+    console.warn('JSONBin load error:', err);
+    if (statusEl) statusEl.textContent = 'Status sinkronisasi: gagal memuat (cek Bin ID / koneksi).';
+  }
+}
+
+function scheduleReminderSync() {
+  clearTimeout(reminderSyncTimer);
+  reminderSyncTimer = setTimeout(saveReminderToBin, 700);
+}
+
+async function saveReminderToBin() {
+  const statusEl = document.getElementById('reminder-sync-status');
+  try {
+    if (statusEl) statusEl.textContent = 'Status sinkronisasi: menyimpan...';
+    if (!REMINDER_CONFIG.jsonbinBinId) {
+      const res = await fetch('https://api.jsonbin.io/v3/b', {
+        method: 'POST',
+        headers: Object.assign(jsonbinHeaders(), { 'X-Bin-Name': 'viiib-reminder' }),
+        body: JSON.stringify(reminderData),
+      });
+      const json = await res.json();
+      REMINDER_CONFIG.jsonbinBinId = (json && json.metadata && json.metadata.id) || '';
+      console.log('%cBIN BARU DIBUAT — copy ID ini ke REMINDER_CONFIG.jsonbinBinId di kode:', 'font-weight:bold;color:#1a6fcf;', REMINDER_CONFIG.jsonbinBinId);
+      if (statusEl) statusEl.textContent = 'Status sinkronisasi: bin baru dibuat, lihat console (F12) lalu copy ID ke kode.';
+      return;
+    }
+    await fetch(`https://api.jsonbin.io/v3/b/${REMINDER_CONFIG.jsonbinBinId}`, {
+      method: 'PUT',
+      headers: jsonbinHeaders(),
+      body: JSON.stringify(reminderData),
+    });
+    if (statusEl) statusEl.textContent = 'Status sinkronisasi: tersimpan · ' + new Date().toLocaleTimeString('id-ID');
+  } catch (err) {
+    console.warn('JSONBin save error:', err);
+    if (statusEl) statusEl.textContent = 'Status sinkronisasi: gagal menyimpan.';
+  }
+}
+
+// ─── Event delegation: klik ───
+document.addEventListener('click', async (e) => {
+  if (e.target && e.target.id === 'reminder-pw-submit') {
+    const input = document.getElementById('reminder-pw-input');
+    const errEl = document.getElementById('reminder-pw-error');
+    const hash = await sha256Hex(input.value);
+    if (hash === REMINDER_CONFIG.adminPasswordHash) {
+      sessionStorage.setItem('viiib-reminder-auth', '1');
+      errEl.textContent = '';
+      input.value = '';
+      document.getElementById('reminder-gate').style.display = 'none';
+      document.getElementById('reminder-app').style.display = 'block';
+      if (!reminderInitialized) { reminderInitialized = true; setupReminderApp(); }
+    } else {
+      errEl.textContent = 'Kata sandi salah.';
+    }
+    return;
+  }
+  const logoutBtn = e.target.closest && e.target.closest('#reminder-logout-btn');
+  if (logoutBtn) { sessionStorage.removeItem('viiib-reminder-auth'); reminderInitialized = false; initReminderPage(); return; }
+
+  const addBtn = e.target.closest && e.target.closest('.reminder-add-btn');
+  if (addBtn) {
+    const key = addBtn.dataset.target;
+    reminderData[key].push('');
+    renderReminderList(key);
+    updateReminderPreview();
+    scheduleReminderSync();
+    return;
+  }
+
+  const delBtn = e.target.closest && e.target.closest('.reminder-row-del');
+  if (delBtn) {
+    const key = delBtn.dataset.key, idx = +delBtn.dataset.idx;
+    reminderData[key].splice(idx, 1);
+    if (reminderData[key].length === 0) reminderData[key].push('');
+    renderReminderList(key);
+    updateReminderPreview();
+    scheduleReminderSync();
+    return;
+  }
+
+  if (e.target && e.target.id === 'btn-copy-pesan') { copyReminderMessage(); return; }
+
+  const openGroupBtn = e.target.closest && e.target.closest('#btn-open-group');
+  if (openGroupBtn) { window.open(CONFIG.waGroup, '_blank'); return; }
+});
+
+// ─── Event delegation: input (ketik) ───
+document.addEventListener('input', (e) => {
+  if (e.target && e.target.id === 'rf-tanggal') {
+    reminderData.tanggal = e.target.value;
+    updateReminderPreview();
+    scheduleReminderSync();
+  }
+  if (e.target && e.target.classList.contains('reminder-row-input')) {
+    const key = e.target.dataset.key, idx = +e.target.dataset.idx;
+    reminderData[key][idx] = e.target.value;
+    updateReminderPreview();
+    scheduleReminderSync();
+  }
+});
+
+// izinkan tekan Enter di kolom password
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && e.target && e.target.id === 'reminder-pw-input') {
+    document.getElementById('reminder-pw-submit').click();
+  }
+});
 
 // ═══════ INIT ═══════
 document.addEventListener('DOMContentLoaded',()=>{applyConfig();initCardObserver();buildStudentList();});
