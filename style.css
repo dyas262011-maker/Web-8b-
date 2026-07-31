@@ -1204,6 +1204,32 @@ body::before {
 }
 .reminder-input:focus { outline: none; border-color: var(--accent); }
 
+.reminder-day-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.reminder-day-tab {
+  padding: 8px 14px;
+  border: 1.5px solid var(--border);
+  background: var(--bg);
+  color: var(--muted);
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.reminder-day-tab:hover { background: var(--bg2); color: var(--text); }
+.reminder-day-tab.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+  box-shadow: var(--shadow);
+}
+
 .reminder-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
 .reminder-row { display: flex; gap: 6px; }
 .reminder-row-input { flex: 1; }
