@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VIIIB — SMPIT ALAMY</title>
+  <title>9B — SMPIT ALAMY</title>
 
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
@@ -33,12 +33,12 @@
 ═══════════════════════════════════════ -->
 <div class="fab-wrap" id="fab-wrap">
   <div class="fab-sub" id="fab-sub-lang">
-    <button class="fab-btn fab-btn--lang" id="lang-btn" onclick="cycleLang()" title="Ganti Bahasa">
+    <button class="fab-btn fab-btn--lang" id="lang-btn" onclick="cycleLang()" data-i18n-title="btn_change_lang" title="Ganti Bahasa">
       <span id="lang-indicator">ID</span>
     </button>
   </div>
   <div class="fab-sub" id="fab-sub-music">
-    <button class="fab-btn" id="music-btn" onclick="toggleMusic()" title="Play / Pause Music">
+    <button class="fab-btn" id="music-btn" onclick="toggleMusic()" data-i18n-title="btn_toggle_music" title="Play / Pause Music">
       <i class="fa-solid fa-music" id="music-icon"></i>
       <span class="bar-icon" aria-hidden="true">
         <span class="bar"></span><span class="bar"></span>
@@ -47,11 +47,11 @@
     </button>
   </div>
   <div class="fab-sub" id="fab-sub-theme">
-    <button class="fab-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle Dark Mode">
+    <button class="fab-btn" id="theme-btn" onclick="toggleTheme()" data-i18n-title="btn_toggle_theme" title="Toggle Dark Mode">
       <i class="fa-solid fa-moon"></i>
     </button>
   </div>
-  <button class="fab-main" id="fab-main" onclick="toggleFab()" title="Menu">
+  <button class="fab-main" id="fab-main" onclick="toggleFab()" data-i18n-title="label_menu" title="Menu">
     <i class="fa-solid fa-sliders"></i>
   </button>
 </div>
@@ -63,22 +63,26 @@
   <div class="page-nav-menu" id="pageNavMenu">
     <button class="nav-item active" onclick="goPage('home')" id="nav-btn-home">
       <i class="fa-solid fa-house"></i>
-      <span>Beranda</span>
+      <span data-i18n="nav_home">Beranda</span>
     </button>
     <button class="nav-item" onclick="goPage('students')" id="nav-btn-students">
       <i class="fa-solid fa-list-ol"></i>
-      <span>Absensi</span>
+      <span data-i18n="nav_students">Absensi</span>
+    </button>
+    <button class="nav-item" onclick="goPage('schedule')" id="nav-btn-schedule">
+      <i class="fa-solid fa-table-list"></i>
+      <span data-i18n="nav_schedule">Jadwal</span>
     </button>
     <button class="nav-item" onclick="goPage('memories')" id="nav-btn-memories">
       <i class="fa-solid fa-camera-retro"></i>
-      <span>Kenangan</span>
+      <span data-i18n="nav_memories">Kenangan</span>
     </button>
     <button class="nav-item" onclick="goPage('reminder')" id="nav-btn-reminder">
       <i class="fa-solid fa-bullhorn"></i>
-      <span>Reminder</span>
+      <span data-i18n="nav_reminder">Reminder</span>
     </button>
   </div>
-  <button class="page-nav-btn" onclick="togglePageNav()" title="Navigasi Halaman">
+  <button class="page-nav-btn" onclick="togglePageNav()" data-i18n-title="label_page_nav" title="Navigasi Halaman">
     <i class="fa-solid fa-ellipsis-vertical"></i>
   </button>
 </div>
@@ -87,6 +91,7 @@
 <div class="page-dots" id="pageDots">
   <span class="dot active" onclick="goPage('home')" title="Beranda"></span>
   <span class="dot" onclick="goPage('students')" title="Absensi"></span>
+  <span class="dot" onclick="goPage('schedule')" title="Jadwal"></span>
   <span class="dot" onclick="goPage('memories')" title="Kenangan"></span>
   <span class="dot" onclick="goPage('reminder')" title="Reminder"></span>
 </div>
@@ -107,15 +112,15 @@
     <div class="avatar-wrap">
       <div class="avatar-ring"></div>
       <div class="avatar-frame">
-        <img id="avatar-img" src="" alt="Kelas VIIIB" />
+        <img id="avatar-img" src="" alt="Kelas 9B" />
       </div>
     </div>
 
     <div class="name-block">
-      <h1>KELAS VIIIB</h1>
+      <h1>KELAS 9B</h1>
       <p class="subtitle">SMPIT ALAMY</p>
       <p class="subtitle-small">
-        Angkatan 12 &nbsp;·&nbsp; Walas: Bapak Dwiki Aprianto
+        Angkatan 12 &nbsp;·&nbsp; <span data-i18n="label_walas">Walas</span>: Bapak Dwiki Aprianto
       </p>
     </div>
 
@@ -137,31 +142,31 @@
       </a>
     </div>
 
-    <div class="section-sep"><span>Info</span></div>
+    <div class="section-sep"><span data-i18n="label_info">Info</span></div>
 
     <div class="card">
-      <div class="card-title"><i class="fa-solid fa-book-open-reader"></i> Quotes</div>
+      <div class="card-title"><i class="fa-solid fa-book-open-reader"></i> <span data-i18n="label_quotes">Quotes</span></div>
       <p class="about-text">
         "Tuntutlah ilmu dari buaian hingga liang lahat —<br>
         karena ilmu adalah cahaya, dan cahaya tak pernah padam."
       </p>
-      <span class="wm-signature">— VIIIB · SMPIT ALAMY · Angkatan 12</span>
+      <span class="wm-signature">— 9B · SMPIT ALAMY · Angkatan 12</span>
     </div>
 
     <div class="card">
-      <div class="card-title"><i class="fa-solid fa-id-card"></i> Informasi Kelas</div>
+      <div class="card-title"><i class="fa-solid fa-id-card"></i> <span data-i18n="label_info_kelas">Informasi Kelas</span></div>
       <div class="tags">
         <span class="tag"><i class="fa-solid fa-school"></i> SMPIT ALAMY</span>
-        <span class="tag"><i class="fa-solid fa-chalkboard"></i> Kelas VIIIB</span>
-        <span class="tag"><i class="fa-solid fa-layer-group"></i> Angkatan 12</span>
+        <span class="tag"><i class="fa-solid fa-chalkboard"></i> <span data-i18n="label_kelas_word">Kelas</span> 9B</span>
+        <span class="tag"><i class="fa-solid fa-layer-group"></i> <span data-i18n="label_angkatan_word">Angkatan</span> 12</span>
         <span class="tag"><i class="fa-solid fa-calendar-days"></i> 2024/2025</span>
-        <span class="tag"><i class="fa-solid fa-users"></i> 32 Siswa</span>
+        <span class="tag"><i class="fa-solid fa-users"></i> 32 <span data-i18n="label_siswa_word">Siswa</span></span>
         <span class="tag"><i class="fa-solid fa-globe"></i> Indonesia</span>
       </div>
     </div>
 
     <div class="card">
-      <div class="card-title"><i class="fa-solid fa-person-chalkboard"></i> Wali Kelas</div>
+      <div class="card-title"><i class="fa-solid fa-person-chalkboard"></i> <span data-i18n="label_wali_kelas">Wali Kelas</span></div>
       <div class="wali-info">
         <div class="wali-avatar">
           <img id="wali-img" src="" alt="Wali Kelas" onerror="this.style.display='none';document.getElementById('wali-ph').style.display='flex';" />
@@ -171,33 +176,33 @@
         </div>
         <div class="wali-detail">
           <div class="wali-name">Bapak Dwiki Aprianto</div>
-          <div class="wali-meta">Wali Kelas · VIIIB</div>
+          <div class="wali-meta"><span data-i18n="label_wali_kelas">Wali Kelas</span> · 9B</div>
           <a class="wali-contact" href="https://wa.me/6285159145010" target="_blank" rel="noopener">
-            <i class="fa-brands fa-whatsapp"></i> Hubungi Walas
+            <i class="fa-brands fa-whatsapp"></i> <span data-i18n="label_hubungi_walas">Hubungi Walas</span>
           </a>
         </div>
       </div>
     </div>
 
     <div class="card">
-      <div class="card-title"><i class="fa-solid fa-list"></i> Keseharian</div>
+      <div class="card-title"><i class="fa-solid fa-list"></i> <span data-i18n="label_keseharian">Keseharian</span></div>
       <div class="tags">
-        <span class="skill-tag"><i class="fa-solid fa-users"></i> Kompak</span>
-        <span class="skill-tag"><i class="fa-solid fa-book"></i> Belajar</span>
-        <span class="skill-tag"><i class="fa-solid fa-futbol"></i> Olahraga</span>
-        <span class="skill-tag"><i class="fa-solid fa-music"></i> Musik</span>
-        <span class="skill-tag"><i class="fa-solid fa-gamepad"></i> Gaming</span>
+        <span class="skill-tag"><i class="fa-solid fa-users"></i> <span data-i18n="skill_kompak">Kompak</span></span>
+        <span class="skill-tag"><i class="fa-solid fa-book"></i> <span data-i18n="skill_belajar">Belajar</span></span>
+        <span class="skill-tag"><i class="fa-solid fa-futbol"></i> <span data-i18n="skill_olahraga">Olahraga</span></span>
+        <span class="skill-tag"><i class="fa-solid fa-music"></i> <span data-i18n="skill_musik">Musik</span></span>
+        <span class="skill-tag"><i class="fa-solid fa-gamepad"></i> <span data-i18n="skill_gaming">Gaming</span></span>
       </div>
     </div>
   </div>
 
   <footer>
     <i class="fa-solid fa-circle" style="opacity:0.35;margin-right:8px;"></i>
-    SMPIT ALAMY · KELAS VIIIB · ANGKATAN 12
+    SMPIT ALAMY · KELAS 9B · ANGKATAN 12
     <i class="fa-solid fa-circle" style="opacity:0.35;margin-left:8px;"></i>
     <br>
     <a href="https://alstecu24.vercel.app" target="_blank" class="dev-link" rel="noopener">
-      <i class="fa-solid fa-code"></i> developer
+      <i class="fa-solid fa-code"></i> <span data-i18n="label_developer">developer</span>
     </a>
   </footer>
 </div>
@@ -207,19 +212,48 @@
 ═══════════════════════════════════════ -->
 <div class="page" id="page-students">
   <div class="page-header">
-    <h2 class="page-title">Daftar Absensi</h2>
-    <p class="page-subtitle">VIIIB · SMPIT ALAMY · Angkatan 12</p>
+    <h2 class="page-title" data-i18n="label_daftar_absensi">Daftar Absensi</h2>
+    <p class="page-subtitle">9B · SMPIT ALAMY · Angkatan 12</p>
   </div>
   <div class="container" style="padding-top:24px;">
     <div class="student-list" id="student-list"></div>
   </div>
   <footer>
     <i class="fa-solid fa-circle" style="opacity:0.35;margin-right:8px;"></i>
-    SMPIT ALAMY · VIIIB · 32 SISWA
+    SMPIT ALAMY · 9B · 32 SISWA
     <i class="fa-solid fa-circle" style="opacity:0.35;margin-left:8px;"></i>
     <br>
     <a href="https://alstecu24.vercel.app" target="_blank" class="dev-link" rel="noopener">
-      <i class="fa-solid fa-code"></i> developer
+      <i class="fa-solid fa-code"></i> <span data-i18n="label_developer">developer</span>
+    </a>
+  </footer>
+</div>
+
+<!-- ═══════════════════════════════════════
+     HALAMAN BARU — JADWAL PELAJARAN (publik)
+═══════════════════════════════════════ -->
+<div class="page" id="page-schedule">
+  <div class="page-header">
+    <h2 class="page-title" data-i18n="label_jadwal_pelajaran">Jadwal Pelajaran</h2>
+    <p class="page-subtitle" data-i18n="label_jadwal_subtitle">Bisa dilihat semua orang</p>
+  </div>
+  <div class="container" style="padding-top:24px;">
+    <div class="card">
+      <div class="card-title"><i class="fa-solid fa-calendar-week"></i> <span data-i18n="label_pilih_hari">Pilih Hari</span></div>
+      <div class="reminder-day-tabs" id="schedule-day-tabs"></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><i class="fa-solid fa-table-list"></i> <span data-i18n="label_jadwal_pelajaran">Jadwal Pelajaran</span></div>
+      <div class="schedule-list" id="schedule-list"></div>
+    </div>
+  </div>
+  <footer>
+    <i class="fa-solid fa-circle" style="opacity:0.35;margin-right:8px;"></i>
+    SMPIT ALAMY · 9B · ANGKATAN 12
+    <i class="fa-solid fa-circle" style="opacity:0.35;margin-left:8px;"></i>
+    <br>
+    <a href="https://alstecu24.vercel.app" target="_blank" class="dev-link" rel="noopener">
+      <i class="fa-solid fa-code"></i> <span data-i18n="label_developer">developer</span>
     </a>
   </footer>
 </div>
@@ -229,8 +263,8 @@
 ═══════════════════════════════════════ -->
 <div class="page" id="page-memories">
   <div class="page-header">
-    <h2 class="page-title">Kenangan Indah</h2>
-    <p class="page-subtitle">VIIIB · SMPIT ALAMY</p>
+    <h2 class="page-title" data-i18n="label_kenangan_indah">Kenangan Indah</h2>
+    <p class="page-subtitle">9B · SMPIT ALAMY</p>
   </div>
   <div class="container" style="padding-top:24px;">
     <div class="memories-video-wrap">
@@ -239,28 +273,28 @@
       </video>
       <div class="memories-video-placeholder" id="mem-placeholder">
         <i class="fa-solid fa-film"></i>
-        <span>Video Kenangan</span>
+        <span data-i18n="label_video_kenangan">Video Kenangan</span>
       </div>
-      <div class="memories-video-overlay">Kenangan Indah</div>
+      <div class="memories-video-overlay" data-i18n="label_kenangan_indah">Kenangan Indah</div>
     </div>
-    <div class="section-sep" style="margin-top:22px;"><span>Galeri Foto</span></div>
+    <div class="section-sep" style="margin-top:22px;"><span data-i18n="label_galeri_foto">Galeri Foto</span></div>
     <div class="photo-grid" id="photo-grid"></div>
     <div class="card" style="margin-top:16px;">
-      <div class="card-title"><i class="fa-solid fa-heart"></i> Momen Berharga</div>
+      <div class="card-title"><i class="fa-solid fa-heart"></i> <span data-i18n="label_momen_berharga">Momen Berharga</span></div>
       <p class="about-text">
         "Setiap momen bersama adalah kenangan yang tak tergantikan.
         Terima kasih sudah menjadi bagian dari cerita ini."
       </p>
-      <span class="wm-signature">— VIIIB · SMPIT ALAMY · Angkatan 12</span>
+      <span class="wm-signature">— 9B · SMPIT ALAMY · Angkatan 12</span>
     </div>
   </div>
   <footer>
     <i class="fa-solid fa-circle" style="opacity:0.35;margin-right:8px;"></i>
-    SMPIT ALAMY · VIIIB · ANGKATAN 12
+    SMPIT ALAMY · 9B · ANGKATAN 12
     <i class="fa-solid fa-circle" style="opacity:0.35;margin-left:8px;"></i>
     <br>
     <a href="https://alstecu24.vercel.app" target="_blank" class="dev-link" rel="noopener">
-      <i class="fa-solid fa-code"></i> developer
+      <i class="fa-solid fa-code"></i> <span data-i18n="label_developer">developer</span>
     </a>
   </footer>
 </div>
@@ -271,8 +305,8 @@
 <div class="page" id="page-reminder">
 
   <div class="page-header">
-    <h2 class="page-title">Reminder Harian</h2>
-    <p class="page-subtitle">VIIIB · SMPIT ALAMY · Khusus Admin</p>
+    <h2 class="page-title" data-i18n="reminder_title">Reminder Harian</h2>
+    <p class="page-subtitle">9B · SMPIT ALAMY · <span data-i18n="reminder_subtitle">Khusus Admin</span></p>
   </div>
 
   <div class="container" style="padding-top:24px;">
@@ -281,11 +315,11 @@
     <div class="reminder-gate" id="reminder-gate">
       <div class="reminder-gate-box">
         <i class="fa-solid fa-lock reminder-gate-icon"></i>
-        <div class="reminder-gate-title">Akses Terbatas</div>
-        <p class="reminder-gate-text">Halaman ini hanya untuk admin kelas. Masukkan kata sandi untuk melanjutkan.</p>
-        <input type="password" id="reminder-pw-input" class="reminder-pw-input" placeholder="KATA SANDI" autocomplete="off" />
+        <div class="reminder-gate-title" data-i18n="reminder_gate_title">Akses Terbatas</div>
+        <p class="reminder-gate-text" data-i18n="reminder_gate_text">Halaman ini hanya untuk admin kelas. Masukkan kata sandi untuk melanjutkan.</p>
+        <input type="password" id="reminder-pw-input" class="reminder-pw-input" data-i18n-placeholder="reminder_pw_placeholder" placeholder="KATA SANDI" autocomplete="off" />
         <button class="reminder-pw-btn" id="reminder-pw-submit">
-          <i class="fa-solid fa-right-to-bracket"></i> Masuk
+          <i class="fa-solid fa-right-to-bracket"></i> <span data-i18n="reminder_pw_submit">Masuk</span>
         </button>
         <p class="reminder-pw-error" id="reminder-pw-error"></p>
       </div>
@@ -295,70 +329,73 @@
     <div class="reminder-app" id="reminder-app" style="display:none;">
 
       <div class="card">
-        <div class="card-title"><i class="fa-solid fa-calendar-week"></i> Pilih Hari</div>
+        <div class="card-title"><i class="fa-solid fa-calendar-week"></i> <span data-i18n="label_pilih_hari">Pilih Hari</span></div>
         <div class="reminder-day-tabs" id="reminder-day-tabs"></div>
       </div>
 
       <div class="card">
-        <div class="card-title"><i class="fa-solid fa-calendar-day"></i> Tanggal — <span id="reminder-day-label">Senin</span></div>
-        <input type="text" id="rf-tanggal" class="reminder-input" placeholder="cth: Senin, 4 Agustus 2026" />
+        <div class="card-title"><i class="fa-solid fa-calendar-day"></i> <span data-i18n="label_tanggal">Tanggal</span> — <span id="reminder-day-label">Senin</span></div>
+        <input type="text" id="rf-tanggal" class="reminder-input" data-i18n-placeholder="placeholder_tanggal_input" placeholder="cth: Senin, 4 Agustus 2026" />
       </div>
 
       <div class="card" data-section="seragam">
-        <div class="card-title"><i class="fa-solid fa-shirt"></i> Seragam</div>
+        <div class="card-title"><i class="fa-solid fa-shirt"></i> <span data-i18n="label_seragam">Seragam</span></div>
         <div class="reminder-list" id="list-seragam"></div>
-        <button class="reminder-add-btn" data-target="seragam"><i class="fa-solid fa-plus"></i> Tambah Baris</button>
+        <button class="reminder-add-btn" data-target="seragam"><i class="fa-solid fa-plus"></i> <span data-i18n="btn_tambah_baris">Tambah Baris</span></button>
       </div>
 
       <div class="card" data-section="mapel">
-        <div class="card-title"><i class="fa-solid fa-book-open"></i> Mata Pelajaran</div>
+        <div class="card-title"><i class="fa-solid fa-book-open"></i> <span data-i18n="label_mapel">Mata Pelajaran</span></div>
         <div class="reminder-list" id="list-mapel"></div>
-        <button class="reminder-add-btn" data-target="mapel"><i class="fa-solid fa-plus"></i> Tambah Baris</button>
+        <button class="reminder-add-btn" data-target="mapel"><i class="fa-solid fa-plus"></i> <span data-i18n="btn_tambah_baris">Tambah Baris</span></button>
       </div>
 
       <div class="card" data-section="tugas">
-        <div class="card-title"><i class="fa-solid fa-pen"></i> Tugas</div>
+        <div class="card-title"><i class="fa-solid fa-pen"></i> <span data-i18n="label_tugas">Tugas</span></div>
         <div class="reminder-list" id="list-tugas"></div>
-        <button class="reminder-add-btn" data-target="tugas"><i class="fa-solid fa-plus"></i> Tambah Baris</button>
+        <button class="reminder-add-btn" data-target="tugas"><i class="fa-solid fa-plus"></i> <span data-i18n="btn_tambah_baris">Tambah Baris</span></button>
       </div>
 
       <div class="card" data-section="piket">
-        <div class="card-title"><i class="fa-solid fa-broom"></i> Piket</div>
+        <div class="card-title"><i class="fa-solid fa-broom"></i> <span data-i18n="label_piket">Piket</span></div>
         <div class="reminder-list" id="list-piket"></div>
-        <button class="reminder-add-btn" data-target="piket"><i class="fa-solid fa-plus"></i> Tambah Baris</button>
+        <button class="reminder-add-btn" data-target="piket"><i class="fa-solid fa-plus"></i> <span data-i18n="btn_tambah_baris">Tambah Baris</span></button>
       </div>
 
       <div class="card" data-section="catatan">
-        <div class="card-title"><i class="fa-solid fa-comment-dots"></i> Catatan</div>
+        <div class="card-title"><i class="fa-solid fa-comment-dots"></i> <span data-i18n="label_catatan">Catatan</span></div>
         <div class="reminder-list" id="list-catatan"></div>
-        <button class="reminder-add-btn" data-target="catatan"><i class="fa-solid fa-plus"></i> Tambah Baris</button>
+        <button class="reminder-add-btn" data-target="catatan"><i class="fa-solid fa-plus"></i> <span data-i18n="btn_tambah_baris">Tambah Baris</span></button>
       </div>
 
       <div class="card">
-        <div class="card-title"><i class="fa-solid fa-eye"></i> Preview Pesan</div>
+        <div class="card-title"><i class="fa-solid fa-eye"></i> <span data-i18n="label_preview_pesan">Preview Pesan</span></div>
         <pre class="reminder-preview" id="reminder-preview">—</pre>
         <div class="reminder-action-row">
-          <button class="reminder-action-btn" id="btn-copy-pesan"><i class="fa-solid fa-copy"></i> Salin Pesan</button>
-          <button class="reminder-action-btn reminder-action-btn--accent" id="btn-open-group"><i class="fa-brands fa-whatsapp"></i> Buka Grup WA</button>
+          <button class="reminder-action-btn" id="btn-copy-pesan"><i class="fa-solid fa-copy"></i> <span data-i18n="btn_salin_pesan">Salin Pesan</span></button>
+          <button class="reminder-action-btn reminder-action-btn--accent" id="btn-open-group"><i class="fa-brands fa-whatsapp"></i> <span data-i18n="btn_buka_grup">Buka Grup WA</span></button>
         </div>
         <p class="reminder-hint">
           <i class="fa-solid fa-circle-info"></i>
-          WhatsApp tidak mengizinkan pengiriman otomatis ke grup. Salin pesan, lalu tempel &amp; kirim manual di grup yang terbuka.
+          <span data-i18n="reminder_hint_wa">WhatsApp tidak mengizinkan pengiriman otomatis ke grup. Salin pesan, lalu tempel &amp; kirim manual di grup yang terbuka.</span>
         </p>
-        <p class="reminder-sync-status" id="reminder-sync-status">Status sinkronisasi: -</p>
+        <p class="reminder-sync-status" id="reminder-sync-status" data-raw="idle">Status sinkronisasi: -</p>
       </div>
 
       <div class="card">
-        <div class="card-title"><i class="fa-solid fa-database"></i> Pengaturan Sinkronisasi (Bin ID)</div>
-        <input type="text" id="reminder-binid-input" class="reminder-input" placeholder="Bin ID akan muncul di sini otomatis" />
-        <button class="reminder-add-btn" id="reminder-binid-save" style="margin-top:8px;"><i class="fa-solid fa-floppy-disk"></i> Simpan Bin ID</button>
+        <div class="card-title"><i class="fa-solid fa-database"></i> <span data-i18n="label_sync_settings">Pengaturan Sinkronisasi (Bin ID)</span></div>
+        <input type="text" id="reminder-binid-input" class="reminder-input" data-i18n-placeholder="binid_placeholder" placeholder="Bin ID akan muncul di sini otomatis" />
+        <div class="reminder-action-row" style="margin-top:8px;">
+          <button class="reminder-action-btn" id="reminder-binid-save"><i class="fa-solid fa-floppy-disk"></i> <span data-i18n="btn_simpan_binid">Simpan Bin ID</span></button>
+          <button class="reminder-action-btn reminder-action-btn--accent" id="reminder-binid-find"><i class="fa-solid fa-magnifying-glass"></i> <span data-i18n="btn_cari_binid">Cari Bin ID Otomatis</span></button>
+        </div>
         <p class="reminder-hint">
           <i class="fa-solid fa-circle-info"></i>
-          Cara cari Bin ID: (1) Paling gampang — biarkan kosong lalu ketik satu reminder & tunggu tersimpan, ID baru otomatis muncul di sini dan di console (F12). (2) Manual — login ke jsonbin.io pakai akun pemilik API key, buka "My Bins", klik bin bernama <b>viiib-reminder</b>, ID-nya ada di URL / detail bin. Kalau ganti device, tempel Bin ID yang sama di sini supaya datanya nyambung.
+          <span data-i18n="binid_hint">Cara cari Bin ID: klik tombol "Cari Bin ID Otomatis" di atas, atau isi manual, atau cek jsonbin.io/app/bins.</span>
         </p>
       </div>
 
-      <button class="reminder-logout-btn" id="reminder-logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Keluar</button>
+      <button class="reminder-logout-btn" id="reminder-logout-btn"><i class="fa-solid fa-right-from-bracket"></i> <span data-i18n="btn_keluar">Keluar</span></button>
 
     </div>
 
@@ -366,11 +403,11 @@
 
   <footer>
     <i class="fa-solid fa-circle" style="opacity:0.35;margin-right:8px;"></i>
-    SMPIT ALAMY · VIIIB · ANGKATAN 12
+    SMPIT ALAMY · 9B · ANGKATAN 12
     <i class="fa-solid fa-circle" style="opacity:0.35;margin-left:8px;"></i>
     <br>
     <a href="https://alstecu24.vercel.app" target="_blank" class="dev-link" rel="noopener">
-      <i class="fa-solid fa-code"></i> developer
+      <i class="fa-solid fa-code"></i> <span data-i18n="label_developer">developer</span>
     </a>
   </footer>
 
@@ -398,13 +435,14 @@
       <p id="modal-msg">Pesan siswa tampil di sini.</p>
       <i class="fa-solid fa-quote-right student-modal-qmark student-modal-qmark--right"></i>
     </div>
-    <div class="student-modal-footer">VIIIB · SMPIT ALAMY</div>
+    <div class="student-modal-footer">9B · SMPIT ALAMY</div>
   </div>
 </div>
 
 <!-- ═══════════════════════════════════════
      SCRIPT UTAMA
 ═══════════════════════════════════════ -->
+<script src="config.js"></script>
 <script src="script.js"></script>
 </body>
 </html>
