@@ -1,63 +1,58 @@
-// ═══════ KONFIGURASI ═══════
-const CONFIG = {
-  heroVideo   : "https://l.top4top.io/m_3779fe6uv1.mp4",
-  heroPoster  : "",
-  heroBanner  : "",
-  avatarImg   : "https://img2.pixhost.to/images/7724/723457563_alip-1778154031488.jpg",
-  bgMusic     : "https://files.catbox.moe/til5wh.mp3",
-  waliImg     : "",
-  waGroup     : "https://chat.whatsapp.com/DEX62QPp12nE86mGyS3grg?s=cl&p=a&ilr=0&amv=3",
-  igClass     : "https://www.instagram.com/class8bright_star",
-  nglLink     : "",
-  tiktokClass : "https://www.tiktok.com/@class8brightstar",
-  waChannel   : "https://whatsapp.com/channel/0029VbBKBD9F6smwoAydKr3x",
-  waliWa      : "https://wa.me/6285159145010",
-  memoriesVideo  : "",
-  memoriesPhotos : [
-    "https://img2.pixhost.to/images/7724/723458876_alip-1778154364652.jpg",
-    "https://img2.pixhost.to/images/7725/723470697_alip-1778157365322.jpg",
-    "", "", "", ""
-  ],
-};
+// ═══════════════════════════════════════════════════
+// SCRIPT.JS — LOGIKA SITUS (data ada di config.js, jangan taruh data di sini)
+// ═══════════════════════════════════════════════════
 
-// ═══════ DAFTAR SISWA ═══════
-const STUDENTS = [
-  { name: "PA DIDIN TAHYUDIN", photo: "", msg: "Hanya allah yang tau." },
-  { name: "ADHYASTA NARARYA AL JAZALI", photo: "", msg: "Kegagalan adalah proses menuju keberhasilan." },
-  { name: "AGUNG MAULANA IBRAHIM", photo: "", msg: "Proses tidak akan pernah mengkhianati hasil." },
-  { name: "ARFA HAIDAR RAISSA", photo: "", msg: "Diam bukan berarti kalah, tapi sedang menyimpan tenaga." },
-  { name: "DAFIN AZKA", photo: "", msg: "Ilmu adalah cahaya, bawa ia ke mana pun kamu pergi." },
-  { name: "DHEVANO ARKA PUTRA PRATAMA", photo: "", msg: "Setiap hari adalah kesempatan untuk jadi lebih baik." },
-  { name: "FAHREZA MAULANA", photo: "", msg: "Kerja keras hari ini adalah cerita sukses esok hari." },
-  { name: "FAUZAN KHODHI LATIF", photo: "", msg: "Yang penting bukan seberapa cepat, tapi seberapa kuat." },
-  { name: "HAFIZ FATIHUL AHZA", photo: "", msg: "Mimpi besar dimulai dari langkah kecil yang konsisten." },
-  { name: "HAFIZH MALIK SOPIYAN", photo: "", msg: "Belajar tanpa batas, tumbuh tanpa henti." },
-  { name: "HAIDAR ALI RASYIDI", photo: "", msg: "Jadilah versi terbaik dirimu, bukan orang lain." },
-  { name: "KENNY JULIAN NAKAJIMA", photo: "", msg: "Hidup terlalu singkat untuk tidak bermimpi besar." },
-  { name: "KEVIN FAEYZA GUNAWAN", photo: "", msg: "Sukses bukan tentang tujuan, tapi perjalanannya." },
-  { name: "MAHER ADEWAN SUHARTA", photo: "", msg: "Tak ada yang mustahil bagi orang yang mau berusaha." },
-  { name: "MUHAMMAD ADNAN GHOFARANA", photo: "", msg: "Kesabaran adalah kunci yang membuka pintu keberhasilan." },
-  { name: "MUHAMMAD AKHDAAN NUR'AIMAN", photo: "", msg: "Jangan berhenti ketika lelah, berhentilah ketika selesai." },
-  { name: "MUHAMMAD DZAKI PURWANDRA S", photo: "", msg: "Setiap tetes keringat adalah benih kesuksesan." },
-  { name: "MUHAMMAD FAKHRI", photo: "", msg: "Rendah hati dalam belajar, tinggi semangat dalam berkarya." },
-  { name: "MUHAMMAD FAWWAAZ SAPUTRA", photo: "", msg: "Ilmu tanpa amal seperti pohon tanpa buah." },
-  { name: "MUHAMMAD RAFIF ALAUNA", photo: "", msg: "Hari ini lebih baik dari kemarin, besok lebih baik dari hari ini." },
-  { name: "MUHAMMAD RIZQY ALFARIDZ", photo: "", msg: "Mengapa aku berubah?" },
-  { name: "MUHAMMAD WAFIQ ZIHNI", photo: "", msg: "Pikiran yang positif menghasilkan hidup yang luar biasa." },
-  { name: "MUHAMMAD WILDAN ALJINAN", photo: "", msg: "Bersyukur atas yang ada, berusaha untuk yang lebih baik." },
-  { name: "NIZAM ABYAN FAEZYA", photo: "", msg: "Fokus pada tujuan, bukan pada rintangan." },
-  { name: "QOULAN TSAQIILA RIZALUSYIIFA", photo: "", msg: "Jangan bergerak tanpa sepengetahuan Tuhan." },
-  { name: "RADINAL AKBAR RUSDANA", photo: "", msg: "Berani bermimpi, lebih berani lagi mewujudkannya." },
-  { name: "RADITYO DZAKWAN EFFENDI", photo: "", msg: "Disiplin adalah jembatan antara tujuan dan pencapaian." },
-  { name: "RAFASHA ERLANDIKA", photo: "", msg: "Jadikan setiap momen sebagai pelajaran berharga." },
-  { name: "RAKA TSAQIF AZZAMY", photo: "", msg: "Kuat bukan berarti tidak pernah jatuh, tapi selalu bangkit." },
-  { name: "RHEKSYA MUHAMAD SYAHROZAQ", photo: "", msg: "Karakter yang baik adalah harta yang paling berharga." },
-  { name: "SADAD FAIRUZ YUSUP JAMALUDIN", photo: "", msg: "Kejujuran adalah fondasi dari segala keberhasilan." },
-  { name: "SAYID HUSEIN SYAMIL", photo: "", msg: "Teruslah belajar, karena ilmu tidak pernah habis." },
-  { name: "SYAKIB ASSAKYA", photo: "", msg: "Akhiri setiap hari dengan rasa syukur dan tekad baru." },
-];
+// ═══════ BAHASA ═══════
+let currentLang = localStorage.getItem('viiib-lang') || 'id';
+if (LANG_ORDER.indexOf(currentLang) === -1) currentLang = 'id';
 
-// ═══════ APPLY CONFIG ═══════
+function t(key) {
+  return (LANG_STRINGS[currentLang] && LANG_STRINGS[currentLang][key])
+      || (LANG_STRINGS.id && LANG_STRINGS.id[key])
+      || key;
+}
+
+function dayLabel(dayKey) {
+  const d = DAYS.find(x => x.key === dayKey);
+  if (!d) return dayKey;
+  return d[currentLang] || d.id;
+}
+
+function applyLang() {
+  document.documentElement.setAttribute('lang', currentLang === 'en' ? 'en' : 'id');
+  document.documentElement.setAttribute('data-lang', currentLang);
+  const indicator = document.getElementById('lang-indicator');
+  if (indicator) indicator.textContent = LANG_LABEL[currentLang] || 'ID';
+
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.textContent = t(el.getAttribute('data-i18n'));
+  });
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    el.setAttribute('title', t(el.getAttribute('data-i18n-title')));
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    el.setAttribute('placeholder', t(el.getAttribute('data-i18n-placeholder')));
+  });
+
+  // Re-render bagian yang dibangun lewat JS supaya ikut ganti bahasa
+  if (document.getElementById('reminder-day-tabs')) renderDayTabs();
+  if (reminderInitialized) {
+    document.getElementById('rf-tanggal').placeholder = t('placeholder_tanggal_input');
+    REMINDER_SECTIONS.forEach(renderReminderList);
+    const statusEl = document.getElementById('reminder-sync-status');
+    if (statusEl && statusEl.dataset.raw === 'idle') statusEl.textContent = t('sync_status_prefix') + ' ' + t('sync_idle');
+  }
+  if (document.getElementById('schedule-day-tabs')) renderScheduleDayTabs();
+}
+
+function cycleLang() {
+  const idx = LANG_ORDER.indexOf(currentLang);
+  currentLang = LANG_ORDER[(idx + 1) % LANG_ORDER.length];
+  localStorage.setItem('viiib-lang', currentLang);
+  applyLang();
+}
+
+// ═══════ APPLY CONFIG (data situs → DOM) ═══════
 function applyConfig() {
   const set = (id, prop, val) => { if (!val) return; const el = document.getElementById(id); if (el) el[prop] = val; };
   if (CONFIG.heroVideo) {
@@ -161,49 +156,96 @@ function toggleFab(){fabOpen=!fabOpen;fabWrap.classList.toggle('open',fabOpen);}
 document.addEventListener('click',e=>{if(fabOpen&&!fabWrap.contains(e.target)){fabOpen=false;fabWrap.classList.remove('open');}});
 
 // ═══════ PAGE NAVIGATION ═══════
-const pageNavWrap=document.getElementById('pageNavWrap');let pageNavOpen=false;let currentPage='home';const PAGE_ORDER=['home','students','memories','reminder'];
+const pageNavWrap=document.getElementById('pageNavWrap');let pageNavOpen=false;let currentPage='home';const PAGE_ORDER=['home','students','schedule','memories','reminder'];
 function togglePageNav(){pageNavOpen=!pageNavOpen;pageNavWrap.classList.toggle('open',pageNavOpen);}
 document.addEventListener('click',e=>{if(pageNavOpen&&!pageNavWrap.contains(e.target)){pageNavOpen=false;pageNavWrap.classList.remove('open');}});
-function goPage(pageId){if(pageId===currentPage){pageNavOpen=false;pageNavWrap.classList.remove('open');return;}document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));const target=document.getElementById('page-'+pageId);if(target){target.classList.add('active');window.scrollTo(0,0);}document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));const activeBtn=document.getElementById('nav-btn-'+pageId);if(activeBtn)activeBtn.classList.add('active');const dots=document.querySelectorAll('.dot');dots.forEach((d,i)=>d.classList.toggle('active',PAGE_ORDER[i]===pageId));pageNavOpen=false;pageNavWrap.classList.remove('open');currentPage=pageId;if(pageId==='students')buildStudentList();if(pageId==='memories')buildPhotoGrid();if(pageId==='reminder')initReminderPage();}
+function goPage(pageId){
+  if(pageId===currentPage){pageNavOpen=false;pageNavWrap.classList.remove('open');return;}
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const target=document.getElementById('page-'+pageId);
+  if(target){
+    // re-trigger animasi masuk halaman tiap kali pindah
+    target.classList.remove('page-anim');
+    void target.offsetWidth;
+    target.classList.add('active','page-anim');
+    window.scrollTo(0,0);
+  }
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  const activeBtn=document.getElementById('nav-btn-'+pageId);
+  if(activeBtn)activeBtn.classList.add('active');
+  const dots=document.querySelectorAll('.dot');
+  dots.forEach((d,i)=>d.classList.toggle('active',PAGE_ORDER[i]===pageId));
+  pageNavOpen=false;pageNavWrap.classList.remove('open');
+  currentPage=pageId;
+  if(pageId==='students')buildStudentList();
+  if(pageId==='schedule')buildSchedulePage();
+  if(pageId==='memories')buildPhotoGrid();
+  if(pageId==='reminder')initReminderPage();
+}
 
 // ═══════ CARD OBSERVER ═══════
 function initCardObserver(){const io=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');io.unobserve(e.target);}});},{threshold:0.08});document.querySelectorAll('.card').forEach((c,i)=>{c.style.transitionDelay=`${i*0.07}s`;io.observe(c);});}
 
 // ═══════════════════════════════════════════════════
+// JADWAL PELAJARAN — halaman publik, tanpa password
+// ═══════════════════════════════════════════════════
+let currentScheduleDay = DAYS[0].key;
+
+function buildSchedulePage() {
+  renderScheduleDayTabs();
+  renderScheduleList(currentScheduleDay);
+}
+
+function renderScheduleDayTabs() {
+  const wrap = document.getElementById('schedule-day-tabs');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  DAYS.forEach(d => {
+    const btn = document.createElement('button');
+    btn.className = 'reminder-day-tab' + (d.key === currentScheduleDay ? ' active' : '');
+    btn.dataset.day = d.key;
+    btn.dataset.role = 'schedule';
+    btn.textContent = dayLabel(d.key);
+    wrap.appendChild(btn);
+  });
+}
+
+function renderScheduleList(dayKey) {
+  currentScheduleDay = dayKey;
+  document.querySelectorAll('#schedule-day-tabs .reminder-day-tab').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.day === dayKey);
+  });
+  const listEl = document.getElementById('schedule-list');
+  if (!listEl) return;
+  const items = (SCHEDULE && SCHEDULE[dayKey]) || [];
+  listEl.innerHTML = '';
+  if (items.length === 0) {
+    const empty = document.createElement('p');
+    empty.className = 'schedule-empty';
+    empty.innerHTML = '<i class="fa-solid fa-circle-info"></i> ' + t('label_jadwal_kosong');
+    listEl.appendChild(empty);
+    return;
+  }
+  items.forEach((it, i) => {
+    const row = document.createElement('div');
+    row.className = 'schedule-row';
+    row.style.transitionDelay = `${i * 0.05}s`;
+    row.innerHTML = `<div class="schedule-jam">${it.jam || ''}</div><div class="schedule-mapel">${it.mapel || ''}</div>`;
+    listEl.appendChild(row);
+  });
+  const io = new IntersectionObserver(entries => { entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } }); }, { threshold: 0.05 });
+  listEl.querySelectorAll('.schedule-row').forEach(el => io.observe(el));
+}
+
+// ═══════════════════════════════════════════════════
 // REMINDER HARIAN — password gate + per-hari + JSONBin sync
 // ═══════════════════════════════════════════════════
-//
-// [PENTING] Ganti kata sandi admin:
-//   1. Buka halaman ini di browser, tekan F12 (console).
-//   2. Ketik: generatePasswordHash('kata-sandi-baru-kamu').then(h => console.log(h))
-//   3. Copy hasil hash yang muncul, tempel ke REMINDER_CONFIG.adminPasswordHash di bawah.
-//   Kata sandi default saat ini: viiib-admin-2026  (SEGERA GANTI sebelum dipakai beneran)
-//
-const REMINDER_CONFIG = {
-  adminPasswordHash: "e56c044b95298b8b03323c6765ee31eb546ff0f16ad0624329fec6c17eb3a847",
-  jsonbinApiKey: "$2a$10$0XA/Bap/CiGTnq9yVVCVq.gXRScb.ycMrrQ2.2uKaScStP/rtx.Um",
-  // Bin ID juga bisa diisi langsung di kode di sini, TAPI cara paling gampang
-  // adalah lewat kolom "Bin ID" yang ada di halaman Reminder (tersimpan otomatis
-  // di browser). Lihat penjelasan cara cari Bin ID di kolom itu.
-  jsonbinBinId: "",
-};
-
 async function sha256Hex(str) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 window.generatePasswordHash = (pw) => sha256Hex(pw).then(h => { console.log('Hash baru:', h); return h; });
 
-// ═══════ HARI ═══════
-// Mau tambah/kurangi hari? Tinggal edit array ini.
-const DAYS = [
-  { key: 'senin',  label: 'Senin' },
-  { key: 'selasa', label: 'Selasa' },
-  { key: 'rabu',   label: 'Rabu' },
-  { key: 'kamis',  label: 'Kamis' },
-  { key: 'jumat',  label: 'Jumat' },
-  { key: 'sabtu',  label: 'Sabtu' },
-];
 const REMINDER_SECTIONS = ['seragam', 'mapel', 'tugas', 'piket', 'catatan'];
 
 function emptyDayData() {
@@ -222,7 +264,7 @@ let reminderSyncTimer = null;
 
 function escapeHtml(s) { return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
 
-// ═══════ BIN ID (tersimpan di browser, tidak perlu edit kode) ═══════
+// ═══════ BIN ID (config.js dulu → lalu override localStorage kalau ada) ═══════
 function getStoredBinId() {
   return localStorage.getItem('viiib-reminder-binid') || REMINDER_CONFIG.jsonbinBinId || '';
 }
@@ -251,7 +293,7 @@ function setupReminderApp() {
   loadReminderFromBin();
 }
 
-// ═══════ TAB HARI ═══════
+// ═══════ TAB HARI (reminder) ═══════
 function renderDayTabs() {
   const wrap = document.getElementById('reminder-day-tabs');
   if (!wrap) return;
@@ -260,19 +302,19 @@ function renderDayTabs() {
     const btn = document.createElement('button');
     btn.className = 'reminder-day-tab' + (d.key === currentDay ? ' active' : '');
     btn.dataset.day = d.key;
-    btn.textContent = d.label;
+    btn.dataset.role = 'reminder';
+    btn.textContent = dayLabel(d.key);
     wrap.appendChild(btn);
   });
 }
 
 function selectDay(dayKey) {
   currentDay = dayKey;
-  document.querySelectorAll('.reminder-day-tab').forEach(btn => {
+  document.querySelectorAll('#reminder-day-tabs .reminder-day-tab').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.day === dayKey);
   });
-  const dayLabel = document.getElementById('reminder-day-label');
-  const d = DAYS.find(x => x.key === dayKey);
-  if (dayLabel && d) dayLabel.textContent = d.label;
+  const dayLabelEl = document.getElementById('reminder-day-label');
+  if (dayLabelEl) dayLabelEl.textContent = dayLabel(dayKey);
   REMINDER_SECTIONS.forEach(renderReminderList);
   document.getElementById('rf-tanggal').value = reminderData[currentDay].tanggal;
   updateReminderPreview();
@@ -286,11 +328,14 @@ function renderReminderList(key) {
   reminderData[currentDay][key].forEach((val, idx) => {
     const row = document.createElement('div');
     row.className = 'reminder-row';
-    row.innerHTML = `<input type="text" class="reminder-input reminder-row-input" data-key="${key}" data-idx="${idx}" value="${escapeHtml(val)}" placeholder="Isi baris..." /><button class="reminder-row-del" data-key="${key}" data-idx="${idx}" title="Hapus"><i class="fa-solid fa-xmark"></i></button>`;
+    row.innerHTML = `<input type="text" class="reminder-input reminder-row-input" data-key="${key}" data-idx="${idx}" value="${escapeHtml(val)}" placeholder="${t('placeholder_isi_baris')}" /><button class="reminder-row-del" data-key="${key}" data-idx="${idx}" title="Hapus"><i class="fa-solid fa-xmark"></i></button>`;
     wrap.appendChild(row);
   });
 }
 
+// Catatan: format pesan REMINDER di bawah SENGAJA tetap Bahasa Indonesia baku
+// (📢 REMINDER / SERAGAM / MAPEL / dst) berapa pun bahasa UI yang dipilih,
+// karena ini format pesan tetap untuk dikirim ke grup WA, bukan teks UI situs.
 function buildReminderMessage() {
   const day = reminderData[currentDay];
   const lines = [];
@@ -320,7 +365,7 @@ function copyReminderMessage() {
   navigator.clipboard.writeText(text).then(() => {
     const btn = document.getElementById('btn-copy-pesan');
     const old = btn.innerHTML;
-    btn.innerHTML = '<i class="fa-solid fa-check"></i> Tersalin!';
+    btn.innerHTML = '<i class="fa-solid fa-check"></i> ' + t('btn_tersalin');
     setTimeout(() => { btn.innerHTML = old; }, 1600);
   }).catch(() => alert('Gagal menyalin otomatis. Silakan salin manual dari kotak preview.'));
 }
@@ -328,6 +373,13 @@ function copyReminderMessage() {
 // ═══════ JSONBIN SYNC (semua hari disimpan dalam satu bin) ═══════
 function jsonbinHeaders() {
   return { 'Content-Type': 'application/json', 'X-Master-Key': REMINDER_CONFIG.jsonbinApiKey };
+}
+
+function setSyncStatus(text, isIdle) {
+  const statusEl = document.getElementById('reminder-sync-status');
+  if (!statusEl) return;
+  statusEl.textContent = text;
+  statusEl.dataset.raw = isIdle ? 'idle' : 'busy';
 }
 
 function normalizeRecord(record) {
@@ -343,23 +395,22 @@ function normalizeRecord(record) {
 }
 
 async function loadReminderFromBin() {
-  const statusEl = document.getElementById('reminder-sync-status');
   if (!REMINDER_CONFIG.jsonbinBinId) {
-    if (statusEl) statusEl.textContent = 'Status sinkronisasi: belum ada Bin ID (isi kolom Bin ID di atas, atau simpan sekali untuk membuat bin baru otomatis).';
+    setSyncStatus(t('sync_status_prefix') + ' belum ada Bin ID (isi kolom Bin ID di bawah, atau klik "Cari Bin ID Otomatis").', true);
     return;
   }
   try {
-    if (statusEl) statusEl.textContent = 'Status sinkronisasi: memuat...';
+    setSyncStatus(t('sync_status_prefix') + ' memuat...', false);
     const res = await fetch(`https://api.jsonbin.io/v3/b/${REMINDER_CONFIG.jsonbinBinId}/latest`, { headers: jsonbinHeaders() });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const json = await res.json();
     reminderData = normalizeRecord(json && json.record);
     renderDayTabs();
     selectDay(currentDay);
-    if (statusEl) statusEl.textContent = 'Status sinkronisasi: tersambung · Bin ID: ' + REMINDER_CONFIG.jsonbinBinId;
+    setSyncStatus(t('sync_status_prefix') + ' tersambung · Bin ID: ' + REMINDER_CONFIG.jsonbinBinId, true);
   } catch (err) {
     console.warn('JSONBin load error:', err);
-    if (statusEl) statusEl.textContent = 'Status sinkronisasi: gagal memuat (cek Bin ID / koneksi).';
+    setSyncStatus(t('sync_status_prefix') + ' gagal memuat (cek Bin ID / koneksi).', true);
   }
 }
 
@@ -369,9 +420,8 @@ function scheduleReminderSync() {
 }
 
 async function saveReminderToBin() {
-  const statusEl = document.getElementById('reminder-sync-status');
   try {
-    if (statusEl) statusEl.textContent = 'Status sinkronisasi: menyimpan...';
+    setSyncStatus(t('sync_status_prefix') + ' menyimpan...', false);
     if (!REMINDER_CONFIG.jsonbinBinId) {
       const res = await fetch('https://api.jsonbin.io/v3/b', {
         method: 'POST',
@@ -381,8 +431,8 @@ async function saveReminderToBin() {
       const json = await res.json();
       const newId = (json && json.metadata && json.metadata.id) || '';
       setStoredBinId(newId);
-      console.log('%cBIN BARU DIBUAT — Bin ID:', 'font-weight:bold;color:#1a6fcf;', newId, '\nID ini sudah otomatis tersimpan di browser ini. Untuk device lain, paste ID ini ke kolom "Bin ID" di halaman Reminder.');
-      if (statusEl) statusEl.textContent = 'Status sinkronisasi: bin baru dibuat · Bin ID: ' + newId;
+      console.log('%cBIN BARU DIBUAT — Bin ID:', 'font-weight:bold;color:#1a6fcf;', newId, '\nUntuk semua device otomatis nyambung tanpa isi manual, taruh ID ini di REMINDER_CONFIG.jsonbinBinId pada config.js lalu upload ulang.');
+      setSyncStatus(t('sync_status_prefix') + ' bin baru dibuat · Bin ID: ' + newId, true);
       return;
     }
     await fetch(`https://api.jsonbin.io/v3/b/${REMINDER_CONFIG.jsonbinBinId}`, {
@@ -390,10 +440,36 @@ async function saveReminderToBin() {
       headers: jsonbinHeaders(),
       body: JSON.stringify(reminderData),
     });
-    if (statusEl) statusEl.textContent = 'Status sinkronisasi: tersimpan · ' + new Date().toLocaleTimeString('id-ID') + ' · Bin ID: ' + REMINDER_CONFIG.jsonbinBinId;
+    setSyncStatus(t('sync_status_prefix') + ' tersimpan · ' + new Date().toLocaleTimeString('id-ID') + ' · Bin ID: ' + REMINDER_CONFIG.jsonbinBinId, true);
   } catch (err) {
     console.warn('JSONBin save error:', err);
-    if (statusEl) statusEl.textContent = 'Status sinkronisasi: gagal menyimpan.';
+    setSyncStatus(t('sync_status_prefix') + ' gagal menyimpan.', true);
+  }
+}
+
+// ═══════ CARI BIN ID OTOMATIS (via daftar bin "uncategorized" milik API key ini) ═══════
+async function findBinIdAutomatically() {
+  try {
+    setSyncStatus(t('sync_status_prefix') + ' mencari Bin ID...', false);
+    const res = await fetch('https://api.jsonbin.io/v3/c/uncategorized/bins', { headers: jsonbinHeaders() });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const list = await res.json();
+    const arr = Array.isArray(list) ? list : (list && list.records) || [];
+    // cari yang namanya "viiib-reminder", kalau tidak ada ambil yang paling baru
+    let found = arr.find(b => (b.record || b).snippetMeta?.name === 'viiib-reminder')
+             || arr.find(b => (b.record || b).name === 'viiib-reminder')
+             || arr[0];
+    const foundId = found && ((found.record && found.record.id) || found.id || found._id);
+    if (foundId) {
+      setStoredBinId(foundId);
+      setSyncStatus(t('sync_status_prefix') + ' Bin ID ditemukan · ' + foundId, true);
+      loadReminderFromBin();
+    } else {
+      setSyncStatus(t('sync_status_prefix') + ' belum ada bin ditemukan. Simpan satu reminder dulu untuk membuat bin baru.', true);
+    }
+  } catch (err) {
+    console.warn('JSONBin find-bin error:', err);
+    setSyncStatus(t('sync_status_prefix') + ' gagal mencari otomatis. Cek console (F12) atau cari manual lewat jsonbin.io/app/bins.', true);
   }
 }
 
@@ -411,7 +487,7 @@ document.addEventListener('click', async (e) => {
       document.getElementById('reminder-app').style.display = 'block';
       if (!reminderInitialized) { reminderInitialized = true; setupReminderApp(); }
     } else {
-      errEl.textContent = 'Kata sandi salah.';
+      errEl.textContent = t('reminder_pw_error');
     }
     return;
   }
@@ -420,10 +496,14 @@ document.addEventListener('click', async (e) => {
   if (logoutBtn) { sessionStorage.removeItem('viiib-reminder-auth'); reminderInitialized = false; initReminderPage(); return; }
 
   const dayTab = e.target.closest && e.target.closest('.reminder-day-tab');
-  if (dayTab) { selectDay(dayTab.dataset.day); return; }
+  if (dayTab) {
+    if (dayTab.dataset.role === 'schedule') { renderScheduleList(dayTab.dataset.day); }
+    else { selectDay(dayTab.dataset.day); }
+    return;
+  }
 
   const addBtn = e.target.closest && e.target.closest('.reminder-add-btn');
-  if (addBtn) {
+  if (addBtn && addBtn.dataset.target) {
     const key = addBtn.dataset.target;
     reminderData[currentDay][key].push('');
     renderReminderList(key);
@@ -455,6 +535,9 @@ document.addEventListener('click', async (e) => {
     loadReminderFromBin();
     return;
   }
+
+  const binFindBtn = e.target.closest && e.target.closest('#reminder-binid-find');
+  if (binFindBtn) { findBinIdAutomatically(); return; }
 });
 
 // ─── Event delegation: input (ketik) ───
@@ -480,4 +563,9 @@ document.addEventListener('keydown', (e) => {
 });
 
 // ═══════ INIT ═══════
-document.addEventListener('DOMContentLoaded',()=>{applyConfig();initCardObserver();buildStudentList();});
+document.addEventListener('DOMContentLoaded', () => {
+  applyConfig();
+  applyLang();
+  initCardObserver();
+  buildStudentList();
+});
