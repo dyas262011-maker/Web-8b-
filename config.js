@@ -91,21 +91,16 @@ const SCHEDULE = {
 
 // ═══════ REMINDER — ADMIN & JSONBIN ═══════
 //
-// [PENTING] Ganti kata sandi admin:
+// [PENTING] Kata sandi admin sudah diganti dari default. Kalau mau ganti lagi:
 //   1. Buka halaman Reminder di browser, tekan F12 (console).
 //   2. Ketik: generatePasswordHash('kata-sandi-baru-kamu').then(h => console.log(h))
 //   3. Copy hasil hash yang muncul, tempel ke REMINDER_CONFIG.adminPasswordHash di bawah.
-//   Kata sandi default saat ini: viiib-admin-2026  (SEGERA GANTI sebelum dipakai beneran)
 //
-// [PENTING] jsonbinBinId — supaya SEMUA ORANG di SEMUA DEVICE otomatis
-// nyambung ke data yang sama tanpa perlu tempel manual, ISI LANGSUNG di
-// sini setelah kamu dapat Bin ID (lihat tombol "Cari Bin ID Otomatis" atau
-// "Simpan Bin ID" di halaman Reminder, atau cek jsonbin.io/app/bins).
-// Kalau dikosongkan, tiap device masih bisa jalan tapi harus tempel Bin ID
-// manual sendiri-sendiri (disimpan di localStorage browser masing-masing).
+// jsonbinBinId sudah diisi permanen supaya SEMUA ORANG di SEMUA DEVICE otomatis
+// nyambung ke data yang sama tanpa perlu tempel manual apapun.
 //
 const REMINDER_CONFIG = {
-  adminPasswordHash: "e56c044b95298b8b03323c6765ee31eb546ff0f16ad0624329fec6c17eb3a847",
+  adminPasswordHash: "25ac88ffce648561c6fd1fa23eb0c3eee4e3103b4499c310e033adfc19bb55d6",
   jsonbinApiKey: "$2a$10$0XA/Bap/CiGTnq9yVVCVq.gXRScb.ycMrrQ2.2uKaScStP/rtx.Um",
   jsonbinBinId: "6a6c8672f5f4af5e29d9b05e",
 };
