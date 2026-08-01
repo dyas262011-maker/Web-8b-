@@ -107,7 +107,7 @@ const SCHEDULE = {
 const REMINDER_CONFIG = {
   adminPasswordHash: "e56c044b95298b8b03323c6765ee31eb546ff0f16ad0624329fec6c17eb3a847",
   jsonbinApiKey: "$2a$10$0XA/Bap/CiGTnq9yVVCVq.gXRScb.ycMrrQ2.2uKaScStP/rtx.Um",
-  jsonbinBinId: "",
+  jsonbinBinId: "6a6c8672f5f4af5e29d9b05e",
 };
 
 // ═══════ BAHASA (Indonesia / Betawi / English / Sunda) ═══════
