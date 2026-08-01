@@ -264,14 +264,23 @@ let reminderSyncTimer = null;
 
 function escapeHtml(s) { return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
 
-// ═══════ BIN ID (config.js dulu → lalu override localStorage kalau ada) ═══════
+// ═══════ BIN ID (config.js SELALU jadi sumber utama) ═══════
+// Kalau admin sudah isi jsonbinBinId di config.js, itu yang dipakai SEMUA
+// device — localStorage lama (misal dari percobaan auto-buat bin
+// sebelumnya) tidak akan menimpa lagi. localStorage hanya dipakai sebagai
+// fallback kalau config.js masih kosong.
+const CONFIG_BIN_ID = (REMINDER_CONFIG.jsonbinBinId || '').trim();
+if (CONFIG_BIN_ID) localStorage.removeItem('viiib-reminder-binid'); // bersihkan sisa localStorage lama yang bisa bikin device beda bin
 function getStoredBinId() {
-  return localStorage.getItem('viiib-reminder-binid') || REMINDER_CONFIG.jsonbinBinId || '';
+  if (CONFIG_BIN_ID) return CONFIG_BIN_ID;
+  return localStorage.getItem('viiib-reminder-binid') || '';
 }
 function setStoredBinId(id) {
   REMINDER_CONFIG.jsonbinBinId = id || '';
-  if (id) localStorage.setItem('viiib-reminder-binid', id);
-  else localStorage.removeItem('viiib-reminder-binid');
+  if (!CONFIG_BIN_ID) {
+    if (id) localStorage.setItem('viiib-reminder-binid', id);
+    else localStorage.removeItem('viiib-reminder-binid');
+  }
   const input = document.getElementById('reminder-binid-input');
   if (input) input.value = id || '';
 }
