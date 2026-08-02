@@ -534,6 +534,20 @@ document.addEventListener('click', async (e) => {
 
   if (e.target && e.target.id === 'btn-copy-pesan') { copyReminderMessage(); return; }
 
+  const saveBtn = e.target.closest && e.target.closest('#btn-simpan-perubahan');
+  if (saveBtn) {
+    clearTimeout(reminderSyncTimer);
+    saveBtn.classList.add('is-saving');
+    saveReminderToBin().finally(() => {
+      saveBtn.classList.remove('is-saving');
+      saveBtn.classList.add('is-saved');
+      const old = saveBtn.innerHTML;
+      saveBtn.innerHTML = '<i class="fa-solid fa-check"></i> ' + t('btn_tersimpan_ok');
+      setTimeout(() => { saveBtn.innerHTML = old; saveBtn.classList.remove('is-saved'); }, 1400);
+    });
+    return;
+  }
+
   const openGroupBtn = e.target.closest && e.target.closest('#btn-open-group');
   if (openGroupBtn) { window.open(CONFIG.waGroup, '_blank'); return; }
 
