@@ -73,21 +73,10 @@ const DAYS = [
   { key: 'sabtu',  id: 'Sabtu',  betawi: 'Sabtu',  en: 'Saturday',  su: 'Saptu'  },
 ];
 
-// ═══════ JADWAL PELAJARAN (halaman publik, semua orang bisa lihat) ═══════
-// [PENTING] Ini masih KOSONG / CONTOH — Al belum kasih jadwal aslinya.
-// Isi tiap hari dengan array {jam, mapel}. Kosongkan array kalau hari itu
-// belum ada jadwalnya (nanti otomatis muncul teks "Belum diisi").
-const SCHEDULE = {
-  senin:  [
-    // { jam: "07:00 - 07:40", mapel: "Upacara" },
-    // { jam: "07:40 - 08:20", mapel: "Matematika" },
-  ],
-  selasa: [],
-  rabu:   [],
-  kamis:  [],
-  jumat:  [],
-  sabtu:  [],
-};
+// ═══════ JADWAL PELAJARAN ═══════
+// Tidak butuh data terpisah di sini lagi — halaman Jadwal (publik) sekarang
+// otomatis mengambil isi dari kolom "Mata Pelajaran" per hari di halaman
+// Reminder (admin). Cukup isi Mapel di Reminder, otomatis muncul di Jadwal.
 
 // ═══════ REMINDER — ADMIN & JSONBIN ═══════
 //
@@ -140,9 +129,7 @@ const LANG_STRINGS = {
     label_jadwal_subtitle: "Bisa dilihat semua orang",
     label_pilih_hari: "Pilih Hari",
     label_jadwal_kosong: "Jadwal untuk hari ini belum diisi admin.",
-    btn_edit_jadwal: "Edit Jadwal (Admin)",
-    btn_simpan_jadwal: "Simpan Jadwal",
-    btn_tutup_edit: "Tutup Mode Edit",
+    label_jadwal_note: 'Jadwal ini otomatis diambil dari isian "Mata Pelajaran" di halaman Reminder (diisi admin).',
     reminder_title: "Reminder Harian",
     reminder_subtitle: "Khusus Admin",
     reminder_gate_title: "Akses Terbatas",
@@ -198,9 +185,7 @@ const LANG_STRINGS = {
     label_jadwal_subtitle: "Bisa diliat semua orang",
     label_pilih_hari: "Pilih Hari",
     label_jadwal_kosong: "Jadwal ari ini belom diisi ame admin.",
-    btn_edit_jadwal: "Edit Jadwal (Admin)",
-    btn_simpan_jadwal: "Simpen Jadwal",
-    btn_tutup_edit: "Tutup Mode Edit",
+    label_jadwal_note: 'Jadwal ini otomatis kesedot dari isian "Mata Pelajaran" di halaman Reminder (diisi ame admin).',
     reminder_title: "Reminder Arian",
     reminder_subtitle: "Cuma Buat Admin",
     reminder_gate_title: "Ga Bisa Masuk Sembarangan",
@@ -256,9 +241,7 @@ const LANG_STRINGS = {
     label_jadwal_subtitle: "Visible to everyone",
     label_pilih_hari: "Select Day",
     label_jadwal_kosong: "The schedule for this day hasn't been filled in yet.",
-    btn_edit_jadwal: "Edit Schedule (Admin)",
-    btn_simpan_jadwal: "Save Schedule",
-    btn_tutup_edit: "Close Edit Mode",
+    label_jadwal_note: 'This schedule is pulled automatically from the "Subjects" field on the Reminder page (filled in by admin).',
     reminder_title: "Daily Reminder",
     reminder_subtitle: "Admin Only",
     reminder_gate_title: "Restricted Access",
@@ -314,9 +297,7 @@ const LANG_STRINGS = {
     label_jadwal_subtitle: "Bisa ditingali ku sadayana",
     label_pilih_hari: "Pilih Poé",
     label_jadwal_kosong: "Jadwal poé ieu can dieusian ku admin.",
-    btn_edit_jadwal: "Edit Jadwal (Admin)",
-    btn_simpan_jadwal: "Simpen Jadwal",
-    btn_tutup_edit: "Tutup Mode Edit",
+    label_jadwal_note: 'Jadwal ieu otomatis dicandak tina eusian "Pelajaran" dina halaman Reminder (dieusian ku admin).',
     reminder_title: "Reminder Sapopoé",
     reminder_subtitle: "Khusus Admin",
     reminder_gate_title: "Aksés Kawates",
