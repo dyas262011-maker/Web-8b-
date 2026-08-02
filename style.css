@@ -481,9 +481,10 @@ body::before {
 
 /* ===== SOCIAL BUTTONS ===== */
 .socials {
-  display: grid;
-  grid-template-columns: repeat(4, auto);
+  display: flex;
+  flex-wrap: wrap;
   justify-content: center;
+  align-items: center;
   gap: 7px;
   margin-top: 18px;
 }
