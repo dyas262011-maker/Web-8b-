@@ -42,7 +42,11 @@ function applyLang() {
     const statusEl = document.getElementById('reminder-sync-status');
     if (statusEl && statusEl.dataset.raw === 'idle') statusEl.textContent = t('sync_status_prefix') + ' ' + t('sync_idle');
   }
-  if (document.getElementById('schedule-day-tabs')) renderScheduleDayTabs();
+  if (document.getElementById('schedule-day-tabs')) {
+    renderScheduleDayTabs();
+    renderScheduleListDisplay(currentScheduleDay);
+    if (scheduleEditMode) renderScheduleEditList(currentScheduleDay);
+  }
 }
 
 function cycleLang() {
@@ -187,13 +191,40 @@ function goPage(pageId){
 function initCardObserver(){const io=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');io.unobserve(e.target);}});},{threshold:0.08});document.querySelectorAll('.card').forEach((c,i)=>{c.style.transitionDelay=`${i*0.07}s`;io.observe(c);});}
 
 // ═══════════════════════════════════════════════════
-// JADWAL PELAJARAN — halaman publik, tanpa password
+// JADWAL PELAJARAN — tampilan publik (baca) + panel edit admin, sinkron JSONBin
 // ═══════════════════════════════════════════════════
 let currentScheduleDay = DAYS[0].key;
+let scheduleData = deepCopySchedule(SCHEDULE);
+let scheduleEditMode = false;
+let scheduleSyncTimer = null;
+
+function deepCopySchedule(src) {
+  const out = {};
+  DAYS.forEach(d => { out[d.key] = ((src && src[d.key]) || []).map(it => ({ jam: it.jam || '', mapel: it.mapel || '' })); });
+  return out;
+}
 
 function buildSchedulePage() {
   renderScheduleDayTabs();
-  renderScheduleList(currentScheduleDay);
+  renderScheduleListDisplay(currentScheduleDay);
+  updateScheduleEditVisibility();
+  loadScheduleFromBin();
+}
+
+function updateScheduleEditVisibility() {
+  const isAdmin = sessionStorage.getItem('viiib-reminder-auth') === '1';
+  const toggleBtn = document.getElementById('schedule-edit-toggle');
+  const panel = document.getElementById('schedule-edit-panel');
+  if (!toggleBtn || !panel) return;
+  if (!isAdmin) {
+    toggleBtn.style.display = 'none';
+    panel.style.display = 'none';
+    scheduleEditMode = false;
+    return;
+  }
+  toggleBtn.style.display = scheduleEditMode ? 'none' : 'block';
+  panel.style.display = scheduleEditMode ? 'block' : 'none';
+  if (scheduleEditMode) renderScheduleEditList(currentScheduleDay);
 }
 
 function renderScheduleDayTabs() {
@@ -210,14 +241,19 @@ function renderScheduleDayTabs() {
   });
 }
 
-function renderScheduleList(dayKey) {
+function selectScheduleDay(dayKey) {
   currentScheduleDay = dayKey;
   document.querySelectorAll('#schedule-day-tabs .reminder-day-tab').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.day === dayKey);
   });
+  renderScheduleListDisplay(dayKey);
+  if (scheduleEditMode) renderScheduleEditList(dayKey);
+}
+
+function renderScheduleListDisplay(dayKey) {
   const listEl = document.getElementById('schedule-list');
   if (!listEl) return;
-  const items = (SCHEDULE && SCHEDULE[dayKey]) || [];
+  const items = (scheduleData && scheduleData[dayKey]) || [];
   listEl.innerHTML = '';
   if (items.length === 0) {
     const empty = document.createElement('p');
@@ -230,12 +266,68 @@ function renderScheduleList(dayKey) {
     const row = document.createElement('div');
     row.className = 'schedule-row';
     row.style.transitionDelay = `${i * 0.05}s`;
-    row.innerHTML = `<div class="schedule-jam">${it.jam || ''}</div><div class="schedule-mapel">${it.mapel || ''}</div>`;
+    row.innerHTML = `<div class="schedule-jam">${escapeHtml(it.jam || '-')}</div><div class="schedule-mapel">${escapeHtml(it.mapel || '-')}</div>`;
     listEl.appendChild(row);
   });
-  const io = new IntersectionObserver(entries => { entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } }); }, { threshold: 0.05 });
-  listEl.querySelectorAll('.schedule-row').forEach(el => io.observe(el));
+  requestAnimationFrame(() => {
+    listEl.querySelectorAll('.schedule-row').forEach(el => el.classList.add('visible'));
+  });
 }
+
+function renderScheduleEditList(dayKey) {
+  const labelEl = document.getElementById('schedule-edit-day-label');
+  if (labelEl) labelEl.textContent = dayLabel(dayKey);
+  const wrap = document.getElementById('schedule-edit-list');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  (scheduleData[dayKey] || []).forEach((it, idx) => {
+    const row = document.createElement('div');
+    row.className = 'reminder-row schedule-edit-row';
+    row.innerHTML = `
+      <input type="text" class="reminder-input schedule-edit-jam" data-idx="${idx}" value="${escapeHtml(it.jam)}" placeholder="Jam, cth: 07:00 - 07:40" />
+      <input type="text" class="reminder-input schedule-edit-mapel" data-idx="${idx}" value="${escapeHtml(it.mapel)}" placeholder="Nama mapel" />
+      <button class="reminder-row-del schedule-edit-del" data-idx="${idx}" title="Hapus"><i class="fa-solid fa-xmark"></i></button>
+    `;
+    wrap.appendChild(row);
+  });
+}
+
+async function loadScheduleFromBin() {
+  if (!REMINDER_CONFIG.jsonbinBinId) {
+    setScheduleSyncStatus('');
+    return;
+  }
+  try {
+    setScheduleSyncStatus(t('sync_status_prefix') + ' memuat jadwal...');
+    const record = await fetchLatestBinRecord();
+    if (record && record.jadwal) {
+      scheduleData = deepCopySchedule(record.jadwal);
+    }
+    renderScheduleListDisplay(currentScheduleDay);
+    if (scheduleEditMode) renderScheduleEditList(currentScheduleDay);
+    setScheduleSyncStatus('');
+  } catch (err) {
+    console.warn('JSONBin load jadwal error:', err);
+    setScheduleSyncStatus(t('sync_status_prefix') + ' gagal memuat jadwal (cek koneksi).');
+  }
+}
+
+async function saveScheduleToBin() {
+  try {
+    await mergeAndSaveToBin({ jadwal: scheduleData }, 'viiib-reminder');
+    setScheduleSyncStatus(t('sync_status_prefix') + ' jadwal tersimpan · ' + new Date().toLocaleTimeString('id-ID'));
+  } catch (err) {
+    console.warn('JSONBin save jadwal error:', err);
+    setScheduleSyncStatus(t('sync_status_prefix') + ' gagal menyimpan jadwal.');
+    throw err;
+  }
+}
+
+function scheduleScheduleSync() {
+  clearTimeout(scheduleSyncTimer);
+  scheduleSyncTimer = setTimeout(saveScheduleToBin, 700);
+}
+
 
 // ═══════════════════════════════════════════════════
 // REMINDER HARIAN — password gate + per-hari + JSONBin sync
@@ -391,6 +483,11 @@ function setSyncStatus(text, isIdle) {
   statusEl.dataset.raw = isIdle ? 'idle' : 'busy';
 }
 
+function setScheduleSyncStatus(text) {
+  const el = document.getElementById('schedule-sync-status');
+  if (el) el.textContent = text;
+}
+
 function normalizeRecord(record) {
   // Migrasi otomatis kalau bin masih pakai format lama (satu reminder tanpa hari)
   if (record && record.tanggal !== undefined && record.seragam !== undefined && !record.senin) {
@@ -403,6 +500,41 @@ function normalizeRecord(record) {
   return merged;
 }
 
+// ═══════ HELPER: fetch record bin apa adanya (dipakai reminder & jadwal) ═══════
+async function fetchLatestBinRecord() {
+  if (!REMINDER_CONFIG.jsonbinBinId) return {};
+  const res = await fetch(`https://api.jsonbin.io/v3/b/${REMINDER_CONFIG.jsonbinBinId}/latest`, { headers: jsonbinHeaders() });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const json = await res.json();
+  return (json && json.record) || {};
+}
+
+// ═══════ HELPER: gabung "patch" ke record TERBARU lalu simpan, supaya
+// menyimpan reminder tidak pernah menghapus data jadwal (atau sebaliknya) ═══════
+async function mergeAndSaveToBin(patch, binNameIfNew) {
+  if (!REMINDER_CONFIG.jsonbinBinId) {
+    const res = await fetch('https://api.jsonbin.io/v3/b', {
+      method: 'POST',
+      headers: Object.assign(jsonbinHeaders(), { 'X-Bin-Name': binNameIfNew || 'viiib-reminder' }),
+      body: JSON.stringify(patch),
+    });
+    const json = await res.json();
+    const newId = (json && json.metadata && json.metadata.id) || '';
+    setStoredBinId(newId);
+    console.log('%cBIN BARU DIBUAT — Bin ID:', 'font-weight:bold;color:#1a6fcf;', newId, '\nUntuk semua device otomatis nyambung tanpa isi manual, taruh ID ini di REMINDER_CONFIG.jsonbinBinId pada config.js lalu upload ulang.');
+    return { created: true, id: newId, merged: patch };
+  }
+  let base = {};
+  try { base = await fetchLatestBinRecord(); } catch (e) { console.warn('Gagal ambil data lama sebelum simpan, lanjut pakai data kosong:', e); }
+  const merged = Object.assign({}, base, patch);
+  await fetch(`https://api.jsonbin.io/v3/b/${REMINDER_CONFIG.jsonbinBinId}`, {
+    method: 'PUT',
+    headers: jsonbinHeaders(),
+    body: JSON.stringify(merged),
+  });
+  return { created: false, id: REMINDER_CONFIG.jsonbinBinId, merged };
+}
+
 async function loadReminderFromBin() {
   if (!REMINDER_CONFIG.jsonbinBinId) {
     setSyncStatus(t('sync_status_prefix') + ' belum ada Bin ID (isi kolom Bin ID di bawah, atau klik "Cari Bin ID Otomatis").', true);
@@ -410,10 +542,8 @@ async function loadReminderFromBin() {
   }
   try {
     setSyncStatus(t('sync_status_prefix') + ' memuat...', false);
-    const res = await fetch(`https://api.jsonbin.io/v3/b/${REMINDER_CONFIG.jsonbinBinId}/latest`, { headers: jsonbinHeaders() });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const json = await res.json();
-    reminderData = normalizeRecord(json && json.record);
+    const record = await fetchLatestBinRecord();
+    reminderData = normalizeRecord(record);
     renderDayTabs();
     selectDay(currentDay);
     setSyncStatus(t('sync_status_prefix') + ' tersambung · Bin ID: ' + REMINDER_CONFIG.jsonbinBinId, true);
@@ -431,30 +561,18 @@ function scheduleReminderSync() {
 async function saveReminderToBin() {
   try {
     setSyncStatus(t('sync_status_prefix') + ' menyimpan...', false);
-    if (!REMINDER_CONFIG.jsonbinBinId) {
-      const res = await fetch('https://api.jsonbin.io/v3/b', {
-        method: 'POST',
-        headers: Object.assign(jsonbinHeaders(), { 'X-Bin-Name': 'viiib-reminder' }),
-        body: JSON.stringify(reminderData),
-      });
-      const json = await res.json();
-      const newId = (json && json.metadata && json.metadata.id) || '';
-      setStoredBinId(newId);
-      console.log('%cBIN BARU DIBUAT — Bin ID:', 'font-weight:bold;color:#1a6fcf;', newId, '\nUntuk semua device otomatis nyambung tanpa isi manual, taruh ID ini di REMINDER_CONFIG.jsonbinBinId pada config.js lalu upload ulang.');
-      setSyncStatus(t('sync_status_prefix') + ' bin baru dibuat · Bin ID: ' + newId, true);
-      return;
+    const result = await mergeAndSaveToBin(Object.assign({}, reminderData), 'viiib-reminder');
+    if (result.created) {
+      setSyncStatus(t('sync_status_prefix') + ' bin baru dibuat · Bin ID: ' + result.id, true);
+    } else {
+      setSyncStatus(t('sync_status_prefix') + ' tersimpan · ' + new Date().toLocaleTimeString('id-ID') + ' · Bin ID: ' + REMINDER_CONFIG.jsonbinBinId, true);
     }
-    await fetch(`https://api.jsonbin.io/v3/b/${REMINDER_CONFIG.jsonbinBinId}`, {
-      method: 'PUT',
-      headers: jsonbinHeaders(),
-      body: JSON.stringify(reminderData),
-    });
-    setSyncStatus(t('sync_status_prefix') + ' tersimpan · ' + new Date().toLocaleTimeString('id-ID') + ' · Bin ID: ' + REMINDER_CONFIG.jsonbinBinId, true);
   } catch (err) {
     console.warn('JSONBin save error:', err);
     setSyncStatus(t('sync_status_prefix') + ' gagal menyimpan.', true);
   }
 }
+
 
 // ═══════ CARI BIN ID OTOMATIS (via daftar bin "uncategorized" milik API key ini) ═══════
 async function findBinIdAutomatically() {
@@ -506,7 +624,7 @@ document.addEventListener('click', async (e) => {
 
   const dayTab = e.target.closest && e.target.closest('.reminder-day-tab');
   if (dayTab) {
-    if (dayTab.dataset.role === 'schedule') { renderScheduleList(dayTab.dataset.day); }
+    if (dayTab.dataset.role === 'schedule') { selectScheduleDay(dayTab.dataset.day); }
     else { selectDay(dayTab.dataset.day); }
     return;
   }
@@ -561,6 +679,47 @@ document.addEventListener('click', async (e) => {
 
   const binFindBtn = e.target.closest && e.target.closest('#reminder-binid-find');
   if (binFindBtn) { findBinIdAutomatically(); return; }
+
+  const schedEditToggle = e.target.closest && e.target.closest('#schedule-edit-toggle');
+  if (schedEditToggle) { scheduleEditMode = true; updateScheduleEditVisibility(); return; }
+
+  const schedEditClose = e.target.closest && e.target.closest('#schedule-edit-close');
+  if (schedEditClose) { scheduleEditMode = false; updateScheduleEditVisibility(); return; }
+
+  const schedAddBtn = e.target.closest && e.target.closest('#schedule-edit-add');
+  if (schedAddBtn) {
+    scheduleData[currentScheduleDay].push({ jam: '', mapel: '' });
+    renderScheduleEditList(currentScheduleDay);
+    renderScheduleListDisplay(currentScheduleDay);
+    scheduleScheduleSync();
+    return;
+  }
+
+  const schedDelBtn = e.target.closest && e.target.closest('.schedule-edit-del');
+  if (schedDelBtn) {
+    const idx = +schedDelBtn.dataset.idx;
+    scheduleData[currentScheduleDay].splice(idx, 1);
+    renderScheduleEditList(currentScheduleDay);
+    renderScheduleListDisplay(currentScheduleDay);
+    scheduleScheduleSync();
+    return;
+  }
+
+  const schedSaveBtn = e.target.closest && e.target.closest('#btn-simpan-jadwal');
+  if (schedSaveBtn) {
+    clearTimeout(scheduleSyncTimer);
+    schedSaveBtn.classList.add('is-saving');
+    saveScheduleToBin().then(() => {
+      schedSaveBtn.classList.remove('is-saving');
+      schedSaveBtn.classList.add('is-saved');
+      const old = schedSaveBtn.innerHTML;
+      schedSaveBtn.innerHTML = '<i class="fa-solid fa-check"></i> ' + t('btn_tersimpan_ok');
+      setTimeout(() => { schedSaveBtn.innerHTML = old; schedSaveBtn.classList.remove('is-saved'); }, 1400);
+    }).catch(() => {
+      schedSaveBtn.classList.remove('is-saving');
+    });
+    return;
+  }
 });
 
 // ─── Event delegation: input (ketik) ───
@@ -575,6 +734,18 @@ document.addEventListener('input', (e) => {
     reminderData[currentDay][key][idx] = e.target.value;
     updateReminderPreview();
     scheduleReminderSync();
+  }
+  if (e.target && e.target.classList.contains('schedule-edit-jam')) {
+    const idx = +e.target.dataset.idx;
+    scheduleData[currentScheduleDay][idx].jam = e.target.value;
+    renderScheduleListDisplay(currentScheduleDay);
+    scheduleScheduleSync();
+  }
+  if (e.target && e.target.classList.contains('schedule-edit-mapel')) {
+    const idx = +e.target.dataset.idx;
+    scheduleData[currentScheduleDay][idx].mapel = e.target.value;
+    renderScheduleListDisplay(currentScheduleDay);
+    scheduleScheduleSync();
   }
 });
 
