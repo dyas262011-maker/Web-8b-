@@ -243,33 +243,19 @@
       <div class="reminder-day-tabs" id="schedule-day-tabs"></div>
     </div>
 
-    <!-- Tampilan publik (baca saja) -->
-    <div class="card" id="schedule-view-card">
+    <div class="card">
       <div class="card-title"><i class="fa-solid fa-table-list"></i> <span data-i18n="label_jadwal_pelajaran">Jadwal Pelajaran</span></div>
-      <p class="reminder-sync-status" id="schedule-sync-status" data-raw="idle">-</p>
+      <p class="reminder-sync-status" id="schedule-sync-status" data-raw="idle"></p>
       <div class="schedule-list" id="schedule-list"></div>
-    </div>
-
-    <!-- Tombol buka mode edit, cuma nongol kalau admin sudah login lewat halaman Reminder -->
-    <button class="reminder-add-btn" id="schedule-edit-toggle" style="display:none;">
-      <i class="fa-solid fa-pen"></i> <span data-i18n="btn_edit_jadwal">Edit Jadwal (Admin)</span>
-    </button>
-
-    <!-- Panel edit (admin) -->
-    <div id="schedule-edit-panel" style="display:none;">
-      <button class="reminder-save-btn" id="btn-simpan-jadwal">
-        <i class="fa-solid fa-floppy-disk"></i> <span data-i18n="btn_simpan_jadwal">Simpan Jadwal</span>
-      </button>
-      <div class="card">
-        <div class="card-title"><i class="fa-solid fa-list-check"></i> <span id="schedule-edit-day-label">Senin</span></div>
-        <div class="reminder-list" id="schedule-edit-list"></div>
-        <button class="reminder-add-btn" id="schedule-edit-add"><i class="fa-solid fa-plus"></i> <span data-i18n="btn_tambah_baris">Tambah Baris</span></button>
-      </div>
-      <button class="reminder-logout-btn" id="schedule-edit-close"><i class="fa-solid fa-xmark"></i> <span data-i18n="btn_tutup_edit">Tutup Mode Edit</span></button>
+      <p class="reminder-hint">
+        <i class="fa-solid fa-circle-info"></i>
+        <span data-i18n="label_jadwal_note">Jadwal ini otomatis diambil dari isian "Mata Pelajaran" di halaman Reminder (diisi admin).</span>
+      </p>
     </div>
   </div>
   <footer>
     <i class="fa-solid fa-circle" style="opacity:0.35;margin-right:8px;"></i>
+
     SMPIT ALAMY · IXB · ANGKATAN 12
     <i class="fa-solid fa-circle" style="opacity:0.35;margin-left:8px;"></i>
     <br>
