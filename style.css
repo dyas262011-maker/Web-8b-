@@ -1407,13 +1407,14 @@ body::before {
 .schedule-row.visible { opacity: 1; transform: translateX(0); }
 .schedule-row:hover { background: var(--bg2); }
 
-.schedule-jam {
+.schedule-no {
   font-family: var(--font-mono);
-  font-size: 0.66rem;
-  letter-spacing: 1px;
+  font-size: 0.65rem;
+  font-weight: 700;
   color: var(--accent);
-  white-space: nowrap;
-  min-width: 100px;
+  min-width: 26px;
+  letter-spacing: 1px;
+  opacity: 0.8;
   flex-shrink: 0;
 }
 
