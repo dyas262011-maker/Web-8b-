@@ -1288,6 +1288,9 @@ body::before {
 }
 .reminder-row { display: flex; gap: 6px; animation: rowSlideIn 0.3s ease both; }
 .reminder-row-input { flex: 1; }
+
+.schedule-edit-row .schedule-edit-jam { flex: 0 0 38%; }
+.schedule-edit-row .schedule-edit-mapel { flex: 1; }
 .reminder-row-del {
   width: 38px; flex-shrink: 0;
   border: 1.5px solid var(--border);
@@ -1300,6 +1303,7 @@ body::before {
 
 .reminder-add-btn {
   width: 100%;
+  margin-bottom: 10px;
   padding: 9px;
   border: 1.5px dashed var(--border);
   background: transparent;
