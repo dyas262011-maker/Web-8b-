@@ -45,7 +45,6 @@ function applyLang() {
   if (document.getElementById('schedule-day-tabs')) {
     renderScheduleDayTabs();
     renderScheduleListDisplay(currentScheduleDay);
-    if (scheduleEditMode) renderScheduleEditList(currentScheduleDay);
   }
 }
 
@@ -191,40 +190,18 @@ function goPage(pageId){
 function initCardObserver(){const io=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');io.unobserve(e.target);}});},{threshold:0.08});document.querySelectorAll('.card').forEach((c,i)=>{c.style.transitionDelay=`${i*0.07}s`;io.observe(c);});}
 
 // ═══════════════════════════════════════════════════
-// JADWAL PELAJARAN — tampilan publik (baca) + panel edit admin, sinkron JSONBin
+// JADWAL PELAJARAN — otomatis ambil dari isian "Mata Pelajaran" di Reminder.
+// Tidak ada penyimpanan/form terpisah — begitu admin isi Mapel di Reminder
+// dan tersimpan, semua orang yang buka Jadwal langsung lihat itu juga.
 // ═══════════════════════════════════════════════════
 let currentScheduleDay = DAYS[0].key;
-let scheduleData = deepCopySchedule(SCHEDULE);
-let scheduleEditMode = false;
-let scheduleSyncTimer = null;
-
-function deepCopySchedule(src) {
-  const out = {};
-  DAYS.forEach(d => { out[d.key] = ((src && src[d.key]) || []).map(it => ({ jam: it.jam || '', mapel: it.mapel || '' })); });
-  return out;
-}
+let scheduleMapelCache = {};
+DAYS.forEach(d => { scheduleMapelCache[d.key] = []; });
 
 function buildSchedulePage() {
   renderScheduleDayTabs();
   renderScheduleListDisplay(currentScheduleDay);
-  updateScheduleEditVisibility();
   loadScheduleFromBin();
-}
-
-function updateScheduleEditVisibility() {
-  const isAdmin = sessionStorage.getItem('viiib-reminder-auth') === '1';
-  const toggleBtn = document.getElementById('schedule-edit-toggle');
-  const panel = document.getElementById('schedule-edit-panel');
-  if (!toggleBtn || !panel) return;
-  if (!isAdmin) {
-    toggleBtn.style.display = 'none';
-    panel.style.display = 'none';
-    scheduleEditMode = false;
-    return;
-  }
-  toggleBtn.style.display = scheduleEditMode ? 'none' : 'block';
-  panel.style.display = scheduleEditMode ? 'block' : 'none';
-  if (scheduleEditMode) renderScheduleEditList(currentScheduleDay);
 }
 
 function renderScheduleDayTabs() {
@@ -247,13 +224,12 @@ function selectScheduleDay(dayKey) {
     btn.classList.toggle('active', btn.dataset.day === dayKey);
   });
   renderScheduleListDisplay(dayKey);
-  if (scheduleEditMode) renderScheduleEditList(dayKey);
 }
 
 function renderScheduleListDisplay(dayKey) {
   const listEl = document.getElementById('schedule-list');
   if (!listEl) return;
-  const items = (scheduleData && scheduleData[dayKey]) || [];
+  const items = scheduleMapelCache[dayKey] || [];
   listEl.innerHTML = '';
   if (items.length === 0) {
     const empty = document.createElement('p');
@@ -262,11 +238,11 @@ function renderScheduleListDisplay(dayKey) {
     listEl.appendChild(empty);
     return;
   }
-  items.forEach((it, i) => {
+  items.forEach((mapel, i) => {
     const row = document.createElement('div');
     row.className = 'schedule-row';
     row.style.transitionDelay = `${i * 0.05}s`;
-    row.innerHTML = `<div class="schedule-jam">${escapeHtml(it.jam || '-')}</div><div class="schedule-mapel">${escapeHtml(it.mapel || '-')}</div>`;
+    row.innerHTML = `<div class="schedule-no">${String(i + 1).padStart(2, '0')}</div><div class="schedule-mapel">${escapeHtml(mapel)}</div>`;
     listEl.appendChild(row);
   });
   requestAnimationFrame(() => {
@@ -274,58 +250,22 @@ function renderScheduleListDisplay(dayKey) {
   });
 }
 
-function renderScheduleEditList(dayKey) {
-  const labelEl = document.getElementById('schedule-edit-day-label');
-  if (labelEl) labelEl.textContent = dayLabel(dayKey);
-  const wrap = document.getElementById('schedule-edit-list');
-  if (!wrap) return;
-  wrap.innerHTML = '';
-  (scheduleData[dayKey] || []).forEach((it, idx) => {
-    const row = document.createElement('div');
-    row.className = 'reminder-row schedule-edit-row';
-    row.innerHTML = `
-      <input type="text" class="reminder-input schedule-edit-jam" data-idx="${idx}" value="${escapeHtml(it.jam)}" placeholder="Jam, cth: 07:00 - 07:40" />
-      <input type="text" class="reminder-input schedule-edit-mapel" data-idx="${idx}" value="${escapeHtml(it.mapel)}" placeholder="Nama mapel" />
-      <button class="reminder-row-del schedule-edit-del" data-idx="${idx}" title="Hapus"><i class="fa-solid fa-xmark"></i></button>
-    `;
-    wrap.appendChild(row);
-  });
-}
-
 async function loadScheduleFromBin() {
-  if (!REMINDER_CONFIG.jsonbinBinId) {
-    setScheduleSyncStatus('');
-    return;
-  }
+  if (!REMINDER_CONFIG.jsonbinBinId) { setScheduleSyncStatus(''); return; }
   try {
-    setScheduleSyncStatus(t('sync_status_prefix') + ' memuat jadwal...');
+    setScheduleSyncStatus(t('sync_status_prefix') + ' memuat...');
     const record = await fetchLatestBinRecord();
-    if (record && record.jadwal) {
-      scheduleData = deepCopySchedule(record.jadwal);
-    }
+    DAYS.forEach(d => {
+      const dayRecord = record && record[d.key];
+      const mapelList = (dayRecord && Array.isArray(dayRecord.mapel)) ? dayRecord.mapel : [];
+      scheduleMapelCache[d.key] = mapelList.filter(m => m && m.trim());
+    });
     renderScheduleListDisplay(currentScheduleDay);
-    if (scheduleEditMode) renderScheduleEditList(currentScheduleDay);
     setScheduleSyncStatus('');
   } catch (err) {
     console.warn('JSONBin load jadwal error:', err);
-    setScheduleSyncStatus(t('sync_status_prefix') + ' gagal memuat jadwal (cek koneksi).');
+    setScheduleSyncStatus(t('sync_status_prefix') + ' gagal memuat (cek koneksi).');
   }
-}
-
-async function saveScheduleToBin() {
-  try {
-    await mergeAndSaveToBin({ jadwal: scheduleData }, 'viiib-reminder');
-    setScheduleSyncStatus(t('sync_status_prefix') + ' jadwal tersimpan · ' + new Date().toLocaleTimeString('id-ID'));
-  } catch (err) {
-    console.warn('JSONBin save jadwal error:', err);
-    setScheduleSyncStatus(t('sync_status_prefix') + ' gagal menyimpan jadwal.');
-    throw err;
-  }
-}
-
-function scheduleScheduleSync() {
-  clearTimeout(scheduleSyncTimer);
-  scheduleSyncTimer = setTimeout(saveScheduleToBin, 700);
 }
 
 
@@ -679,47 +619,6 @@ document.addEventListener('click', async (e) => {
 
   const binFindBtn = e.target.closest && e.target.closest('#reminder-binid-find');
   if (binFindBtn) { findBinIdAutomatically(); return; }
-
-  const schedEditToggle = e.target.closest && e.target.closest('#schedule-edit-toggle');
-  if (schedEditToggle) { scheduleEditMode = true; updateScheduleEditVisibility(); return; }
-
-  const schedEditClose = e.target.closest && e.target.closest('#schedule-edit-close');
-  if (schedEditClose) { scheduleEditMode = false; updateScheduleEditVisibility(); return; }
-
-  const schedAddBtn = e.target.closest && e.target.closest('#schedule-edit-add');
-  if (schedAddBtn) {
-    scheduleData[currentScheduleDay].push({ jam: '', mapel: '' });
-    renderScheduleEditList(currentScheduleDay);
-    renderScheduleListDisplay(currentScheduleDay);
-    scheduleScheduleSync();
-    return;
-  }
-
-  const schedDelBtn = e.target.closest && e.target.closest('.schedule-edit-del');
-  if (schedDelBtn) {
-    const idx = +schedDelBtn.dataset.idx;
-    scheduleData[currentScheduleDay].splice(idx, 1);
-    renderScheduleEditList(currentScheduleDay);
-    renderScheduleListDisplay(currentScheduleDay);
-    scheduleScheduleSync();
-    return;
-  }
-
-  const schedSaveBtn = e.target.closest && e.target.closest('#btn-simpan-jadwal');
-  if (schedSaveBtn) {
-    clearTimeout(scheduleSyncTimer);
-    schedSaveBtn.classList.add('is-saving');
-    saveScheduleToBin().then(() => {
-      schedSaveBtn.classList.remove('is-saving');
-      schedSaveBtn.classList.add('is-saved');
-      const old = schedSaveBtn.innerHTML;
-      schedSaveBtn.innerHTML = '<i class="fa-solid fa-check"></i> ' + t('btn_tersimpan_ok');
-      setTimeout(() => { schedSaveBtn.innerHTML = old; schedSaveBtn.classList.remove('is-saved'); }, 1400);
-    }).catch(() => {
-      schedSaveBtn.classList.remove('is-saving');
-    });
-    return;
-  }
 });
 
 // ─── Event delegation: input (ketik) ───
@@ -734,18 +633,6 @@ document.addEventListener('input', (e) => {
     reminderData[currentDay][key][idx] = e.target.value;
     updateReminderPreview();
     scheduleReminderSync();
-  }
-  if (e.target && e.target.classList.contains('schedule-edit-jam')) {
-    const idx = +e.target.dataset.idx;
-    scheduleData[currentScheduleDay][idx].jam = e.target.value;
-    renderScheduleListDisplay(currentScheduleDay);
-    scheduleScheduleSync();
-  }
-  if (e.target && e.target.classList.contains('schedule-edit-mapel')) {
-    const idx = +e.target.dataset.idx;
-    scheduleData[currentScheduleDay][idx].mapel = e.target.value;
-    renderScheduleListDisplay(currentScheduleDay);
-    scheduleScheduleSync();
   }
 });
 
