@@ -72,6 +72,15 @@ function applyConfig() {
     'link-channel': CONFIG.waChannel, 'link-group': CONFIG.waGroup,
   };
   Object.entries(links).forEach(([id, url]) => { if (url) { const el = document.getElementById(id); if (el) el.href = url; } });
+  const nglBtn = document.getElementById('link-ngl');
+  if (nglBtn) {
+    if (CONFIG.nglLink && CONFIG.nglLink.trim()) {
+      nglBtn.href = CONFIG.nglLink.trim();
+      nglBtn.style.display = '';
+    } else {
+      nglBtn.style.display = 'none';
+    }
+  }
   const wc = document.querySelector('.wali-contact');
   if (wc && CONFIG.waliWa) wc.href = CONFIG.waliWa;
   const mv = document.getElementById('memories-video');
