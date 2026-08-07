@@ -13,7 +13,7 @@ const CONFIG = {
   waliImg     : "",
   waGroup     : "https://chat.whatsapp.com/DEX62QPp12nE86mGyS3grg?s=cl&p=a&ilr=0&amv=3",
   igClass     : "https://www.instagram.com/class8bright_star",
-  nglLink     : "", // isi link NGL kamu di sini (mis. "https://ngl.link/username") -- tombolnya otomatis muncul di beranda kalau ini diisi, dan otomatis sembunyi kalau kosong
+  nglLink     : "https://ngl.link/brightstar41884", 
   tiktokClass : "https://www.tiktok.com/@class8brightstar",
   waChannel   : "https://whatsapp.com/channel/0029VbBKBD9F6smwoAydKr3x",
   waliWa      : "https://wa.me/6285159145010",
