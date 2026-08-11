@@ -8,7 +8,7 @@ const CONFIG = {
   heroVideo   : "https://l.top4top.io/m_3779fe6uv1.mp4",
   heroPoster  : "",
   heroBanner  : "",
-  avatarImg   : "https://img2.pixhost.to/images/7724/723457563_alip-1778154031488.jpg",
+  avatarImg   : "https://i.ibb.co.com/RTMrHn3C/The-Nine-B-20260807-183100.jpg",
   bgMusic     : "https://files.catbox.moe/til5wh.mp3",
   waliImg     : "",
   waGroup     : "https://chat.whatsapp.com/DEX62QPp12nE86mGyS3grg?s=cl&p=a&ilr=0&amv=3",
