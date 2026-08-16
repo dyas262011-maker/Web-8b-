@@ -21,7 +21,7 @@ const CONFIG = {
   waGroup     : "https://chat.whatsapp.com/DEX62QPp12nE86mGyS3grg?s=cl&p=a&ilr=0&amv=3",
   // [PENTING] Isi link grup WA ORANG TUA di sini (beda dari grup murid di
   // atas). Dipakai fitur Kas untuk kirim pemberitahuan tunggakan.
-  waGroupOrtu : "https://whatsapp.com/channel/0029VbBKBD9F6smwoAydKr3x",
+  waGroupOrtu : "https://chat.whatsapp.com/DEX62QPp12nE86mGyS3grg?s=cl&p=a&mlu=4",
   igClass     : "https://www.instagram.com/class8bright_star",
   nglLink     : "https://ngl.link/brightstar41884",
   tiktokClass : "https://www.tiktok.com/@class8brightstar",
