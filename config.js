@@ -31,7 +31,7 @@ const CONFIG = {
   // contoh: "https://star-area.my.id/piket.html" -- dipakai untuk generate
   // QR code di halaman Admin. Kalau dikosongkan, otomatis dideteksi dari
   // URL situs yang sedang dibuka (biasanya sudah benar juga).
-  piketPageUrl : "",
+  piketPageUrl : "https://www.star-area.my.id/piket.html",
   memoriesVideo  : "",
   // Ini cuma FOTO CADANGAN/AWAL. Untuk nambah foto sehari-hari, pakai
   // menu "Kenangan" di halaman Admin -- lebih gampang, tanpa edit file ini.
