@@ -1,5 +1,8 @@
 // ═══════════════════════════════════════════════════
-// SCRIPT.JS — LOGIKA SITUS (data ada di config.js, jangan taruh data di sini)
+// SCRIPT.JS — LOGIKA HALAMAN UTAMA (index.html)
+// Data ada di config.js, helper bersama ada di shared.js.
+// Fitur "Kelola Piket" (isi status per anak) HANYA ada di piket.html
+// yang cuma bisa diakses lewat scan QR -- lihat komentar di file itu.
 // ═══════════════════════════════════════════════════
 
 // ═══════ BAHASA ═══════
@@ -24,28 +27,9 @@ function applyLang() {
   const indicator = document.getElementById('lang-indicator');
   if (indicator) indicator.textContent = LANG_LABEL[currentLang] || 'ID';
 
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    el.textContent = t(el.getAttribute('data-i18n'));
-  });
-  document.querySelectorAll('[data-i18n-title]').forEach(el => {
-    el.setAttribute('title', t(el.getAttribute('data-i18n-title')));
-  });
-  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-    el.setAttribute('placeholder', t(el.getAttribute('data-i18n-placeholder')));
-  });
-
-  // Re-render bagian yang dibangun lewat JS supaya ikut ganti bahasa
-  if (document.getElementById('reminder-day-tabs')) renderDayTabs();
-  if (reminderInitialized) {
-    document.getElementById('rf-tanggal').placeholder = t('placeholder_tanggal_input');
-    REMINDER_SECTIONS.forEach(renderReminderList);
-    const statusEl = document.getElementById('reminder-sync-status');
-    if (statusEl && statusEl.dataset.raw === 'idle') statusEl.textContent = t('sync_status_prefix') + ' ' + t('sync_idle');
-  }
-  if (document.getElementById('schedule-day-tabs')) {
-    renderScheduleDayTabs();
-    renderScheduleListDisplay(currentScheduleDay);
-  }
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.getAttribute('data-i18n')); });
+  document.querySelectorAll('[data-i18n-title]').forEach(el => { el.setAttribute('title', t(el.getAttribute('data-i18n-title'))); });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.setAttribute('placeholder', t(el.getAttribute('data-i18n-placeholder'))); });
 }
 
 function cycleLang() {
@@ -74,12 +58,8 @@ function applyConfig() {
   Object.entries(links).forEach(([id, url]) => { if (url) { const el = document.getElementById(id); if (el) el.href = url; } });
   const nglBtn = document.getElementById('link-ngl');
   if (nglBtn) {
-    if (CONFIG.nglLink && CONFIG.nglLink.trim()) {
-      nglBtn.href = CONFIG.nglLink.trim();
-      nglBtn.style.display = '';
-    } else {
-      nglBtn.style.display = 'none';
-    }
+    if (CONFIG.nglLink && CONFIG.nglLink.trim()) { nglBtn.href = CONFIG.nglLink.trim(); nglBtn.style.display = ''; }
+    else { nglBtn.style.display = 'none'; }
   }
   const wc = document.querySelector('.wali-contact');
   if (wc && CONFIG.waliWa) wc.href = CONFIG.waliWa;
@@ -98,7 +78,7 @@ function buildStudentList() {
     const item = document.createElement('div');
     item.className = 'student-item';
     item.style.transitionDelay = `${i * 0.04}s`;
-    item.innerHTML = `<div class="student-no">${String(i+1).padStart(2,'0')}</div><div class="student-name">${s.name}</div><div class="student-tap-hint"><i class="fa-solid fa-comment-dots"></i></div>`;
+    item.innerHTML = `<div class="student-no">${String(i+1).padStart(2,'0')}</div><div class="student-name">${escapeHtml(s.name)}</div><div class="student-tap-hint"><i class="fa-solid fa-comment-dots"></i></div>`;
     item.addEventListener('click', () => openStudentModal(i));
     list.appendChild(item);
   });
@@ -106,7 +86,6 @@ function buildStudentList() {
   list.querySelectorAll('.student-item').forEach(el => io.observe(el));
 }
 
-// ═══════ STUDENT MODAL ═══════
 function openStudentModal(idx) {
   const s = STUDENTS[idx];
   document.getElementById('modal-no').textContent = String(idx+1).padStart(2,'0');
@@ -122,16 +101,6 @@ function closeStudentModal(e) {
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { document.getElementById('student-modal').classList.remove('open'); document.body.style.overflow = ''; } });
 
-// ═══════ BUILD PHOTO GRID ═══════
-function buildPhotoGrid() {
-  const grid = document.getElementById('photo-grid');
-  if (!grid) return;
-  grid.innerHTML = '';
-  const photos = (CONFIG.memoriesPhotos || []).filter(p => p && p.trim() !== '');
-  if (photos.length === 0) { for (let i=0;i<6;i++) { const slot = document.createElement('div'); slot.className='photo-item'; slot.innerHTML='<div class="photo-item-placeholder"><i class="fa-solid fa-image"></i></div>'; grid.appendChild(slot); } return; }
-  photos.forEach((url, i) => { const item = document.createElement('div'); item.className='photo-item'; const img = document.createElement('img'); img.src=url; img.alt=`Foto ${i+1}`; img.loading='lazy'; item.appendChild(img); item.addEventListener('click',()=>openLightbox(url)); grid.appendChild(item); });
-}
-
 // ═══════ LIGHTBOX ═══════
 function openLightbox(src) { const lb=document.getElementById('lightbox'); const img=document.getElementById('lightbox-img'); if(!lb||!img)return; img.src=src; lb.classList.add('open'); document.body.style.overflow='hidden'; }
 function closeLightbox() { const lb=document.getElementById('lightbox'); if(lb)lb.classList.remove('open'); document.body.style.overflow=''; }
@@ -141,19 +110,15 @@ const canvas=document.getElementById('grid-canvas'); const ctx=canvas.getContext
 function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;} resizeCanvas(); window.addEventListener('resize',resizeCanvas);
 function drawGrid(){ctx.clearRect(0,0,canvas.width,canvas.height);const size=38;const isDark=document.documentElement.getAttribute('data-theme')==='dark';ctx.strokeStyle=isDark?'rgba(180,175,168,0.055)':'rgba(30,28,26,0.06)';ctx.lineWidth=1;const offset=gridOffset%size;for(let x=-size+offset;x<canvas.width+size;x+=size){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,canvas.height);ctx.stroke();}for(let y=-size+offset;y<canvas.height+size;y+=size){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(canvas.width,y);ctx.stroke();}gridOffset+=0.18;requestAnimationFrame(drawGrid);} drawGrid();
 
-// ═══════ VIDEO FALLBACK ═══════
+// ═══════ VIDEO / AVATAR FALLBACK ═══════
 const heroVideo=document.getElementById('hero-video');const heroImg=document.getElementById('hero-img');
 if(heroVideo){heroVideo.addEventListener('error',()=>{heroVideo.style.display='none';if(heroImg)heroImg.style.display='block';});setTimeout(()=>{if(heroVideo.readyState===0){heroVideo.style.display='none';if(heroImg)heroImg.style.display='block';}},3000);}
-
-// ═══════ AVATAR FALLBACK ═══════
 const avatarImg=document.getElementById('avatar-img');
 if(avatarImg){avatarImg.addEventListener('error',()=>{avatarImg.src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='110' height='110' viewBox='0 0 110 110'%3E%3Crect width='110' height='110' fill='%23e4e2dc'/%3E%3Ccircle cx='55' cy='40' r='18' fill='%23aaa'/%3E%3Cellipse cx='55' cy='86' rx='28' ry='20' fill='%23aaa'/%3E%3C/svg%3E";});}
 
-// ═══════ MUSIC NOTES ═══════
-const notesContainer=document.getElementById('music-notes-container');let noteInterval=null;const noteSymbols=['♩','♪','♫','♬'];
+// ═══════ MUSIC NOTES + TOGGLE ═══════
+const notesContainer=document.getElementById('music-notes-container');let noteInterval=null;const noteSymbols=['\u2669','\u266A','\u266B','\u266C'];
 function spawnNote(){const note=document.createElement('span');note.className='music-note-fall';note.textContent=noteSymbols[Math.floor(Math.random()*noteSymbols.length)];note.style.left=(Math.random()*92+2)+'vw';note.style.fontSize=(Math.random()*12+10)+'px';note.style.animationDuration=(Math.random()*4+5)+'s';note.style.opacity=(Math.random()*0.2+0.07).toFixed(2);notesContainer.appendChild(note);setTimeout(()=>note.remove(),10000);}
-
-// ═══════ MUSIC TOGGLE ═══════
 const audio=document.getElementById('bg-music');const musicBtn=document.getElementById('music-btn');let isPlaying=false;
 function toggleMusic(){if(isPlaying){audio.pause();musicBtn.classList.remove('playing');isPlaying=false;clearInterval(noteInterval);noteInterval=null;}else{audio.play().then(()=>{musicBtn.classList.add('playing');isPlaying=true;noteInterval=setInterval(spawnNote,700);}).catch(err=>console.warn('Audio blocked:',err));}}
 
@@ -168,15 +133,17 @@ function toggleFab(){fabOpen=!fabOpen;fabWrap.classList.toggle('open',fabOpen);}
 document.addEventListener('click',e=>{if(fabOpen&&!fabWrap.contains(e.target)){fabOpen=false;fabWrap.classList.remove('open');}});
 
 // ═══════ PAGE NAVIGATION ═══════
-const pageNavWrap=document.getElementById('pageNavWrap');let pageNavOpen=false;let currentPage='home';const PAGE_ORDER=['home','students','schedule','memories','reminder'];
+const pageNavWrap=document.getElementById('pageNavWrap');let pageNavOpen=false;let currentPage='home';
+const PAGE_ORDER=['home','students','announcement','memories','admin'];
 function togglePageNav(){pageNavOpen=!pageNavOpen;pageNavWrap.classList.toggle('open',pageNavOpen);}
 document.addEventListener('click',e=>{if(pageNavOpen&&!pageNavWrap.contains(e.target)){pageNavOpen=false;pageNavWrap.classList.remove('open');}});
-function goPage(pageId){
+
+function goPage(pageId, skipHash){
+  if(PAGE_ORDER.indexOf(pageId)===-1) pageId='home';
   if(pageId===currentPage){pageNavOpen=false;pageNavWrap.classList.remove('open');return;}
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   const target=document.getElementById('page-'+pageId);
   if(target){
-    // re-trigger animasi masuk halaman tiap kali pindah
     target.classList.remove('page-anim');
     void target.offsetWidth;
     target.classList.add('active','page-anim');
@@ -189,473 +156,673 @@ function goPage(pageId){
   dots.forEach((d,i)=>d.classList.toggle('active',PAGE_ORDER[i]===pageId));
   pageNavOpen=false;pageNavWrap.classList.remove('open');
   currentPage=pageId;
+  if(!skipHash) { try { history.replaceState(null, '', '#'+pageId); } catch(e) {} }
   if(pageId==='students')buildStudentList();
-  if(pageId==='schedule')buildSchedulePage();
+  if(pageId==='announcement'){ loadAnnouncements(); loadPiketProblems(); }
   if(pageId==='memories')buildPhotoGrid();
-  if(pageId==='reminder')initReminderPage();
+  if(pageId==='admin')initAdminPage();
+}
+
+function handleInitialHash() {
+  const hash = (location.hash || '').replace('#', '');
+  if (PAGE_ORDER.indexOf(hash) !== -1) goPage(hash, true);
 }
 
 // ═══════ CARD OBSERVER ═══════
 function initCardObserver(){const io=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');io.unobserve(e.target);}});},{threshold:0.08});document.querySelectorAll('.card').forEach((c,i)=>{c.style.transitionDelay=`${i*0.07}s`;io.observe(c);});}
 
 // ═══════════════════════════════════════════════════
-// JADWAL PELAJARAN — otomatis ambil dari isian "Mata Pelajaran" di Reminder.
-// Tidak ada penyimpanan/form terpisah — begitu admin isi Mapel di Reminder
-// dan tersimpan, semua orang yang buka Jadwal langsung lihat itu juga.
+// ADMIN — gerbang password (Pengumuman / Kenangan / Tema / QR Piket)
 // ═══════════════════════════════════════════════════
-let currentScheduleDay = DAYS[0].key;
-let scheduleMapelCache = {};
-DAYS.forEach(d => { scheduleMapelCache[d.key] = []; });
-
-function buildSchedulePage() {
-  renderScheduleDayTabs();
-  renderScheduleListDisplay(currentScheduleDay);
-  loadScheduleFromBin();
+let adminInitialized = false;
+function initAdminPage() {
+  const authed = isAdminAuthed();
+  document.getElementById('admin-gate').style.display = authed ? 'none' : 'flex';
+  document.getElementById('admin-app').style.display = authed ? 'block' : 'none';
+  if (authed && !adminInitialized) { adminInitialized = true; setupAdminApp(); }
+}
+function setupAdminApp() {
+  renderQrAdmin();
+  switchAdminTab('pengumuman');
+  renderThemeButtons();
+  loadMemoriesAdminList();
+  initKasAdmin();
+}
+function switchAdminTab(tabKey) {
+  document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tabKey));
+  document.querySelectorAll('.admin-tab-panel').forEach(p => p.style.display = (p.dataset.panel === tabKey) ? 'block' : 'none');
+  if (tabKey === 'kas') loadKasArrears();
+}
+function renderQrAdmin() {
+  const img = document.getElementById('admin-qr-img');
+  const linkEl = document.getElementById('admin-qr-link');
+  if (!img) return;
+  // Ganti PIKET_PAGE_URL di config.js kalau domain kamu sudah pasti (mis. https://star-area.my.id/piket.html)
+  const url = (CONFIG.piketPageUrl && CONFIG.piketPageUrl.trim())
+    ? CONFIG.piketPageUrl.trim()
+    : (window.location.origin + window.location.pathname.replace(/index\.html$/, '').replace(/\/$/, '') + '/piket.html');
+  img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=480x480&data=' + encodeURIComponent(url);
+  if (linkEl) { linkEl.textContent = url; linkEl.href = url; }
+}
+async function downloadQrImage() {
+  const img = document.getElementById('admin-qr-img');
+  const btn = document.getElementById('btn-download-qr');
+  if (!img || !img.src) return;
+  const old = btn.innerHTML;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ...';
+  try {
+    const res = await fetch(img.src, { mode: 'cors' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const blob = await res.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = 'qr-piket-ixb.png';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 4000);
+  } catch (err) {
+    console.warn('Gagal unduh langsung, buka di tab baru sebagai cadangan:', err);
+    window.open(img.src, '_blank');
+  } finally {
+    btn.innerHTML = old;
+  }
 }
 
-function renderScheduleDayTabs() {
-  const wrap = document.getElementById('schedule-day-tabs');
-  if (!wrap) return;
-  wrap.innerHTML = '';
-  DAYS.forEach(d => {
-    const btn = document.createElement('button');
-    btn.className = 'reminder-day-tab' + (d.key === currentScheduleDay ? ' active' : '');
-    btn.dataset.day = d.key;
-    btn.dataset.role = 'schedule';
-    btn.textContent = dayLabel(d.key);
-    wrap.appendChild(btn);
-  });
-}
-
-function selectScheduleDay(dayKey) {
-  currentScheduleDay = dayKey;
-  document.querySelectorAll('#schedule-day-tabs .reminder-day-tab').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.day === dayKey);
-  });
-  renderScheduleListDisplay(dayKey);
-}
-
-function renderScheduleListDisplay(dayKey) {
-  const listEl = document.getElementById('schedule-list');
+// ═══════════════════════════════════════════════════
+// PENGUMUMAN (publik) + komposer (admin)
+// ═══════════════════════════════════════════════════
+async function loadAnnouncements() {
+  const listEl = document.getElementById('announcement-list');
   if (!listEl) return;
-  const items = scheduleMapelCache[dayKey] || [];
+  listEl.innerHTML = `<p class="schedule-empty">${t('label_memuat')}</p>`;
+  try {
+    const rows = await supaSelect('announcements', '?select=*&order=created_at.desc&limit=30');
+    renderAnnouncements(rows);
+  } catch (err) {
+    console.warn(err);
+    listEl.innerHTML = `<p class="schedule-empty"><i class="fa-solid fa-triangle-exclamation"></i> ${t('label_gagal_memuat')}</p>`;
+  }
+}
+function renderAnnouncements(rows) {
+  const listEl = document.getElementById('announcement-list');
+  if (!listEl) return;
   listEl.innerHTML = '';
-  if (items.length === 0) {
-    const empty = document.createElement('p');
-    empty.className = 'schedule-empty';
-    empty.innerHTML = '<i class="fa-solid fa-circle-info"></i> ' + t('label_jadwal_kosong');
-    listEl.appendChild(empty);
+  if (!rows || rows.length === 0) {
+    listEl.innerHTML = `<p class="schedule-empty"><i class="fa-solid fa-circle-info"></i> ${t('label_belum_ada_pengumuman')}</p>`;
     return;
   }
-  items.forEach((mapel, i) => {
-    const row = document.createElement('div');
-    row.className = 'schedule-row';
-    row.style.transitionDelay = `${i * 0.05}s`;
-    row.innerHTML = `<div class="schedule-no">${String(i + 1).padStart(2, '0')}</div><div class="schedule-mapel">${escapeHtml(mapel)}</div>`;
-    listEl.appendChild(row);
+  const isAdmin = isAdminAuthed();
+  rows.forEach((r, i) => {
+    const card = document.createElement('div');
+    card.className = 'announce-card';
+    card.style.transitionDelay = `${i * 0.06}s`;
+    const dt = r.created_at ? new Date(r.created_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : '';
+    card.innerHTML = `
+      ${r.image_url ? `<img src="${escapeHtml(r.image_url)}" class="announce-img" alt="${escapeHtml(r.title||'')}" loading="lazy" />` : ''}
+      <div class="announce-body">
+        ${r.title ? `<div class="announce-title">${escapeHtml(r.title)}</div>` : ''}
+        <div class="announce-text">${escapeHtml(r.body||'')}</div>
+        <div class="announce-meta">${dt}</div>
+      </div>
+      ${isAdmin ? `<button class="announce-del-btn" data-id="${r.id}" title="Hapus"><i class="fa-solid fa-trash"></i></button>` : ''}
+    `;
+    listEl.appendChild(card);
   });
-  requestAnimationFrame(() => {
-    listEl.querySelectorAll('.schedule-row').forEach(el => el.classList.add('visible'));
-  });
+  requestAnimationFrame(() => listEl.querySelectorAll('.announce-card').forEach(el => el.classList.add('visible')));
 }
-
-async function loadScheduleFromBin() {
-  if (!REMINDER_CONFIG.jsonbinBinId) { setScheduleSyncStatus(''); return; }
+async function postAnnouncement() {
+  const titleEl = document.getElementById('ann-title');
+  const bodyEl = document.getElementById('ann-body');
+  const imgEl = document.getElementById('ann-image');
+  const title = titleEl.value.trim(), body = bodyEl.value.trim(), image = imgEl.value.trim();
+  if (!body && !title) { alert('Isi judul atau teks pengumuman dulu.'); return; }
+  const btn = document.getElementById('btn-post-announcement');
+  btn.disabled = true;
+  const old = btn.innerHTML;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ...';
   try {
-    setScheduleSyncStatus(t('sync_status_prefix') + ' memuat...');
-    const record = await fetchLatestBinRecord();
-    DAYS.forEach(d => {
-      const dayRecord = record && record[d.key];
-      const mapelList = (dayRecord && Array.isArray(dayRecord.mapel)) ? dayRecord.mapel : [];
-      scheduleMapelCache[d.key] = mapelList.filter(m => m && m.trim());
-    });
-    renderScheduleListDisplay(currentScheduleDay);
-    setScheduleSyncStatus('');
+    await supaInsert('announcements', [{ title: title || null, body: body || null, image_url: image || null }]);
+    titleEl.value = ''; bodyEl.value = ''; imgEl.value = '';
+    loadAnnouncements();
   } catch (err) {
-    console.warn('JSONBin load jadwal error:', err);
-    setScheduleSyncStatus(t('sync_status_prefix') + ' gagal memuat (cek koneksi).');
+    console.warn(err);
+    alert('Gagal mengirim pengumuman. Cek koneksi / Supabase sudah di-setup (lihat supabase_setup.sql).');
+  } finally {
+    btn.disabled = false; btn.innerHTML = old;
   }
 }
-
+async function deleteAnnouncement(id) {
+  if (!confirm('Hapus pengumuman ini?')) return;
+  try { await supaDelete('announcements', `?id=eq.${id}`); loadAnnouncements(); }
+  catch (err) { console.warn(err); alert('Gagal menghapus.'); }
+}
 
 // ═══════════════════════════════════════════════════
-// REMINDER HARIAN — password gate + per-hari + JSONBin sync
+// PIKET — tampilan publik "yang bermasalah" saja (isi datanya ada di piket.html)
 // ═══════════════════════════════════════════════════
-async function sha256Hex(str) {
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
-}
-window.generatePasswordHash = (pw) => sha256Hex(pw).then(h => { console.log('Hash baru:', h); return h; });
-
-const REMINDER_SECTIONS = ['seragam', 'mapel', 'tugas', 'piket', 'catatan'];
-
-function emptyDayData() {
-  return { tanggal: '', seragam: [''], mapel: [''], tugas: [''], piket: [''], catatan: [''] };
-}
-function emptyAllDaysData() {
-  const obj = {};
-  DAYS.forEach(d => { obj[d.key] = emptyDayData(); });
-  return obj;
-}
-
-let reminderData = emptyAllDaysData();
-let currentDay = DAYS[0].key;
-let reminderInitialized = false;
-let reminderSyncTimer = null;
-
-function escapeHtml(s) { return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
-
-// ═══════ BIN ID (config.js SELALU jadi sumber utama) ═══════
-// Kalau admin sudah isi jsonbinBinId di config.js, itu yang dipakai SEMUA
-// device — localStorage lama (misal dari percobaan auto-buat bin
-// sebelumnya) tidak akan menimpa lagi. localStorage hanya dipakai sebagai
-// fallback kalau config.js masih kosong.
-const CONFIG_BIN_ID = (REMINDER_CONFIG.jsonbinBinId || '').trim();
-if (CONFIG_BIN_ID) localStorage.removeItem('viiib-reminder-binid'); // bersihkan sisa localStorage lama yang bisa bikin device beda bin
-function getStoredBinId() {
-  if (CONFIG_BIN_ID) return CONFIG_BIN_ID;
-  return localStorage.getItem('viiib-reminder-binid') || '';
-}
-function setStoredBinId(id) {
-  REMINDER_CONFIG.jsonbinBinId = id || '';
-  if (!CONFIG_BIN_ID) {
-    if (id) localStorage.setItem('viiib-reminder-binid', id);
-    else localStorage.removeItem('viiib-reminder-binid');
+async function loadPiketProblems() {
+  const wrap = document.getElementById('piket-problem-list');
+  if (!wrap) return;
+  wrap.innerHTML = `<p class="schedule-empty">${t('label_memuat')}</p>`;
+  try {
+    const rows = await supaSelect('piket_status', '?status=neq.piket&resolved=eq.false&select=*&order=tanggal.desc');
+    renderPiketProblems(rows);
+  } catch (err) {
+    console.warn(err);
+    wrap.innerHTML = `<p class="schedule-empty"><i class="fa-solid fa-triangle-exclamation"></i> ${t('label_gagal_memuat')}</p>`;
   }
-  const input = document.getElementById('reminder-binid-input');
-  if (input) input.value = id || '';
 }
-
-// ═══════ GATE PASSWORD ═══════
-function initReminderPage() {
-  const authed = sessionStorage.getItem('viiib-reminder-auth') === '1';
-  document.getElementById('reminder-gate').style.display = authed ? 'none' : 'flex';
-  document.getElementById('reminder-app').style.display = authed ? 'block' : 'none';
-  if (authed && !reminderInitialized) { reminderInitialized = true; setupReminderApp(); }
-}
-
-function setupReminderApp() {
-  REMINDER_CONFIG.jsonbinBinId = getStoredBinId();
-  const binInput = document.getElementById('reminder-binid-input');
-  if (binInput) binInput.value = REMINDER_CONFIG.jsonbinBinId;
-  renderDayTabs();
-  selectDay(currentDay);
-  loadReminderFromBin();
-}
-
-// ═══════ TAB HARI (reminder) ═══════
-function renderDayTabs() {
-  const wrap = document.getElementById('reminder-day-tabs');
+function renderPiketProblems(rows) {
+  const wrap = document.getElementById('piket-problem-list');
   if (!wrap) return;
   wrap.innerHTML = '';
-  DAYS.forEach(d => {
-    const btn = document.createElement('button');
-    btn.className = 'reminder-day-tab' + (d.key === currentDay ? ' active' : '');
-    btn.dataset.day = d.key;
-    btn.dataset.role = 'reminder';
-    btn.textContent = dayLabel(d.key);
-    wrap.appendChild(btn);
+  if (!rows || rows.length === 0) {
+    wrap.innerHTML = `<p class="schedule-empty"><i class="fa-solid fa-circle-check"></i> ${t('label_piket_aman')}</p>`;
+    return;
+  }
+  const isAdmin = isAdminAuthed();
+  rows.forEach((r, i) => {
+    const meta = PIKET_STATUS_META[r.status] || PIKET_STATUS_META.piket;
+    const card = document.createElement('div');
+    card.className = 'piket-problem-card';
+    card.style.transitionDelay = `${i * 0.05}s`;
+    card.style.setProperty('--pk-color', meta.color);
+    card.style.setProperty('--pk-text', meta.textColor);
+    const fineText = r.status === 'kabur' ? `<span class="piket-fine">${t('label_denda')}${Number(PIKET_CONFIG.fineAmount||0).toLocaleString('id-ID')}</span>` : '';
+    card.innerHTML = `
+      <div class="piket-problem-badge">${t(meta.labelKey)}</div>
+      <div class="piket-problem-info">
+        <div class="piket-problem-name">${escapeHtml(r.nama)}</div>
+        <div class="piket-problem-date">${escapeHtml(r.tanggal)}</div>
+        ${fineText}
+      </div>
+      ${isAdmin ? `<button class="piket-resolve-btn" data-id="${r.id}">${t('btn_sudah_terlaksana')}</button>` : ''}
+    `;
+    wrap.appendChild(card);
   });
+  requestAnimationFrame(() => wrap.querySelectorAll('.piket-problem-card').forEach(el => el.classList.add('visible')));
+}
+async function resolvePiketIssue(id) {
+  try { await supaUpdate('piket_status', `?id=eq.${id}`, { resolved: true }); loadPiketProblems(); }
+  catch (err) { console.warn(err); alert('Gagal update status.'); }
 }
 
-function selectDay(dayKey) {
-  currentDay = dayKey;
-  document.querySelectorAll('#reminder-day-tabs .reminder-day-tab').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.day === dayKey);
-  });
-  const dayLabelEl = document.getElementById('reminder-day-label');
-  if (dayLabelEl) dayLabelEl.textContent = dayLabel(dayKey);
-  REMINDER_SECTIONS.forEach(renderReminderList);
-  document.getElementById('rf-tanggal').value = reminderData[currentDay].tanggal;
-  updateReminderPreview();
+// ═══════════════════════════════════════════════════
+// KAS KELAS — status bayar per bulan + ringkasan tunggakan
+// ═══════════════════════════════════════════════════
+function kasStudentNames() {
+  // Ambil nama siswa, buang entri wali kelas (nama diawali "PA ")
+  return STUDENTS.filter(s => !/^PA\s/i.test(s.name)).map(s => s.name);
+}
+function currentMonthStr() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+}
+function monthDisplayLabel(monthStr) {
+  if (!monthStr) return '';
+  const [y, m] = monthStr.split('-').map(Number);
+  const d = new Date(y, m - 1, 1);
+  return d.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
 }
 
-// ═══════ LIST DINAMIS (per hari) ═══════
-function renderReminderList(key) {
-  const wrap = document.getElementById('list-' + key);
+let kasAdminMonth = '';
+let kasAdminData = {};
+
+function initKasAdmin() {
+  const input = document.getElementById('kas-admin-month');
+  if (!input) return;
+  if (!input.value) input.value = currentMonthStr();
+  loadKasForMonth(input.value);
+}
+async function loadKasForMonth(monthStr) {
+  kasAdminMonth = monthStr;
+  const wrap = document.getElementById('kas-admin-list');
+  if (!wrap) return;
+  const names = kasStudentNames();
+  kasAdminData = {};
+  names.forEach(n => { kasAdminData[n] = 'belum'; });
+  wrap.innerHTML = `<p class="schedule-empty">${t('label_memuat')}</p>`;
+  try {
+    const rows = await supaSelect('kas_status', `?bulan=eq.${monthStr}&select=nama,status`);
+    rows.forEach(r => { if (kasAdminData.hasOwnProperty(r.nama)) kasAdminData[r.nama] = r.status; });
+  } catch (err) { console.warn(err); }
+  renderKasAdminList();
+}
+function renderKasAdminList() {
+  const wrap = document.getElementById('kas-admin-list');
   if (!wrap) return;
   wrap.innerHTML = '';
-  reminderData[currentDay][key].forEach((val, idx) => {
+  Object.keys(kasAdminData).forEach((name, i) => {
+    const status = kasAdminData[name];
     const row = document.createElement('div');
-    row.className = 'reminder-row';
-    row.innerHTML = `<input type="text" class="reminder-input reminder-row-input" data-key="${key}" data-idx="${idx}" value="${escapeHtml(val)}" placeholder="${t('placeholder_isi_baris')}" /><button class="reminder-row-del" data-key="${key}" data-idx="${idx}" title="Hapus"><i class="fa-solid fa-xmark"></i></button>`;
+    row.className = 'piket-admin-row';
+    row.style.transitionDelay = `${i * 0.03}s`;
+    row.innerHTML = `
+      <div class="piket-admin-name">${escapeHtml(name)}</div>
+      <div class="piket-status-picker">
+        <button class="piket-status-btn${status==='lunas'?' active':''}" data-name="${escapeHtml(name)}" data-kas-status="lunas" style="--pk-color:#ffffff;--pk-text:#333333;">${t('kas_status_lunas')}</button>
+        <button class="piket-status-btn${status==='belum'?' active':''}" data-name="${escapeHtml(name)}" data-kas-status="belum" style="--pk-color:#e5484d;--pk-text:#ffffff;">${t('kas_status_belum')}</button>
+      </div>`;
     wrap.appendChild(row);
   });
+  requestAnimationFrame(() => wrap.querySelectorAll('.piket-admin-row').forEach(el => el.classList.add('visible')));
+}
+async function setKasStatus(name, status) {
+  kasAdminData[name] = status;
+  renderKasAdminList();
+  try {
+    await supaUpsert('kas_status', [{ nama: name, bulan: kasAdminMonth, status }], 'nama,bulan');
+  } catch (err) {
+    console.warn('Gagal simpan status kas:', err);
+    alert('Gagal menyimpan ke server. Cek koneksi / setup Supabase.');
+  }
 }
 
-// Catatan: format pesan REMINDER di bawah SENGAJA tetap Bahasa Indonesia baku
-// (📢 REMINDER / SERAGAM / MAPEL / dst) berapa pun bahasa UI yang dipilih,
-// karena ini format pesan tetap untuk dikirim ke grup WA, bukan teks UI situs.
-function buildReminderMessage() {
-  const day = reminderData[currentDay];
+async function loadKasArrears() {
+  const wrap = document.getElementById('kas-arrears-list');
+  if (!wrap) return;
+  wrap.innerHTML = `<p class="schedule-empty">${t('label_memuat')}</p>`;
+  try {
+    const rows = await supaSelect('kas_status', "?status=eq.belum&select=nama,bulan&order=bulan.asc");
+    const byName = {};
+    (rows || []).forEach(r => { (byName[r.nama] = byName[r.nama] || []).push(r.bulan); });
+    const arrears = Object.keys(byName)
+      .map(nama => ({ nama, bulanBelum: byName[nama] }))
+      .filter(x => x.bulanBelum.length >= (KAS_CONFIG.tunggakThreshold || 2))
+      .sort((a, b) => b.bulanBelum.length - a.bulanBelum.length);
+    renderKasArrears(arrears);
+  } catch (err) {
+    console.warn(err);
+    wrap.innerHTML = `<p class="schedule-empty">${t('label_gagal_memuat')}</p>`;
+  }
+}
+function renderKasArrears(arrears) {
+  const wrap = document.getElementById('kas-arrears-list');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  if (!arrears || arrears.length === 0) {
+    wrap.innerHTML = `<p class="schedule-empty"><i class="fa-solid fa-circle-check"></i> ${t('label_semua_lunas')}</p>`;
+    return;
+  }
+  arrears.forEach((item, i) => {
+    const total = item.bulanBelum.length * (KAS_CONFIG.monthlyAmount || 0);
+    const card = document.createElement('div');
+    card.className = 'piket-problem-card';
+    card.style.transitionDelay = `${i * 0.05}s`;
+    card.style.setProperty('--pk-color', '#e5484d');
+    card.style.setProperty('--pk-text', '#ffffff');
+    card.innerHTML = `
+      <div class="piket-problem-badge">${item.bulanBelum.length} ${t('label_menunggak_bulan')}</div>
+      <div class="piket-problem-info">
+        <div class="piket-problem-name">${escapeHtml(item.nama)}</div>
+        <div class="piket-problem-date">${item.bulanBelum.map(monthDisplayLabel).join(', ')}</div>
+        <span class="piket-fine">Rp${total.toLocaleString('id-ID')}</span>
+      </div>
+      <button class="piket-resolve-btn kas-send-btn" data-nama="${escapeHtml(item.nama)}" data-bulan="${escapeHtml(item.bulanBelum.join('|'))}" data-total="${total}">
+        <i class="fa-brands fa-whatsapp"></i> ${t('btn_kirim_grup_ortu')}
+      </button>`;
+    wrap.appendChild(card);
+  });
+  requestAnimationFrame(() => wrap.querySelectorAll('.piket-problem-card').forEach(el => el.classList.add('visible')));
+}
+function buildKasNoticeMessage(nama, bulanList, total) {
   const lines = [];
-  lines.push('📢 REMINDER', '');
-  lines.push('📅 Hari/Tanggal :');
-  lines.push(day.tanggal.trim() || '-', '');
-  lines.push('👔 SERAGAM');
-  day.seragam.filter(x => x.trim()).forEach(x => lines.push('• ' + x));
-  lines.push('', '📚 MAPEL');
-  day.mapel.filter(x => x.trim()).forEach(x => lines.push('• ' + x));
-  lines.push('', '📝 TUGAS');
-  day.tugas.filter(x => x.trim()).forEach(x => lines.push('• ' + x));
-  lines.push('', '🧹 PIKET');
-  day.piket.filter(x => x.trim()).forEach(x => lines.push('• ' + x));
-  lines.push('', '💬 CATATAN');
-  day.catatan.filter(x => x.trim()).forEach(x => lines.push('• ' + x));
+  lines.push('PEMBERITAHUAN KAS KELAS');
+  lines.push('');
+  lines.push('Yth. Bapak/Ibu Orang Tua/Wali dari ananda ' + nama + ',');
+  lines.push('');
+  lines.push('Berdasarkan catatan kas kelas IXB SMPIT ALAMY, ananda tercatat belum melunasi kas untuk bulan:');
+  bulanList.forEach(b => lines.push('- ' + monthDisplayLabel(b)));
+  lines.push('');
+  lines.push('Total tunggakan: Rp' + Number(total).toLocaleString('id-ID'));
+  lines.push('');
+  lines.push('Mohon kesediaannya untuk melunasi secepatnya. Terima kasih atas perhatian dan kerja samanya.');
+  lines.push('');
+  lines.push('Wali Kelas IXB - SMPIT ALAMY');
+  return lines.join('\n');
+}
+async function sendKasNoticeToParents(nama, bulanStr, total) {
+  const bulanList = bulanStr.split('|').filter(Boolean);
+  const text = buildKasNoticeMessage(nama, bulanList, total);
+  const groupUrl = (CONFIG.waGroupOrtu && CONFIG.waGroupOrtu.trim()) || '';
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch (err) {
+    console.warn('Gagal menyalin otomatis:', err);
+    alert(text); // fallback: tampilkan teksnya biar bisa disalin manual
+  }
+  if (!groupUrl) {
+    alert(t('label_belum_ada_link_grup_ortu'));
+    return;
+  }
+  window.open(groupUrl, '_blank');
+}
+
+// ═══ KAS — komposer manual (admin ketik nama+jumlah, kirim jadi satu pesan) ═══
+let kasManualEntries = [];
+
+function renderKasManualList() {
+  const wrap = document.getElementById('kas-manual-list');
+  const totalEl = document.getElementById('kas-manual-total');
+  const sendBtn = document.getElementById('btn-kas-manual-send');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  if (kasManualEntries.length === 0) {
+    totalEl.style.display = 'none';
+    sendBtn.style.display = 'none';
+    return;
+  }
+  let total = 0;
+  kasManualEntries.forEach((entry, idx) => {
+    total += entry.jumlah;
+    const row = document.createElement('div');
+    row.className = 'memories-admin-row';
+    row.innerHTML = `
+      <div style="flex:1;">
+        <div class="piket-admin-name" style="font-size:0.8rem;">${escapeHtml(entry.nama)}</div>
+        <div class="piket-problem-date">Rp${entry.jumlah.toLocaleString('id-ID')}</div>
+      </div>
+      <button class="reminder-row-del" data-idx="${idx}" title="Hapus"><i class="fa-solid fa-xmark"></i></button>`;
+    wrap.appendChild(row);
+  });
+  totalEl.style.display = 'block';
+  totalEl.textContent = 'Total: Rp' + total.toLocaleString('id-ID') + ' (' + kasManualEntries.length + ' siswa)';
+  sendBtn.style.display = 'flex';
+}
+
+function addKasManualEntry() {
+  const namaEl = document.getElementById('kas-manual-nama');
+  const jumlahEl = document.getElementById('kas-manual-jumlah');
+  const nama = namaEl.value.trim();
+  const jumlah = parseInt(jumlahEl.value, 10);
+  if (!nama || !jumlah || jumlah <= 0) { alert('Isi nama dan jumlah yang valid dulu.'); return; }
+  kasManualEntries.push({ nama, jumlah });
+  namaEl.value = ''; jumlahEl.value = '';
+  namaEl.focus();
+  renderKasManualList();
+}
+
+function removeKasManualEntry(idx) {
+  kasManualEntries.splice(idx, 1);
+  renderKasManualList();
+}
+
+function buildKasManualBatchMessage() {
+  const lines = [];
+  lines.push('PEMBERITAHUAN KAS KELAS');
+  lines.push('');
+  lines.push('Yth. Bapak/Ibu Orang Tua/Wali,');
+  lines.push('');
+  lines.push('Berdasarkan catatan kas kelas IXB SMPIT ALAMY, berikut daftar ananda yang masih memiliki tunggakan kas:');
+  lines.push('');
+  let total = 0;
+  kasManualEntries.forEach((entry, i) => {
+    total += entry.jumlah;
+    lines.push((i + 1) + '. ' + entry.nama + ' - Rp' + entry.jumlah.toLocaleString('id-ID'));
+  });
+  lines.push('');
+  lines.push('Total keseluruhan: Rp' + total.toLocaleString('id-ID'));
+  lines.push('');
+  lines.push('Mohon kesediaannya untuk melunasi secepatnya. Terima kasih atas perhatian dan kerja samanya.');
+  lines.push('');
+  lines.push('Wali Kelas IXB - SMPIT ALAMY');
   return lines.join('\n');
 }
 
-function updateReminderPreview() {
-  const el = document.getElementById('reminder-preview');
-  if (el) el.textContent = buildReminderMessage();
+async function sendKasManualBatch() {
+  if (kasManualEntries.length === 0) return;
+  const text = buildKasManualBatchMessage();
+  const groupUrl = (CONFIG.waGroupOrtu && CONFIG.waGroupOrtu.trim()) || '';
+  try { await navigator.clipboard.writeText(text); }
+  catch (err) { console.warn('Gagal menyalin otomatis:', err); alert(text); }
+  if (!groupUrl) { alert(t('label_belum_ada_link_grup_ortu')); return; }
+  window.open(groupUrl, '_blank');
 }
 
-function copyReminderMessage() {
-  const text = buildReminderMessage();
-  navigator.clipboard.writeText(text).then(() => {
-    const btn = document.getElementById('btn-copy-pesan');
-    const old = btn.innerHTML;
-    btn.innerHTML = '<i class="fa-solid fa-check"></i> ' + t('btn_tersalin');
-    setTimeout(() => { btn.innerHTML = old; }, 1600);
-  }).catch(() => alert('Gagal menyalin otomatis. Silakan salin manual dari kotak preview.'));
-}
-
-// ═══════ JSONBIN SYNC (semua hari disimpan dalam satu bin) ═══════
-function jsonbinHeaders() {
-  return { 'Content-Type': 'application/json', 'X-Master-Key': REMINDER_CONFIG.jsonbinApiKey };
-}
-
-function setSyncStatus(text, isIdle) {
-  const statusEl = document.getElementById('reminder-sync-status');
-  if (!statusEl) return;
-  statusEl.textContent = text;
-  statusEl.dataset.raw = isIdle ? 'idle' : 'busy';
-}
-
-function setScheduleSyncStatus(text) {
-  const el = document.getElementById('schedule-sync-status');
-  if (el) el.textContent = text;
-}
-
-function normalizeRecord(record) {
-  // Migrasi otomatis kalau bin masih pakai format lama (satu reminder tanpa hari)
-  if (record && record.tanggal !== undefined && record.seragam !== undefined && !record.senin) {
-    const merged = emptyAllDaysData();
-    merged[DAYS[0].key] = Object.assign(emptyDayData(), record);
-    return merged;
+// ═══════════════════════════════════════════════════
+// KENANGAN — foto dari Supabase (+ seed dari config.js kalau kosong)
+// ═══════════════════════════════════════════════════
+async function fetchMemoriesPhotos() {
+  try {
+    const rows = await supaSelect('memories_photos', '?select=*&order=created_at.desc');
+    if (rows && rows.length > 0) return rows;
+    return (CONFIG.memoriesPhotosSeed || []).map((url, i) => ({ id: 'seed-' + i, url }));
+  } catch (err) {
+    console.warn('Gagal ambil foto dari server, pakai foto cadangan:', err);
+    return (CONFIG.memoriesPhotosSeed || []).map((url, i) => ({ id: 'seed-' + i, url }));
   }
-  const merged = emptyAllDaysData();
-  DAYS.forEach(d => { merged[d.key] = Object.assign(emptyDayData(), (record && record[d.key]) || {}); });
-  return merged;
 }
-
-// ═══════ HELPER: fetch record bin apa adanya (dipakai reminder & jadwal) ═══════
-async function fetchLatestBinRecord() {
-  if (!REMINDER_CONFIG.jsonbinBinId) return {};
-  const res = await fetch(`https://api.jsonbin.io/v3/b/${REMINDER_CONFIG.jsonbinBinId}/latest`, { headers: jsonbinHeaders() });
-  if (!res.ok) throw new Error('HTTP ' + res.status);
-  const json = await res.json();
-  return (json && json.record) || {};
-}
-
-// ═══════ HELPER: gabung "patch" ke record TERBARU lalu simpan, supaya
-// menyimpan reminder tidak pernah menghapus data jadwal (atau sebaliknya) ═══════
-async function mergeAndSaveToBin(patch, binNameIfNew) {
-  if (!REMINDER_CONFIG.jsonbinBinId) {
-    const res = await fetch('https://api.jsonbin.io/v3/b', {
-      method: 'POST',
-      headers: Object.assign(jsonbinHeaders(), { 'X-Bin-Name': binNameIfNew || 'viiib-reminder' }),
-      body: JSON.stringify(patch),
-    });
-    const json = await res.json();
-    const newId = (json && json.metadata && json.metadata.id) || '';
-    setStoredBinId(newId);
-    console.log('%cBIN BARU DIBUAT — Bin ID:', 'font-weight:bold;color:#1a6fcf;', newId, '\nUntuk semua device otomatis nyambung tanpa isi manual, taruh ID ini di REMINDER_CONFIG.jsonbinBinId pada config.js lalu upload ulang.');
-    return { created: true, id: newId, merged: patch };
+async function buildPhotoGrid() {
+  const grid = document.getElementById('photo-grid');
+  if (!grid) return;
+  grid.innerHTML = `<p class="schedule-empty">${t('label_memuat')}</p>`;
+  const photos = await fetchMemoriesPhotos();
+  grid.innerHTML = '';
+  if (photos.length === 0) {
+    for (let i = 0; i < 6; i++) { const slot = document.createElement('div'); slot.className = 'photo-item'; slot.innerHTML = '<div class="photo-item-placeholder"><i class="fa-solid fa-image"></i></div>'; grid.appendChild(slot); }
+    return;
   }
-  let base = {};
-  try { base = await fetchLatestBinRecord(); } catch (e) { console.warn('Gagal ambil data lama sebelum simpan, lanjut pakai data kosong:', e); }
-  const merged = Object.assign({}, base, patch);
-  await fetch(`https://api.jsonbin.io/v3/b/${REMINDER_CONFIG.jsonbinBinId}`, {
-    method: 'PUT',
-    headers: jsonbinHeaders(),
-    body: JSON.stringify(merged),
+  photos.forEach((p) => {
+    const item = document.createElement('div'); item.className = 'photo-item';
+    const img = document.createElement('img'); img.src = p.url; img.alt = 'Foto kenangan'; img.loading = 'lazy';
+    item.appendChild(img);
+    item.addEventListener('click', () => openLightbox(p.url));
+    grid.appendChild(item);
   });
-  return { created: false, id: REMINDER_CONFIG.jsonbinBinId, merged };
 }
-
-async function loadReminderFromBin() {
-  if (!REMINDER_CONFIG.jsonbinBinId) {
-    setSyncStatus(t('sync_status_prefix') + ' belum ada Bin ID (isi kolom Bin ID di bawah, atau klik "Cari Bin ID Otomatis").', true);
-    return;
-  }
+async function loadMemoriesAdminList() {
+  const wrap = document.getElementById('memories-admin-list');
+  if (!wrap) return;
+  wrap.innerHTML = `<p class="schedule-empty">${t('label_memuat')}</p>`;
   try {
-    setSyncStatus(t('sync_status_prefix') + ' memuat...', false);
-    const record = await fetchLatestBinRecord();
-    reminderData = normalizeRecord(record);
-    renderDayTabs();
-    selectDay(currentDay);
-    setSyncStatus(t('sync_status_prefix') + ' tersambung · Bin ID: ' + REMINDER_CONFIG.jsonbinBinId, true);
-  } catch (err) {
-    console.warn('JSONBin load error:', err);
-    setSyncStatus(t('sync_status_prefix') + ' gagal memuat (cek Bin ID / koneksi).', true);
-  }
-}
-
-function scheduleReminderSync() {
-  clearTimeout(reminderSyncTimer);
-  reminderSyncTimer = setTimeout(saveReminderToBin, 700);
-}
-
-async function saveReminderToBin() {
-  try {
-    setSyncStatus(t('sync_status_prefix') + ' menyimpan...', false);
-    const result = await mergeAndSaveToBin(Object.assign({}, reminderData), 'viiib-reminder');
-    if (result.created) {
-      setSyncStatus(t('sync_status_prefix') + ' bin baru dibuat · Bin ID: ' + result.id, true);
-    } else {
-      setSyncStatus(t('sync_status_prefix') + ' tersimpan · ' + new Date().toLocaleTimeString('id-ID') + ' · Bin ID: ' + REMINDER_CONFIG.jsonbinBinId, true);
-    }
-  } catch (err) {
-    console.warn('JSONBin save error:', err);
-    setSyncStatus(t('sync_status_prefix') + ' gagal menyimpan.', true);
-  }
-}
-
-
-// ═══════ CARI BIN ID OTOMATIS (via daftar bin "uncategorized" milik API key ini) ═══════
-async function findBinIdAutomatically() {
-  try {
-    setSyncStatus(t('sync_status_prefix') + ' mencari Bin ID...', false);
-    const res = await fetch('https://api.jsonbin.io/v3/c/uncategorized/bins', { headers: jsonbinHeaders() });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const list = await res.json();
-    const arr = Array.isArray(list) ? list : (list && list.records) || [];
-    // cari yang namanya "viiib-reminder", kalau tidak ada ambil yang paling baru
-    let found = arr.find(b => (b.record || b).snippetMeta?.name === 'viiib-reminder')
-             || arr.find(b => (b.record || b).name === 'viiib-reminder')
-             || arr[0];
-    const foundId = found && ((found.record && found.record.id) || found.id || found._id);
-    if (foundId) {
-      setStoredBinId(foundId);
-      setSyncStatus(t('sync_status_prefix') + ' Bin ID ditemukan · ' + foundId, true);
-      loadReminderFromBin();
-    } else {
-      setSyncStatus(t('sync_status_prefix') + ' belum ada bin ditemukan. Simpan satu reminder dulu untuk membuat bin baru.', true);
-    }
-  } catch (err) {
-    console.warn('JSONBin find-bin error:', err);
-    setSyncStatus(t('sync_status_prefix') + ' gagal mencari otomatis. Cek console (F12) atau cari manual lewat jsonbin.io/app/bins.', true);
-  }
-}
-
-// ─── Event delegation: klik ───
-document.addEventListener('click', async (e) => {
-  if (e.target && e.target.id === 'reminder-pw-submit') {
-    const input = document.getElementById('reminder-pw-input');
-    const errEl = document.getElementById('reminder-pw-error');
-    const hash = await sha256Hex(input.value);
-    if (hash === REMINDER_CONFIG.adminPasswordHash) {
-      sessionStorage.setItem('viiib-reminder-auth', '1');
-      errEl.textContent = '';
-      input.value = '';
-      document.getElementById('reminder-gate').style.display = 'none';
-      document.getElementById('reminder-app').style.display = 'block';
-      if (!reminderInitialized) { reminderInitialized = true; setupReminderApp(); }
-    } else {
-      errEl.textContent = t('reminder_pw_error');
-    }
-    return;
-  }
-
-  const logoutBtn = e.target.closest && e.target.closest('#reminder-logout-btn');
-  if (logoutBtn) { sessionStorage.removeItem('viiib-reminder-auth'); reminderInitialized = false; initReminderPage(); return; }
-
-  const dayTab = e.target.closest && e.target.closest('.reminder-day-tab');
-  if (dayTab) {
-    if (dayTab.dataset.role === 'schedule') { selectScheduleDay(dayTab.dataset.day); }
-    else { selectDay(dayTab.dataset.day); }
-    return;
-  }
-
-  const addBtn = e.target.closest && e.target.closest('.reminder-add-btn');
-  if (addBtn && addBtn.dataset.target) {
-    const key = addBtn.dataset.target;
-    reminderData[currentDay][key].push('');
-    renderReminderList(key);
-    updateReminderPreview();
-    scheduleReminderSync();
-    return;
-  }
-
-  const delBtn = e.target.closest && e.target.closest('.reminder-row-del');
-  if (delBtn) {
-    const key = delBtn.dataset.key, idx = +delBtn.dataset.idx;
-    reminderData[currentDay][key].splice(idx, 1);
-    if (reminderData[currentDay][key].length === 0) reminderData[currentDay][key].push('');
-    renderReminderList(key);
-    updateReminderPreview();
-    scheduleReminderSync();
-    return;
-  }
-
-  if (e.target && e.target.id === 'btn-copy-pesan') { copyReminderMessage(); return; }
-
-  const saveBtn = e.target.closest && e.target.closest('#btn-simpan-perubahan');
-  if (saveBtn) {
-    clearTimeout(reminderSyncTimer);
-    saveBtn.classList.add('is-saving');
-    saveReminderToBin().finally(() => {
-      saveBtn.classList.remove('is-saving');
-      saveBtn.classList.add('is-saved');
-      const old = saveBtn.innerHTML;
-      saveBtn.innerHTML = '<i class="fa-solid fa-check"></i> ' + t('btn_tersimpan_ok');
-      setTimeout(() => { saveBtn.innerHTML = old; saveBtn.classList.remove('is-saved'); }, 1400);
+    const rows = await supaSelect('memories_photos', '?select=*&order=created_at.desc');
+    wrap.innerHTML = '';
+    if (!rows || rows.length === 0) { wrap.innerHTML = '<p class="schedule-empty">Belum ada foto tersimpan di server (masih pakai foto cadangan di config.js).</p>'; return; }
+    rows.forEach(r => {
+      const row = document.createElement('div');
+      row.className = 'memories-admin-row';
+      row.innerHTML = `<img src="${escapeHtml(r.url)}" class="memories-admin-thumb" alt="" loading="lazy" /><button class="reminder-row-del" data-id="${r.id}" title="Hapus"><i class="fa-solid fa-xmark"></i></button>`;
+      wrap.appendChild(row);
     });
+  } catch (err) {
+    console.warn(err);
+    wrap.innerHTML = `<p class="schedule-empty">${t('label_gagal_memuat')}</p>`;
+  }
+}
+async function addMemoryPhoto() {
+  const input = document.getElementById('memories-photo-input');
+  const url = input.value.trim();
+  if (!url) return;
+  const btn = document.getElementById('btn-tambah-foto');
+  btn.disabled = true;
+  try {
+    await supaInsert('memories_photos', [{ url }]);
+    input.value = '';
+    loadMemoriesAdminList();
+  } catch (err) {
+    console.warn(err);
+    alert('Gagal menambah foto. Cek koneksi / setup Supabase.');
+  } finally { btn.disabled = false; }
+}
+async function deleteMemoryPhoto(id) {
+  try { await supaDelete('memories_photos', `?id=eq.${id}`); loadMemoriesAdminList(); }
+  catch (err) { console.warn(err); alert('Gagal menghapus foto.'); }
+}
+
+// ═══════════════════════════════════════════════════
+// TEMA / MUSIM (Kemerdekaan / Ramadhan / Biasa) — sinkron semua pengunjung
+// ═══════════════════════════════════════════════════
+let currentSeason = THEME_CONFIG.default;
+function applyThemeLocal(season) {
+  currentSeason = season;
+  document.documentElement.setAttribute('data-season', season);
+  localStorage.setItem('viiib-season-cache', season);
+  const musicUrl = (THEME_CONFIG.musics && THEME_CONFIG.musics[season]) || CONFIG.bgMusic;
+  const src = document.getElementById('music-src');
+  if (src && musicUrl && src.src !== musicUrl) {
+    const wasPlaying = isPlaying;
+    src.src = musicUrl;
+    const aud = document.getElementById('bg-music');
+    if (aud) { aud.load(); if (wasPlaying) aud.play().catch(() => {}); }
+  }
+  renderThemeButtons();
+  const countdownWrap = document.getElementById('ramadhan-countdown');
+  if (countdownWrap) countdownWrap.style.display = (season === 'ramadhan') ? 'flex' : 'none';
+  if (season === 'ramadhan') updateRamadhanCountdown();
+}
+function renderThemeButtons() {
+  document.querySelectorAll('.theme-choice-btn').forEach(b => b.classList.toggle('active', b.dataset.season === currentSeason));
+}
+function updateRamadhanCountdown() {
+  const el = document.getElementById('ramadhan-countdown-value');
+  if (!el) return;
+  if (!THEME_CONFIG.idulFitriDate) { el.textContent = '—'; return; }
+  const target = new Date(THEME_CONFIG.idulFitriDate + 'T00:00:00');
+  const now = new Date();
+  const days = Math.max(0, Math.ceil((target - now) / 86400000));
+  el.textContent = days;
+}
+async function loadThemeFromServer() {
+  try {
+    const rows = await supaSelect('site_settings', '?key=eq.theme&select=value');
+    const season = (rows && rows[0] && rows[0].value) || localStorage.getItem('viiib-season-cache') || THEME_CONFIG.default;
+    applyThemeLocal(season);
+  } catch (err) {
+    console.warn('Gagal ambil tema dari server, pakai cache lokal:', err);
+    applyThemeLocal(localStorage.getItem('viiib-season-cache') || THEME_CONFIG.default);
+  }
+}
+async function setThemeGlobal(season) {
+  applyThemeLocal(season);
+  try { await supaUpsert('site_settings', [{ key: 'theme', value: season }], 'key'); }
+  catch (err) { console.warn('Gagal simpan tema ke server (tema tetap berubah di device ini):', err); }
+}
+
+// ═══════════════════════════════════════════════════
+// EVENT DELEGATION
+// ═══════════════════════════════════════════════════
+document.addEventListener('click', async (e) => {
+  if (e.target && e.target.id === 'admin-pw-submit') {
+    const input = document.getElementById('admin-pw-input');
+    const errEl = document.getElementById('admin-pw-error');
+    const hash = await sha256Hex(input.value);
+    if (hash === ADMIN_CONFIG.adminPasswordHash) {
+      sessionStorage.setItem('viiib-admin-auth', '1');
+      errEl.textContent = ''; input.value = '';
+      initAdminPage();
+    } else { errEl.textContent = t('reminder_pw_error'); }
     return;
   }
+  const logoutBtn = e.target.closest && e.target.closest('#admin-logout-btn');
+  if (logoutBtn) { sessionStorage.removeItem('viiib-admin-auth'); adminInitialized = false; initAdminPage(); return; }
 
-  const openGroupBtn = e.target.closest && e.target.closest('#btn-open-group');
-  if (openGroupBtn) { window.open(CONFIG.waGroup, '_blank'); return; }
+  const tabBtn = e.target.closest && e.target.closest('.admin-tab-btn');
+  if (tabBtn) { switchAdminTab(tabBtn.dataset.tab); return; }
 
-  const binSaveBtn = e.target.closest && e.target.closest('#reminder-binid-save');
-  if (binSaveBtn) {
-    const val = document.getElementById('reminder-binid-input').value.trim();
-    setStoredBinId(val);
-    loadReminderFromBin();
-    return;
-  }
+  if (e.target && e.target.id === 'btn-post-announcement') { postAnnouncement(); return; }
+  const delAnnBtn = e.target.closest && e.target.closest('.announce-del-btn');
+  if (delAnnBtn) { deleteAnnouncement(delAnnBtn.dataset.id); return; }
 
-  const binFindBtn = e.target.closest && e.target.closest('#reminder-binid-find');
-  if (binFindBtn) { findBinIdAutomatically(); return; }
+  const resolveBtn = e.target.closest && e.target.closest('.piket-resolve-btn');
+  const kasSendBtn = e.target.closest && e.target.closest('.kas-send-btn');
+  if (kasSendBtn) { sendKasNoticeToParents(kasSendBtn.dataset.nama, kasSendBtn.dataset.bulan, kasSendBtn.dataset.total); return; }
+  if (resolveBtn) { resolvePiketIssue(resolveBtn.dataset.id); return; }
+
+  const kasStatusBtn = e.target.closest && e.target.closest('.piket-status-btn[data-kas-status]');
+  if (kasStatusBtn) { setKasStatus(kasStatusBtn.dataset.name, kasStatusBtn.dataset.kasStatus); return; }
+
+  if (e.target && e.target.id === 'btn-kas-manual-add') { addKasManualEntry(); return; }
+  const kasManualDelBtn = e.target.closest && e.target.closest('#kas-manual-list .reminder-row-del');
+  if (kasManualDelBtn) { removeKasManualEntry(+kasManualDelBtn.dataset.idx); return; }
+  if (e.target && e.target.id === 'btn-kas-manual-send') { sendKasManualBatch(); return; }
+
+  if (e.target && e.target.id === 'btn-download-qr') { downloadQrImage(); return; }
+
+  if (e.target && e.target.id === 'btn-tambah-foto') { addMemoryPhoto(); return; }
+  const delMemBtn = e.target.closest && e.target.closest('#memories-admin-list .reminder-row-del');
+  if (delMemBtn) { deleteMemoryPhoto(delMemBtn.dataset.id); return; }
+
+  const themeBtnEl = e.target.closest && e.target.closest('.theme-choice-btn');
+  if (themeBtnEl) { setThemeGlobal(themeBtnEl.dataset.season); return; }
 });
 
-// ─── Event delegation: input (ketik) ───
 document.addEventListener('input', (e) => {
-  if (e.target && e.target.id === 'rf-tanggal') {
-    reminderData[currentDay].tanggal = e.target.value;
-    updateReminderPreview();
-    scheduleReminderSync();
-  }
-  if (e.target && e.target.classList.contains('reminder-row-input')) {
-    const key = e.target.dataset.key, idx = +e.target.dataset.idx;
-    reminderData[currentDay][key][idx] = e.target.value;
-    updateReminderPreview();
-    scheduleReminderSync();
+  if (e.target && e.target.id === 'kas-admin-month') loadKasForMonth(e.target.value);
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && e.target && e.target.id === 'admin-pw-input') {
+    document.getElementById('admin-pw-submit').click();
   }
 });
 
-// izinkan tekan Enter di kolom password
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && e.target && e.target.id === 'reminder-pw-input') {
-    document.getElementById('reminder-pw-submit').click();
+// ═══════ SPLASH SCREEN (ikut tema aktif) ═══════
+function splitLettersWithDelay(el, baseDelay, step) {
+  if (!el) return;
+  const text = el.textContent;
+  el.textContent = '';
+  [...text].forEach((ch, i) => {
+    const span = document.createElement('span');
+    span.className = 'letter';
+    span.textContent = ch === ' ' ? '\u00A0' : ch;
+    span.style.animationDelay = (baseDelay + i * step) + 's';
+    el.appendChild(span);
+  });
+}
+function getCachedSeason() {
+  try {
+    const s = localStorage.getItem('viiib-season-cache');
+    if (s && THEME_CONFIG.splash && THEME_CONFIG.splash[s]) return s;
+  } catch (e) {}
+  return THEME_CONFIG.default;
+}
+function initSplashScreen() {
+  const splash = document.getElementById('splash-screen');
+  if (!splash) return;
+  document.body.classList.add('splash-active');
+
+  const season = getCachedSeason();
+  document.documentElement.setAttribute('data-season', season); // jaga-jaga kalau script di <head> belum sempat jalan
+  const conf = (THEME_CONFIG.splash && THEME_CONFIG.splash[season]) || THEME_CONFIG.splash.kemerdekaan;
+
+  const line1El = document.getElementById('splash-line1-word');
+  const line2El = document.getElementById('splash-line2');
+  if (line1El) line1El.textContent = conf.line1;
+  if (line2El) line2El.textContent = conf.line2;
+  splitLettersWithDelay(line1El, 0.1, 0.03);
+  splitLettersWithDelay(line2El, 0.55, 0.02);
+
+  const img = document.getElementById('splash-garuda-img');
+  const fallback = document.getElementById('splash-garuda-fallback');
+  fallback.innerHTML = `<i class="${conf.fallbackIcon || 'fa-solid fa-star'}"></i>`;
+  fallback.classList.remove('show');
+  img.style.display = '';
+  const link = (conf.image || '').trim();
+  if (link) {
+    img.addEventListener('error', () => { img.style.display = 'none'; fallback.classList.add('show'); });
+    img.src = link;
+  } else {
+    img.style.display = 'none';
+    fallback.classList.add('show');
   }
-});
+
+  const duration = (SPLASH_CONFIG && SPLASH_CONFIG.durationMs) || 3200;
+  setTimeout(() => {
+    splash.classList.add('hide');
+    document.body.classList.remove('splash-active');
+    setTimeout(() => { splash.style.display = 'none'; }, 550);
+  }, duration);
+}
 
 // ═══════ INIT ═══════
 document.addEventListener('DOMContentLoaded', () => {
+  initSplashScreen();
   applyConfig();
   applyLang();
   initCardObserver();
   buildStudentList();
+  loadThemeFromServer();
+  handleInitialHash();
 });
