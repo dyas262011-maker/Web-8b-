@@ -271,6 +271,8 @@ const LANG_STRINGS = {
     piket_status_dispen: "Dispen",
     piket_status_kabur: "Tidak Piket / Kabur",
     label_denda: "Denda Rp",
+    label_catatan_dispen: "Catatan: Harap dikerjakan lain hari!",
+    btn_kirim_grup: "Kirim ke Grup",
     // Admin
     label_admin_panel: "Panel Admin",
     admin_tab_pengumuman: "Pengumuman",
