@@ -331,18 +331,51 @@ function renderPiketProblems(rows) {
     card.style.setProperty('--pk-color', meta.color);
     card.style.setProperty('--pk-text', meta.textColor);
     const fineText = r.status === 'kabur' ? `<span class="piket-fine">${t('label_denda')}${Number(PIKET_CONFIG.fineAmount||0).toLocaleString('id-ID')}</span>` : '';
+    const dispenNote = r.status === 'dispen' ? `<div class="piket-dispen-note"><i class="fa-solid fa-note-sticky"></i> ${t('label_catatan_dispen')}</div>` : '';
+    let actions = '';
+    if (isAdmin) {
+      actions += `<button class="piket-resolve-btn" data-id="${r.id}">${t('btn_sudah_terlaksana')}</button>`;
+      if (r.status === 'kabur') {
+        actions += `<button class="piket-resolve-btn piket-send-group-btn" data-nama="${escapeHtml(r.nama)}" data-tanggal="${escapeHtml(r.tanggal)}"><i class="fa-brands fa-whatsapp"></i> ${t('btn_kirim_grup')}</button>`;
+      }
+    }
     card.innerHTML = `
       <div class="piket-problem-badge">${t(meta.labelKey)}</div>
       <div class="piket-problem-info">
         <div class="piket-problem-name">${escapeHtml(r.nama)}</div>
         <div class="piket-problem-date">${escapeHtml(r.tanggal)}</div>
         ${fineText}
+        ${dispenNote}
       </div>
-      ${isAdmin ? `<button class="piket-resolve-btn" data-id="${r.id}">${t('btn_sudah_terlaksana')}</button>` : ''}
+      ${actions ? `<div class="piket-problem-actions">${actions}</div>` : ''}
     `;
     wrap.appendChild(card);
   });
   requestAnimationFrame(() => wrap.querySelectorAll('.piket-problem-card').forEach(el => el.classList.add('visible')));
+}
+function buildPiketKaburMessage(nama, tanggal) {
+  const fine = Number(PIKET_CONFIG.fineAmount || 0);
+  const lines = [];
+  lines.push('PEMBERITAHUAN PIKET KELAS');
+  lines.push('');
+  lines.push('Yth. Bapak/Ibu Orang Tua/Wali dari ananda ' + nama + ',');
+  lines.push('');
+  lines.push('Berdasarkan catatan piket kelas IXB SMPIT ALAMY, pada tanggal ' + tanggal + ' ananda tercatat tidak melaksanakan piket / tanpa keterangan.');
+  lines.push('');
+  lines.push('Sesuai kesepakatan kelas, terdapat denda sebesar Rp' + fine.toLocaleString('id-ID') + '.');
+  lines.push('');
+  lines.push('Mohon menjadi perhatian bersama. Terima kasih atas kerja samanya.');
+  lines.push('');
+  lines.push('Wali Kelas IXB - SMPIT ALAMY');
+  return lines.join('\n');
+}
+async function sendPiketKaburToGroup(nama, tanggal) {
+  const text = buildPiketKaburMessage(nama, tanggal);
+  const groupUrl = (CONFIG.waGroupOrtu && CONFIG.waGroupOrtu.trim()) || '';
+  try { await navigator.clipboard.writeText(text); }
+  catch (err) { console.warn('Gagal menyalin otomatis:', err); alert(text); }
+  if (!groupUrl) { alert(t('label_belum_ada_link_grup_ortu')); return; }
+  window.open(groupUrl, '_blank');
 }
 async function resolvePiketIssue(id) {
   try { await supaUpdate('piket_status', `?id=eq.${id}`, { resolved: true }); loadPiketProblems(); }
@@ -727,7 +760,9 @@ document.addEventListener('click', async (e) => {
 
   const resolveBtn = e.target.closest && e.target.closest('.piket-resolve-btn');
   const kasSendBtn = e.target.closest && e.target.closest('.kas-send-btn');
+  const piketSendGroupBtn = e.target.closest && e.target.closest('.piket-send-group-btn');
   if (kasSendBtn) { sendKasNoticeToParents(kasSendBtn.dataset.nama, kasSendBtn.dataset.bulan, kasSendBtn.dataset.total); return; }
+  if (piketSendGroupBtn) { sendPiketKaburToGroup(piketSendGroupBtn.dataset.nama, piketSendGroupBtn.dataset.tanggal); return; }
   if (resolveBtn) { resolvePiketIssue(resolveBtn.dataset.id); return; }
 
   const kasStatusBtn = e.target.closest && e.target.closest('.piket-status-btn[data-kas-status]');
