@@ -1,0 +1,188 @@
+<!--
+  ═══════════════════════════════════════════════════════════════
+  PIKET.HTML — SENGAJA TIDAK ADA DI MENU MANAPUN.
+  Halaman ini cuma bisa dibuka lewat:
+  1. Scan QR code yang ada di halaman Admin situs utama, atau
+  2. Ketik langsung URL-nya di browser (mis. https://domainmu.my.id/piket.html)
+  Tidak ada tombol/link ke halaman ini dari index.html, jadi pengunjung
+  biasa tidak akan "tersasar" ke sini lewat navigasi normal.
+  ═══════════════════════════════════════════════════════════════
+-->
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Input Piket — Khusus QR</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=IBM+Plex+Mono:wght@400;700&family=Noto+Sans:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<canvas id="grid-canvas"></canvas>
+
+<div class="page active" id="page-piket-standalone">
+  <div class="page-header">
+    <h2 class="page-title">Input Piket</h2>
+    <p class="page-subtitle">Halaman Khusus QR · IXB · SMPIT ALAMY</p>
+  </div>
+
+  <div class="container" style="padding-top:24px;">
+
+    <!-- GATE PASSWORD -->
+    <div class="reminder-gate" id="admin-gate">
+      <div class="reminder-gate-box">
+        <i class="fa-solid fa-lock reminder-gate-icon"></i>
+        <div class="reminder-gate-title">Akses Terbatas</div>
+        <p class="reminder-gate-text">Halaman ini khusus penanggung jawab piket. Masukkan kata sandi admin untuk melanjutkan.</p>
+        <input type="password" id="admin-pw-input" class="reminder-pw-input" placeholder="KATA SANDI" autocomplete="off" />
+        <button class="reminder-pw-btn" id="admin-pw-submit">
+          <i class="fa-solid fa-right-to-bracket"></i> Masuk
+        </button>
+        <p class="reminder-pw-error" id="admin-pw-error"></p>
+      </div>
+    </div>
+
+    <!-- FORM PIKET (tampil setelah login) -->
+    <div id="piket-app" style="display:none;">
+
+      <div class="card">
+        <div class="card-title"><i class="fa-solid fa-calendar-day"></i> Pilih Tanggal</div>
+        <input type="date" id="piket-admin-date" class="reminder-input" />
+      </div>
+
+      <div class="card">
+        <div class="card-title"><i class="fa-solid fa-users"></i> Daftar Piket Hari Ini</div>
+        <div id="piket-admin-list"></div>
+      </div>
+
+      <p class="reminder-hint">
+        <i class="fa-solid fa-circle-info"></i>
+        Ketuk nama, lalu pilih status: <b>Piket</b> (putih, sudah piket normal), <b>Sakit</b> (kuning), <b>Dispen</b> (biru), atau <b>Tidak Piket/Kabur</b> (merah, kena denda). Tersimpan otomatis begitu dipilih.
+      </p>
+
+      <button class="reminder-logout-btn" id="admin-logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Keluar</button>
+    </div>
+
+  </div>
+
+  <footer>
+    <i class="fa-solid fa-circle" style="opacity:0.35;margin-right:8px;"></i>
+    SMPIT ALAMY · IXB · HALAMAN KHUSUS QR
+    <i class="fa-solid fa-circle" style="opacity:0.35;margin-left:8px;"></i>
+  </footer>
+</div>
+
+<script src="config.js"></script>
+<script src="shared.js"></script>
+<script>
+// ═══════════════════════════════════════════════════
+// LOGIKA HALAMAN PIKET (mandiri, tidak bergantung pada script.js)
+// ═══════════════════════════════════════════════════
+
+// Grid canvas dekorasi (dipertahankan biar konsisten sama situs utama)
+const canvas = document.getElementById('grid-canvas'); const ctx = canvas.getContext('2d'); let gridOffset = 0;
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;} resizeCanvas(); window.addEventListener('resize',resizeCanvas);
+function drawGrid(){ctx.clearRect(0,0,canvas.width,canvas.height);const size=38;ctx.strokeStyle='rgba(30,28,26,0.06)';ctx.lineWidth=1;const offset=gridOffset%size;for(let x=-size+offset;x<canvas.width+size;x+=size){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,canvas.height);ctx.stroke();}for(let y=-size+offset;y<canvas.height+size;y+=size){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(canvas.width,y);ctx.stroke();}gridOffset+=0.18;requestAnimationFrame(drawGrid);} drawGrid();
+
+// ═══ GATE PASSWORD ═══
+function initPiketGate() {
+  const authed = isAdminAuthed();
+  document.getElementById('admin-gate').style.display = authed ? 'none' : 'flex';
+  document.getElementById('piket-app').style.display = authed ? 'block' : 'none';
+  if (authed) {
+    // Halaman ini pendek/simpel, jadi kartu langsung ditampilkan tanpa
+    // animasi "muncul saat di-scroll" (beda dengan index.html yang pakai
+    // IntersectionObserver) -- ini yang kemarin bikin kartu keliatan kosong.
+    document.querySelectorAll('.card').forEach(c => c.classList.add('visible'));
+    const dateInput = document.getElementById('piket-admin-date');
+    if (!dateInput.value) dateInput.value = todayDateStr();
+    loadPiketAdminForDate(dateInput.value);
+  }
+}
+
+// ═══ ROSTER + STATUS ═══
+let piketAdminDate = '';
+let piketAdminData = {};
+
+async function loadPiketAdminForDate(dateStr) {
+  piketAdminDate = dateStr;
+  const wrap = document.getElementById('piket-admin-list');
+  const dayKey = weekdayKeyFromDateStr(dateStr);
+  if (!dayKey) { wrap.innerHTML = '<p class="schedule-empty">Tidak ada piket di hari Minggu.</p>'; return; }
+  const names = (PIKET_CONFIG.roster && PIKET_CONFIG.roster[dayKey]) || [];
+  if (names.length === 0) { wrap.innerHTML = '<p class="schedule-empty">Belum ada nama piket untuk hari ini. Isi dulu di config.js bagian PIKET_CONFIG.roster.</p>'; return; }
+  piketAdminData = {};
+  names.forEach(n => { piketAdminData[n] = 'piket'; });
+  wrap.innerHTML = '<p class="schedule-empty">Memuat...</p>';
+  try {
+    const rows = await supaSelect('piket_status', `?tanggal=eq.${dateStr}&select=nama,status`);
+    rows.forEach(r => { if (piketAdminData.hasOwnProperty(r.nama)) piketAdminData[r.nama] = r.status; });
+  } catch (err) { console.warn(err); }
+  renderPiketAdminList();
+}
+
+function renderPiketAdminList() {
+  const wrap = document.getElementById('piket-admin-list');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  Object.keys(piketAdminData).forEach((name, i) => {
+    const status = piketAdminData[name];
+    const row = document.createElement('div');
+    row.className = 'piket-admin-row';
+    row.style.transitionDelay = `${i * 0.04}s`;
+    row.innerHTML = `
+      <div class="piket-admin-name">${escapeHtml(name)}</div>
+      <div class="piket-status-picker">
+        ${Object.keys(PIKET_STATUS_META).map(key => `<button class="piket-status-btn${key===status?' active':''}" data-name="${escapeHtml(name)}" data-status="${key}" style="--pk-color:${PIKET_STATUS_META[key].color};--pk-text:${PIKET_STATUS_META[key].textColor};">${PIKET_STATUS_META[key].label}</button>`).join('')}
+      </div>`;
+    wrap.appendChild(row);
+  });
+  requestAnimationFrame(() => wrap.querySelectorAll('.piket-admin-row').forEach(el => el.classList.add('visible')));
+}
+
+async function setPiketStatus(name, status) {
+  piketAdminData[name] = status;
+  renderPiketAdminList();
+  try {
+    await supaUpsert('piket_status', [{ tanggal: piketAdminDate, nama: name, status: status, resolved: status === 'piket' }], 'tanggal,nama');
+  } catch (err) {
+    console.warn('Gagal simpan status piket:', err);
+    alert('Gagal menyimpan ke server. Cek koneksi internet, atau pastikan supabase_setup.sql sudah dijalankan.');
+  }
+}
+
+// ═══ EVENTS ═══
+document.addEventListener('click', async (e) => {
+  if (e.target && e.target.id === 'admin-pw-submit') {
+    const input = document.getElementById('admin-pw-input');
+    const errEl = document.getElementById('admin-pw-error');
+    const hash = await sha256Hex(input.value);
+    if (hash === ADMIN_CONFIG.adminPasswordHash) {
+      sessionStorage.setItem('viiib-admin-auth', '1');
+      errEl.textContent = ''; input.value = '';
+      initPiketGate();
+    } else { errEl.textContent = 'Kata sandi salah.'; }
+    return;
+  }
+  const logoutBtn = e.target.closest && e.target.closest('#admin-logout-btn');
+  if (logoutBtn) { sessionStorage.removeItem('viiib-admin-auth'); initPiketGate(); return; }
+
+  const statusBtn = e.target.closest && e.target.closest('.piket-status-btn');
+  if (statusBtn) { setPiketStatus(statusBtn.dataset.name, statusBtn.dataset.status); return; }
+});
+document.addEventListener('input', (e) => {
+  if (e.target && e.target.id === 'piket-admin-date') loadPiketAdminForDate(e.target.value);
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && e.target && e.target.id === 'admin-pw-input') document.getElementById('admin-pw-submit').click();
+});
+
+document.addEventListener('DOMContentLoaded', initPiketGate);
+</script>
+</body>
+</html>
