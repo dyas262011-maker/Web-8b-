@@ -191,8 +191,8 @@ const THEME_CONFIG = {
   // Tinggal ganti 3 link di bawah dengan link lagu asli kamu (upload dulu
   // ke catbox.moe atau hosting lain, sama seperti musik yang sudah ada):
   musics: {
-    kemerdekaan: "https://n.uguu.se/tOGfdEjH.mp3", // GANTI dengan link lagu 17 Agustus / lagu nasional
-    ramadhan: "https://h.uguu.se/zzogpXvV.mp3",    // GANTI dengan link lagu Marhaban / Ramadhan
+    kemerdekaan: "https://files.catbox.moe/i8twq6.mp3", // GANTI dengan link lagu 17 Agustus / lagu nasional
+    ramadhan: "https://files.catbox.moe/g1r3hb.mp3",    // GANTI dengan link lagu Marhaban / Ramadhan
     normal: "https://files.catbox.moe/til5wh.mp3",      // musik biasa -- JANGAN diubah kalau tidak perlu
   },
   // Isi splash (halaman selamat datang) per tema. "image" boleh dikosongkan
