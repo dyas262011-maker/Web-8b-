@@ -3,26 +3,48 @@
 // (script.js berisi LOGIKA, jangan diedit kalau cuma mau ganti data)
 // ═══════════════════════════════════════════════════
 
+// ═══════ SPLASH SCREEN (halaman selamat datang) ═══════
+// Gambar & teksnya sekarang ikut tema aktif -- lihat THEME_CONFIG.splash
+// di bawah. Ini cuma durasinya, berlaku untuk semua tema.
+const SPLASH_CONFIG = {
+  durationMs: 3200, // lama splash tampil sebelum hilang (dalam milidetik)
+};
+
 // ═══════ KONFIGURASI UMUM ═══════
 const CONFIG = {
   heroVideo   : "https://l.top4top.io/m_3779fe6uv1.mp4",
   heroPoster  : "",
   heroBanner  : "",
   avatarImg   : "https://i.ibb.co.com/RTMrHn3C/The-Nine-B-20260807-183100.jpg",
-  bgMusic     : "https://files.catbox.moe/til5wh.mp3",
+  bgMusic     : "https://files.catbox.moe/til5wh.mp3", // musik tema "Kemerdekaan" (default)
   waliImg     : "",
   waGroup     : "https://chat.whatsapp.com/DEX62QPp12nE86mGyS3grg?s=cl&p=a&ilr=0&amv=3",
+  // [PENTING] Isi link grup WA ORANG TUA di sini (beda dari grup murid di
+  // atas). Dipakai fitur Kas untuk kirim pemberitahuan tunggakan.
+  waGroupOrtu : "https://whatsapp.com/channel/0029VbBKBD9F6smwoAydKr3x",
   igClass     : "https://www.instagram.com/class8bright_star",
-  nglLink     : "https://ngl.link/brightstar41884", 
+  nglLink     : "https://ngl.link/brightstar41884",
   tiktokClass : "https://www.tiktok.com/@class8brightstar",
   waChannel   : "https://whatsapp.com/channel/0029VbBKBD9F6smwoAydKr3x",
   waliWa      : "https://wa.me/6285159145010",
+  // [PENTING] Isi ini dengan URL asli piket.html setelah situs di-deploy,
+  // contoh: "https://star-area.my.id/piket.html" -- dipakai untuk generate
+  // QR code di halaman Admin. Kalau dikosongkan, otomatis dideteksi dari
+  // URL situs yang sedang dibuka (biasanya sudah benar juga).
+  piketPageUrl : "",
   memoriesVideo  : "",
-  memoriesPhotos : [
+  // Ini cuma FOTO CADANGAN/AWAL. Untuk nambah foto sehari-hari, pakai
+  // menu "Kenangan" di halaman Admin -- lebih gampang, tanpa edit file ini.
+  memoriesPhotosSeed : [
     "https://img2.pixhost.to/images/7724/723458876_alip-1778154364652.jpg",
     "https://img2.pixhost.to/images/7725/723470697_alip-1778157365322.jpg",
-    "", "", "", ""
   ],
+};
+
+// ═══════ KAS KELAS ═══════
+const KAS_CONFIG = {
+  monthlyAmount: 10000, // jumlah kas per bulan (Rupiah) -- dipakai buat teks pemberitahuan
+  tunggakThreshold: 2,  // berapa bulan belum bayar (total) sampai dianggap "menunggak"
 };
 
 // ═══════ DAFTAR SISWA ═══════
@@ -62,8 +84,7 @@ const STUDENTS = [
   { name: "SYAKIB ASSAKYA", photo: "", msg: "Akhiri setiap hari dengan rasa syukur dan tekad baru." },
 ];
 
-// ═══════ HARI (dipakai Reminder & Jadwal) ═══════
-// Mau tambah/kurangi hari sekolah? Tinggal edit array ini.
+// ═══════ HARI (dipakai untuk jadwal piket) ═══════
 const DAYS = [
   { key: 'senin',  id: 'Senin',  betawi: 'Senén',  en: 'Monday',    su: 'Senén'  },
   { key: 'selasa', id: 'Selasa', betawi: 'Selasa', en: 'Tuesday',   su: 'Salasa' },
@@ -73,30 +94,136 @@ const DAYS = [
   { key: 'sabtu',  id: 'Sabtu',  betawi: 'Sabtu',  en: 'Saturday',  su: 'Saptu'  },
 ];
 
-// ═══════ JADWAL PELAJARAN ═══════
-// Tidak butuh data terpisah di sini lagi — halaman Jadwal (publik) sekarang
-// otomatis mengambil isi dari kolom "Mata Pelajaran" per hari di halaman
-// Reminder (admin). Cukup isi Mapel di Reminder, otomatis muncul di Jadwal.
-
-// ═══════ REMINDER — ADMIN & JSONBIN ═══════
-//
-// [PENTING] Kata sandi admin sudah diganti dari default. Kalau mau ganti lagi:
-//   1. Buka halaman Reminder di browser, tekan F12 (console).
+// ═══════ ADMIN (password) ═══════
+// [PENTING] Ganti kata sandi admin:
+//   1. Buka halaman Admin di browser, tekan F12 (console).
 //   2. Ketik: generatePasswordHash('kata-sandi-baru-kamu').then(h => console.log(h))
-//   3. Copy hasil hash yang muncul, tempel ke REMINDER_CONFIG.adminPasswordHash di bawah.
-//
-// jsonbinBinId sudah diisi permanen supaya SEMUA ORANG di SEMUA DEVICE otomatis
-// nyambung ke data yang sama tanpa perlu tempel manual apapun.
-//
-const REMINDER_CONFIG = {
+//   3. Copy hasil hash yang muncul, tempel ke ADMIN_CONFIG.adminPasswordHash.
+const ADMIN_CONFIG = {
   adminPasswordHash: "25ac88ffce648561c6fd1fa23eb0c3eee4e3103b4499c310e033adfc19bb55d6",
-  jsonbinApiKey: "$2a$10$0XA/Bap/CiGTnq9yVVCVq.gXRScb.ycMrrQ2.2uKaScStP/rtx.Um",
-  jsonbinBinId: "6a6c8672f5f4af5e29d9b05e",
+};
+
+// ═══════ SUPABASE (server penyimpanan data) ═══════
+// [PENTING] Sebelum fitur Pengumuman/Piket/Kenangan/Tema jalan, kamu WAJIB
+// jalankan file supabase_setup.sql SEKALI di Supabase SQL Editor project ini
+// untuk membuat tabel yang dipakai (announcements, piket_status,
+// memories_photos, site_settings).
+//
+// Catatan jujur: anonKey di bawah di-obfuscate (disamarkan lewat XOR +
+// array kode karakter) supaya tidak langsung kebaca mentah kalau ada yang
+// buka file ini sekilas. TAPI ini BUKAN enkripsi sungguhan -- siapapun yang
+// paham JS tetap bisa decode-nya (tinggal jalankan fungsi _dk di bawah).
+// Untuk kunci publik/anon Supabase seperti ini sebenarnya wajar terekspos
+// ke browser (memang begitu cara kerja REST API publik), keamanan
+// sesungguhnya ada di kebijakan RLS di Supabase, bukan di menyembunyikan
+// key ini.
+function _dk(codes, xorKey) {
+  return codes.map(c => String.fromCharCode(c ^ xorKey)).join('');
+}
+const SUPABASE_CONFIG = {
+  url: "https://kisctdvhzdixakdbgvdd.supabase.co",
+  anonKey: _dk([89,72,117,90,95,72,70,67,89,66,75,72,70,79,117,94,101,68,69,94,126,97,100,92,29,105,104,29,89,18,105,97,95,111,72,80,123,117,67,78,91,7,104,114,108,104], 0x2A),
+};
+
+// ═══════ PIKET KELAS ═══════
+// Isi nama-nama yang piket di tiap hari (harus SAMA PERSIS dengan nama di
+// STUDENTS supaya rapi, tapi boleh beda kalau perlu). Kosongkan array kalau
+// hari itu tidak ada piket (mis. hari libur sekolah).
+const PIKET_CONFIG = {
+  fineAmount: 50000, // denda untuk status "Tidak Piket / Kabur" (dalam Rupiah)
+  roster: {
+    senin: [
+      "Fauzan Khodhi Latif",
+      "Sadad Fairuz Yusup Jamaludin",
+      "Dafin Azka",
+      "Sayid Husein Syamil",
+      "Muhammad Fawwaaz Saputra",
+      "Syakib Assakya",
+      "Rheksya Muhamad Syahrozaq",
+    ],
+    selasa: [
+      "Muhammad Wafiq Zihni",
+      "Raka Tsaqif Azzamy",
+      "Adhyasta Nararya Al Jazali",
+      "Muhammad Rafif Alauna",
+      "Haidar Ali Rasyidi",
+      "Muhammad Adnan Ghofarana",
+      "Maher Adewan Suharta",
+    ],
+    rabu: [
+      "Kenny Julian Nakajima",
+      "Muhammad Wildan Aljinan",
+      "Muhammad Fakhri",
+      "Hafiz Fatihul Ahza",
+      "Rafasha Erlandika",
+      "Muhammad Akhdaan Nur'aiman",
+    ],
+    kamis: [
+      "Kevin Faeyza Gunawan",
+      "Nizam Abyan Faezya",
+      "Agung Maulana Ibrahim",
+      "Muhammad Rizqy Alfaridz",
+      "Muhammad Dzaki Purwandra Saripudin",
+      "Arfa Haidar Raissa",
+    ],
+    jumat: [
+      "Radityo Dzakwan Effendi",
+      "Fahreza Maulana",
+      "Radinal Akbar Rusdana",
+      "Qoulan Tsaqiila Rizalusyiifa",
+      "Dhevano Arka Putra Pratama",
+      "Hafizh Malik Sopiyan",
+    ],
+    sabtu: [], // belum dikasih tim Sabtu -- isi di sini kalau ada
+  },
+};
+
+// ═══════ TEMA / MUSIM ═══════
+// Admin bisa ganti tema aktif dari halaman Admin (tersimpan untuk SEMUA
+// pengunjung lewat Supabase). Tiap tema punya musik DAN halaman selamat
+// datang (splash) sendiri -- ganti tema = ganti semuanya sekaligus.
+const THEME_CONFIG = {
+  default: 'kemerdekaan', // dipakai kalau belum ada setting di server
+  idulFitriDate: "", // isi tanggal Idul Fitri tahun ini, format "YYYY-MM-DD", untuk hitung mundur di tema Ramadhan
+  // [PENTING] Sudah ada 3 SLOT musik terpisah -- satu per tema. Sekarang
+  // ketiganya masih menunjuk ke file yang SAMA (placeholder) karena saya
+  // tidak punya lagu asli untuk "lagu 17-an" / "lagu Marhaban Ramadhan".
+  // Tinggal ganti 3 link di bawah dengan link lagu asli kamu (upload dulu
+  // ke catbox.moe atau hosting lain, sama seperti musik yang sudah ada):
+  musics: {
+    kemerdekaan: "https://n.uguu.se/tOGfdEjH.mp3", // GANTI dengan link lagu 17 Agustus / lagu nasional
+    ramadhan: "https://h.uguu.se/zzogpXvV.mp3",    // GANTI dengan link lagu Marhaban / Ramadhan
+    normal: "https://files.catbox.moe/til5wh.mp3",      // musik biasa -- JANGAN diubah kalau tidak perlu
+  },
+  // Isi splash (halaman selamat datang) per tema. "image" boleh dikosongkan
+  // -- otomatis pakai ikon fallback (fa-solid class dari Font Awesome).
+  splash: {
+    kemerdekaan: {
+      image: "https://i.ibb.co.com/dwyxbYkC/pngtree-garuda-indonesia-illustration-with-red-and-white-wavy-flag-png-image-8388212.jpg",
+      fallbackIcon: "fa-solid fa-star",
+      line1: "Dirgahayu",
+      line2: "Republik Indonesia",
+    },
+    ramadhan: {
+      image: "", // isi link gambar bulan sabit/masjid kalau punya, kalau kosong pakai ikon fallback
+      fallbackIcon: "fa-solid fa-mosque",
+      line1: "Marhaban Ya",
+      line2: "Ramadhan",
+    },
+    normal: {
+      image: "", // isi link logo/foto kelas kalau mau, kalau kosong pakai ikon fallback
+      fallbackIcon: "fa-solid fa-graduation-cap",
+      line1: "Selamat Datang",
+      line2: "Kelas IXB SMPIT ALAMY",
+    },
+  },
 };
 
 // ═══════ BAHASA (Indonesia / Betawi / English / Sunda) ═══════
-// Ini menerjemahkan teks UI (menu, judul, tombol, hint). Konten seperti
-// quotes, pesan siswa, dan nama tetap apa adanya di semua bahasa.
+// Catatan: untuk fitur BARU (Admin, Pengumuman, Piket, Tema) teks yang
+// tersedia baru Bahasa Indonesia dulu -- kalau bahasa lain dipilih, teks
+// fitur baru ini otomatis jatuh ke Bahasa Indonesia (tidak error, cuma
+// belum diterjemahkan). Bisa menyusul kalau kamu mau.
 const LANG_ORDER = ['id', 'betawi', 'en', 'su'];
 const LANG_LABEL = { id: 'ID', betawi: 'BE', en: 'EN', su: 'SU' };
 
@@ -107,8 +234,8 @@ const LANG_STRINGS = {
     btn_toggle_theme: "Mode Gelap",
     label_menu: "Menu",
     label_page_nav: "Navigasi Halaman",
-    nav_home: "Beranda", nav_students: "Absensi", nav_schedule: "Jadwal",
-    nav_memories: "Kenangan", nav_reminder: "Reminder",
+    nav_home: "Beranda", nav_students: "Absensi", nav_announcement: "Pengumuman",
+    nav_memories: "Kenangan", nav_admin: "Admin",
     label_info: "Info",
     label_quotes: "Quotes",
     label_info_kelas: "Informasi Kelas",
@@ -125,37 +252,72 @@ const LANG_STRINGS = {
     label_galeri_foto: "Galeri Foto",
     label_video_kenangan: "Video Kenangan",
     label_momen_berharga: "Momen Berharga",
-    label_jadwal_pelajaran: "Jadwal Pelajaran",
-    label_jadwal_subtitle: "Bisa dilihat semua orang",
-    label_pilih_hari: "Pilih Hari",
-    label_jadwal_kosong: "Jadwal untuk hari ini belum diisi admin.",
-    label_jadwal_note: 'Jadwal ini otomatis diambil dari isian "Mata Pelajaran" di halaman Reminder (diisi admin).',
-    reminder_title: "Reminder Harian",
-    reminder_subtitle: "Khusus Admin",
     reminder_gate_title: "Akses Terbatas",
     reminder_gate_text: "Halaman ini hanya untuk admin kelas. Masukkan kata sandi untuk melanjutkan.",
     reminder_pw_placeholder: "KATA SANDI",
     reminder_pw_submit: "Masuk",
     reminder_pw_error: "Kata sandi salah.",
-    label_tanggal: "Tanggal", label_seragam: "Seragam", label_mapel: "Mata Pelajaran",
-    label_tugas: "Tugas", label_piket: "Piket", label_catatan: "Catatan",
-    btn_tambah_baris: "Tambah Baris",
-    btn_simpan_perubahan: "Simpan Perubahan",
-    btn_tersimpan_ok: "Tersimpan!",
-    label_preview_pesan: "Preview Pesan",
-    btn_salin_pesan: "Salin Pesan", btn_tersalin: "Tersalin!",
-    btn_buka_grup: "Buka Grup WA",
-    reminder_hint_wa: "WhatsApp tidak mengizinkan pengiriman otomatis ke grup. Salin pesan, lalu tempel & kirim manual di grup yang terbuka.",
-    label_sync_settings: "Pengaturan Sinkronisasi (Bin ID)",
-    binid_placeholder: "Bin ID akan muncul di sini otomatis",
-    btn_simpan_binid: "Simpan",
-    btn_cari_binid: "Cari Bin ID Otomatis",
-    binid_hint: "Bin ID sudah diatur permanen lewat config.js sehingga semua orang otomatis nyambung. Kolom ini hanya untuk override manual kalau sewaktu-waktu perlu pindah ke bin lain.",
     btn_keluar: "Keluar",
-    placeholder_tanggal_input: "cth: Senin, 4 Agustus 2026",
-    placeholder_isi_baris: "Isi baris...",
-    sync_status_prefix: "Status sinkronisasi:",
-    sync_idle: "-",
+    sync_status_prefix: "Status:",
+    // Pengumuman
+    label_pengumuman: "Pengumuman",
+    label_pengumuman_subtitle: "Info terbaru dari kelas",
+    label_belum_ada_pengumuman: "Belum ada pengumuman.",
+    label_piket_bermasalah: "Piket Bermasalah",
+    label_piket_aman: "Semua piket aman, tidak ada masalah.",
+    btn_sudah_terlaksana: "Sudah Terlaksana",
+    piket_status_piket: "Piket",
+    piket_status_sakit: "Sakit",
+    piket_status_dispen: "Dispen",
+    piket_status_kabur: "Tidak Piket / Kabur",
+    label_denda: "Denda Rp",
+    // Admin
+    label_admin_panel: "Panel Admin",
+    admin_tab_pengumuman: "Pengumuman",
+    admin_tab_piket: "Piket",
+    admin_tab_kenangan: "Kenangan",
+    admin_tab_tema: "Tema & Musik",
+    label_buat_pengumuman: "Buat Pengumuman",
+    placeholder_judul_pengumuman: "Judul (opsional)",
+    placeholder_isi_pengumuman: "Tulis pengumuman di sini...",
+    placeholder_gambar_pengumuman: "Link gambar (opsional)",
+    btn_kirim_pengumuman: "Kirim Pengumuman",
+    btn_hapus: "Hapus",
+    label_kelola_piket: "Kelola Piket",
+    label_pilih_tanggal: "Pilih Tanggal",
+    label_belum_ada_nama_piket: 'Belum ada nama piket untuk hari ini. Isi dulu di config.js bagian PIKET_CONFIG.roster.',
+    label_qr_piket: "QR Akses Cepat Admin",
+    label_qr_piket_hint: "Tempel/print QR ini di kelas. Scan pakai kamera HP biasa untuk langsung masuk ke halaman Admin.",
+    btn_download_qr: "Unduh QR",
+    label_tambah_foto_kenangan: "Tambah Foto Kenangan",
+    placeholder_link_foto: "Tempel link foto di sini",
+    btn_tambah_foto: "Tambah Foto",
+    label_ganti_tema: "Pilih Tema Situs",
+    label_ganti_tema_hint: "Tema ini berlaku untuk SEMUA pengunjung situs, tersimpan otomatis.",
+    theme_kemerdekaan: "\u{1F1EE}\u{1F1E9} Kemerdekaan",
+    theme_ramadhan: "\u{1F319} Ramadhan",
+    theme_normal: "\u{1F3A8} Biasa",
+    label_countdown_lebaran: "Menuju Hari Raya",
+    label_hari: "hari",
+    label_memuat: "Memuat...",
+    label_gagal_memuat: "Gagal memuat data.",
+    // Kas
+    admin_tab_kas: "Kas",
+    label_kelola_kas: "Kelola Kas",
+    label_pilih_bulan: "Pilih Bulan",
+    kas_status_lunas: "Lunas",
+    kas_status_belum: "Belum Bayar",
+    label_ringkasan_tunggakan: "Ringkasan Tunggakan",
+    label_semua_lunas: "Semua siswa lunas, tidak ada tunggakan.",
+    label_menunggak_bulan: "bulan belum lunas",
+    btn_kirim_grup_ortu: "Kirim ke Grup Ortu",
+    btn_tersalin: "Tersalin, buka grup...",
+    label_belum_ada_link_grup_ortu: "Link grup WA orang tua belum diisi di config.js (CONFIG.waGroupOrtu).",
+    label_buat_pemberitahuan_manual: "Buat Pemberitahuan Tunggakan (Manual)",
+    label_kas_manual_hint: "Ketik nama & jumlah yang belum dibayar satu-satu, tambahkan ke daftar. Setelah semua terkumpul, kirim jadi SATU pesan ke grup orang tua sekaligus.",
+    placeholder_nama_siswa: "Nama siswa",
+    placeholder_jumlah_rp: "Jumlah belum dibayar (Rp)",
+    btn_tambah_ke_daftar: "Tambah ke Daftar",
   },
   betawi: {
     btn_change_lang: "Ganti Bahasa",
@@ -163,8 +325,8 @@ const LANG_STRINGS = {
     btn_toggle_theme: "Mode Gelap",
     label_menu: "Menu",
     label_page_nav: "Navigasi Ané",
-    nav_home: "Beranda", nav_students: "Absen", nav_schedule: "Jadwal",
-    nav_memories: "Kenangan", nav_reminder: "Reminder",
+    nav_home: "Beranda", nav_students: "Absen", nav_announcement: "Pengumuman",
+    nav_memories: "Kenangan", nav_admin: "Admin",
     label_info: "Info",
     label_quotes: "Kate-Kate",
     label_info_kelas: "Info Kelas",
@@ -181,37 +343,13 @@ const LANG_STRINGS = {
     label_galeri_foto: "Galeri Foto",
     label_video_kenangan: "Video Kenangan",
     label_momen_berharga: "Momen Berharga",
-    label_jadwal_pelajaran: "Jadwal Pelajaran",
-    label_jadwal_subtitle: "Bisa diliat semua orang",
-    label_pilih_hari: "Pilih Hari",
-    label_jadwal_kosong: "Jadwal ari ini belom diisi ame admin.",
-    label_jadwal_note: 'Jadwal ini otomatis kesedot dari isian "Mata Pelajaran" di halaman Reminder (diisi ame admin).',
-    reminder_title: "Reminder Arian",
-    reminder_subtitle: "Cuma Buat Admin",
     reminder_gate_title: "Ga Bisa Masuk Sembarangan",
     reminder_gate_text: "Ini halaman cuma buat admin kelas. Masukin kate sandi dulu ye.",
     reminder_pw_placeholder: "KATE SANDI",
     reminder_pw_submit: "Masuk",
     reminder_pw_error: "Kate sandinye salah tuh.",
-    label_tanggal: "Tanggal", label_seragam: "Seragam", label_mapel: "Mata Pelajaran",
-    label_tugas: "Tugas", label_piket: "Piket", label_catatan: "Catetan",
-    btn_tambah_baris: "Tambah Baris",
-    btn_simpan_perubahan: "Simpen Perubahannye",
-    btn_tersimpan_ok: "Udeh Kesimpen!",
-    label_preview_pesan: "Liat Dulu Pesennye",
-    btn_salin_pesan: "Kopi Pesen", btn_tersalin: "Udeh Kekopi!",
-    btn_buka_grup: "Buka Grup WA",
-    reminder_hint_wa: "WhatsApp emang gak bisa langsung kirim ke grup. Kopi pesennye dulu, abis itu paste & kirim sendiri di grup yang kebuka.",
-    label_sync_settings: "Setelan Singkronisasi (Bin ID)",
-    binid_placeholder: "Bin ID bakal muncul di sini otomatis",
-    btn_simpan_binid: "Simpen",
-    btn_cari_binid: "Cariin Bin ID Otomatis",
-    binid_hint: "Bin ID-nye udeh diatur permanen di config.js jadi semua orang otomatis nyambung. Kolom ini cuma buat ganti manual kalo sewaktu-waktu mesti pindah ke bin laen.",
     btn_keluar: "Keluar",
-    placeholder_tanggal_input: "cth: Senén, 4 Agustus 2026",
-    placeholder_isi_baris: "Isi barisnye...",
-    sync_status_prefix: "Status singkronisasi:",
-    sync_idle: "-",
+    sync_status_prefix: "Status:",
   },
   en: {
     btn_change_lang: "Change Language",
@@ -219,8 +357,8 @@ const LANG_STRINGS = {
     btn_toggle_theme: "Dark Mode",
     label_menu: "Menu",
     label_page_nav: "Page Navigation",
-    nav_home: "Home", nav_students: "Roll Call", nav_schedule: "Schedule",
-    nav_memories: "Memories", nav_reminder: "Reminder",
+    nav_home: "Home", nav_students: "Roll Call", nav_announcement: "Announcements",
+    nav_memories: "Memories", nav_admin: "Admin",
     label_info: "Info",
     label_quotes: "Quotes",
     label_info_kelas: "Class Info",
@@ -237,37 +375,13 @@ const LANG_STRINGS = {
     label_galeri_foto: "Photo Gallery",
     label_video_kenangan: "Memory Video",
     label_momen_berharga: "Precious Moments",
-    label_jadwal_pelajaran: "Class Schedule",
-    label_jadwal_subtitle: "Visible to everyone",
-    label_pilih_hari: "Select Day",
-    label_jadwal_kosong: "The schedule for this day hasn't been filled in yet.",
-    label_jadwal_note: 'This schedule is pulled automatically from the "Subjects" field on the Reminder page (filled in by admin).',
-    reminder_title: "Daily Reminder",
-    reminder_subtitle: "Admin Only",
     reminder_gate_title: "Restricted Access",
     reminder_gate_text: "This page is for class admins only. Enter the password to continue.",
     reminder_pw_placeholder: "PASSWORD",
     reminder_pw_submit: "Enter",
     reminder_pw_error: "Wrong password.",
-    label_tanggal: "Date", label_seragam: "Uniform", label_mapel: "Subjects",
-    label_tugas: "Assignments", label_piket: "Cleaning Duty", label_catatan: "Notes",
-    btn_tambah_baris: "Add Line",
-    btn_simpan_perubahan: "Save Changes",
-    btn_tersimpan_ok: "Saved!",
-    label_preview_pesan: "Message Preview",
-    btn_salin_pesan: "Copy Message", btn_tersalin: "Copied!",
-    btn_buka_grup: "Open WA Group",
-    reminder_hint_wa: "WhatsApp doesn't allow auto-sending to a group. Copy the message, then paste & send it manually in the group that opens.",
-    label_sync_settings: "Sync Settings (Bin ID)",
-    binid_placeholder: "Bin ID will appear here automatically",
-    btn_simpan_binid: "Save",
-    btn_cari_binid: "Auto-Find Bin ID",
-    binid_hint: "The Bin ID is already set permanently in config.js so everyone connects automatically. This field is only for a manual override if you ever need to switch to a different bin.",
     btn_keluar: "Log Out",
-    placeholder_tanggal_input: "e.g. Monday, August 4 2026",
-    placeholder_isi_baris: "Enter item...",
-    sync_status_prefix: "Sync status:",
-    sync_idle: "-",
+    sync_status_prefix: "Status:",
   },
   su: {
     btn_change_lang: "Ganti Basa",
@@ -275,8 +389,8 @@ const LANG_STRINGS = {
     btn_toggle_theme: "Mode Poek",
     label_menu: "Menu",
     label_page_nav: "Navigasi Halaman",
-    nav_home: "Bumi", nav_students: "Absén", nav_schedule: "Jadwal",
-    nav_memories: "Kenangan", nav_reminder: "Reminder",
+    nav_home: "Bumi", nav_students: "Absén", nav_announcement: "Pengumuman",
+    nav_memories: "Kenangan", nav_admin: "Admin",
     label_info: "Info",
     label_quotes: "Kekecapan",
     label_info_kelas: "Inpormasi Kelas",
@@ -293,36 +407,12 @@ const LANG_STRINGS = {
     label_galeri_foto: "Galeri Poto",
     label_video_kenangan: "Video Kenangan",
     label_momen_berharga: "Momén Berharga",
-    label_jadwal_pelajaran: "Jadwal Pangajaran",
-    label_jadwal_subtitle: "Bisa ditingali ku sadayana",
-    label_pilih_hari: "Pilih Poé",
-    label_jadwal_kosong: "Jadwal poé ieu can dieusian ku admin.",
-    label_jadwal_note: 'Jadwal ieu otomatis dicandak tina eusian "Pelajaran" dina halaman Reminder (dieusian ku admin).',
-    reminder_title: "Reminder Sapopoé",
-    reminder_subtitle: "Khusus Admin",
     reminder_gate_title: "Aksés Kawates",
     reminder_gate_text: "Halaman ieu khusus admin kelas. Asupkeun kecap sandi heula.",
     reminder_pw_placeholder: "KECAP SANDI",
     reminder_pw_submit: "Asup",
     reminder_pw_error: "Kecap sandina salah.",
-    label_tanggal: "Tanggal", label_seragam: "Seragam", label_mapel: "Pelajaran",
-    label_tugas: "Tugas", label_piket: "Piket", label_catatan: "Catetan",
-    btn_tambah_baris: "Tambah Baris",
-    btn_simpan_perubahan: "Simpen Parobahan",
-    btn_tersimpan_ok: "Parantos Kasimpen!",
-    label_preview_pesan: "Ningali Pesen Heula",
-    btn_salin_pesan: "Salin Pesen", btn_tersalin: "Parantos Kasalin!",
-    btn_buka_grup: "Buka Grup WA",
-    reminder_hint_wa: "WhatsApp teu ngawidian ngirim otomatis ka grup. Salin pesen heula, tuluy témpél sarta kirim manual di grup nu muka.",
-    label_sync_settings: "Setelan Singkronisasi (Bin ID)",
-    binid_placeholder: "Bin ID bakal muncul otomatis di dieu",
-    btn_simpan_binid: "Simpen",
-    btn_cari_binid: "Panggihan Bin ID Otomatis",
-    binid_hint: "Bin ID parantos diatur permanén dina config.js supados sadayana otomatis nyambung. Kolom ieu ngan kanggo ngaganti manual upami kedah pindah ka bin sanés.",
     btn_keluar: "Kaluar",
-    placeholder_tanggal_input: "ct: Senén, 4 Agustus 2026",
-    placeholder_isi_baris: "Eusian baris...",
-    sync_status_prefix: "Status singkronisasi:",
-    sync_idle: "-",
+    sync_status_prefix: "Status:",
   },
 };
