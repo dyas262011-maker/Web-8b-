@@ -56,6 +56,21 @@
         Ketuk nama, lalu pilih status: <b>Piket</b> (putih, sudah piket normal) atau <b>Tidak Piket</b> (merah, kena denda). Tersimpan otomatis begitu dipilih.
       </p>
 
+      <div class="card">
+        <div class="card-title"><i class="fa-brands fa-whatsapp"></i> Kirim Pemberitahuan ke Grup Ortu</div>
+        <p class="reminder-hint" style="margin-top:0;">
+          <i class="fa-solid fa-circle-info"></i>
+          Centang nama yang mau dikirim, bisa pilih beberapa sekaligus. Semua digabung jadi satu pesan.
+        </p>
+        <div id="kabur-list"></div>
+        <div class="piket-kabur-send-bar" id="piket-kabur-send-bar" style="display:none;">
+          <span><span id="piket-kabur-send-count">0</span> terpilih</span>
+          <button class="reminder-action-btn reminder-action-btn--accent" id="btn-kirim-piket-terpilih">
+            <i class="fa-brands fa-whatsapp"></i> Kirim ke Grup Ortu
+          </button>
+        </div>
+      </div>
+
     </div>
 
   </div>
@@ -86,6 +101,7 @@ function initPiketPage() {
   const dateInput = document.getElementById('piket-admin-date');
   if (!dateInput.value) dateInput.value = todayDateStr();
   loadPiketAdminForDate(dateInput.value);
+  loadKaburList();
 }
 
 // ═══ ROSTER + STATUS ═══
@@ -133,19 +149,116 @@ async function setPiketStatus(name, status) {
   renderPiketAdminList();
   try {
     await supaUpsert('piket_status', [{ tanggal: piketAdminDate, nama: name, status: status, resolved: status === 'piket' }], 'tanggal,nama');
+    loadKaburList(); // sinkron daftar kirim ke ortu kalau ada status baru
   } catch (err) {
     console.warn('Gagal simpan status piket:', err);
     alert('Gagal menyimpan ke server. Cek koneksi internet, atau pastikan supabase_setup.sql sudah dijalankan.');
   }
 }
 
+// ═══ KIRIM PEMBERITAHUAN TIDAK PIKET KE GRUP ORTU ═══
+const EMOJI = {
+  megaphone: '\u{1F4E2}',
+  broom: '\u{1F9F9}',
+  money: '\u{1F4B0}',
+  pray: '\u{1F64F}',
+  cap: '\u{1F393}',
+};
+let kaburSelected = {}; // key: id -> {nama, tanggal}
+
+async function loadKaburList() {
+  const wrap = document.getElementById('kabur-list');
+  if (!wrap) return;
+  wrap.innerHTML = '<p class="schedule-empty">Memuat...</p>';
+  kaburSelected = {};
+  updateKaburSendBar();
+  try {
+    const rows = await supaSelect('piket_status', '?status=eq.kabur&resolved=eq.false&select=*&order=tanggal.desc');
+    renderKaburList(rows);
+  } catch (err) {
+    console.warn(err);
+    wrap.innerHTML = '<p class="schedule-empty">Gagal memuat data.</p>';
+  }
+}
+function renderKaburList(rows) {
+  const wrap = document.getElementById('kabur-list');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  if (!rows || rows.length === 0) {
+    wrap.innerHTML = '<p class="schedule-empty"><i class="fa-solid fa-circle-check"></i> Tidak ada yang perlu dikirim, semua aman.</p>';
+    return;
+  }
+  rows.forEach((r, i) => {
+    const row = document.createElement('div');
+    row.className = 'piket-problem-card visible';
+    row.style.setProperty('--pk-color', '#e5484d');
+    row.style.setProperty('--pk-text', '#ffffff');
+    row.innerHTML = `
+      <input type="checkbox" class="piket-kabur-check" data-id="${r.id}" data-nama="${escapeHtml(r.nama)}" data-tanggal="${escapeHtml(r.tanggal)}" />
+      <div class="piket-problem-badge">Tidak Piket</div>
+      <div class="piket-problem-info">
+        <div class="piket-problem-name">${escapeHtml(r.nama)}</div>
+        <div class="piket-problem-date">${escapeHtml(r.tanggal)}</div>
+        <span class="piket-fine">Denda Rp${Number(PIKET_CONFIG.fineAmount||0).toLocaleString('id-ID')}</span>
+      </div>`;
+    wrap.appendChild(row);
+  });
+}
+function toggleKaburSelection(id, nama, tanggal, checked) {
+  if (checked) kaburSelected[id] = { nama, tanggal };
+  else delete kaburSelected[id];
+  updateKaburSendBar();
+}
+function updateKaburSendBar() {
+  const bar = document.getElementById('piket-kabur-send-bar');
+  if (!bar) return;
+  const count = Object.keys(kaburSelected).length;
+  bar.style.display = count > 0 ? 'flex' : 'none';
+  const countEl = document.getElementById('piket-kabur-send-count');
+  if (countEl) countEl.textContent = count;
+}
+function buildKaburBatchMessage(entries) {
+  const fine = Number(PIKET_CONFIG.fineAmount || 0);
+  const lines = [];
+  lines.push(EMOJI.megaphone + ' PEMBERITAHUAN PIKET KELAS');
+  lines.push('');
+  lines.push('Yth. Bapak/Ibu Orang Tua/Wali,');
+  lines.push('');
+  lines.push(EMOJI.broom + ' Berdasarkan catatan piket kelas IXB SMPIT ALAMY, berikut daftar ananda yang tercatat tidak melaksanakan piket / tanpa keterangan:');
+  lines.push('');
+  entries.forEach((entry, i) => { lines.push((i + 1) + '. ' + entry.nama + ' - ' + entry.tanggal); });
+  lines.push('');
+  lines.push(EMOJI.money + ' Sesuai kesepakatan kelas, terdapat denda Rp' + fine.toLocaleString('id-ID') + ' per anak (total Rp' + (fine * entries.length).toLocaleString('id-ID') + ').');
+  lines.push('');
+  lines.push(EMOJI.pray + ' Mohon menjadi perhatian bersama. Terima kasih atas kerja samanya.');
+  lines.push('');
+  lines.push(EMOJI.cap + ' Wali Kelas IXB - SMPIT ALAMY');
+  return lines.join('\n');
+}
+async function sendKaburBatchToGroup() {
+  const entries = Object.values(kaburSelected);
+  if (entries.length === 0) return;
+  const text = buildKaburBatchMessage(entries);
+  const groupUrl = (CONFIG.waGroupOrtu && CONFIG.waGroupOrtu.trim()) || '';
+  try { await navigator.clipboard.writeText(text); }
+  catch (err) { console.warn('Gagal menyalin otomatis:', err); alert(text); }
+  if (!groupUrl) { alert('Link grup WA orang tua belum diisi di config.js (CONFIG.waGroupOrtu).'); return; }
+  window.open(groupUrl, '_blank');
+}
+
 // ═══ EVENTS ═══
 document.addEventListener('click', (e) => {
   const statusBtn = e.target.closest && e.target.closest('.piket-status-btn');
   if (statusBtn) { setPiketStatus(statusBtn.dataset.name, statusBtn.dataset.status); return; }
+  if (e.target && e.target.id === 'btn-kirim-piket-terpilih') { sendKaburBatchToGroup(); return; }
 });
 document.addEventListener('input', (e) => {
   if (e.target && e.target.id === 'piket-admin-date') loadPiketAdminForDate(e.target.value);
+});
+document.addEventListener('change', (e) => {
+  if (e.target && e.target.classList.contains('piket-kabur-check')) {
+    toggleKaburSelection(e.target.dataset.id, e.target.dataset.nama, e.target.dataset.tanggal, e.target.checked);
+  }
 });
 
 document.addEventListener('DOMContentLoaded', initPiketPage);
