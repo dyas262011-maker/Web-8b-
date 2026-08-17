@@ -1712,12 +1712,6 @@ body::before {
 }
 .piket-resolve-btn:hover { background: #1f9d55; color: #fff; border-color: #1f9d55; }
 .piket-problem-actions { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
-.piket-send-group-btn:hover { background: #25d366; color: #fff; border-color: #25d366; }
-.piket-dispen-note {
-  margin-top: 4px; font-family: var(--font-mono); font-size: 0.6rem;
-  letter-spacing: 0.5px; color: var(--accent); font-style: italic;
-}
-.piket-dispen-note i { margin-right: 4px; }
 
 /* ===== KENANGAN — admin ===== */
 .memories-admin-row {
