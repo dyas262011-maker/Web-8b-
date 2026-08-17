@@ -307,7 +307,10 @@ async function loadPiketProblems() {
   if (!wrap) return;
   wrap.innerHTML = `<p class="schedule-empty">${t('label_memuat')}</p>`;
   try {
-    const rows = await supaSelect('piket_status', '?status=neq.piket&resolved=eq.false&select=*&order=tanggal.desc');
+    // Cuma status "kabur" (Tidak Piket) yang dianggap masalah -- Sakit &
+    // Dispen sudah dihapus dari sistem. Kalau masih ada data lama berstatus
+    // sakit/dispen di database, otomatis tidak ikut tampil di sini.
+    const rows = await supaSelect('piket_status', '?status=eq.kabur&resolved=eq.false&select=*&order=tanggal.desc');
     renderPiketProblems(rows);
   } catch (err) {
     console.warn(err);
@@ -335,7 +338,6 @@ function renderPiketProblems(rows) {
     card.style.setProperty('--pk-color', meta.color);
     card.style.setProperty('--pk-text', meta.textColor);
     const fineText = r.status === 'kabur' ? `<span class="piket-fine">${t('label_denda')}${Number(PIKET_CONFIG.fineAmount||0).toLocaleString('id-ID')}</span>` : '';
-    const dispenNote = r.status === 'dispen' ? `<div class="piket-dispen-note"><i class="fa-solid fa-note-sticky"></i> ${t('label_catatan_dispen')}</div>` : '';
     const checkbox = (isAdmin && r.status === 'kabur')
       ? `<input type="checkbox" class="piket-kabur-check" data-id="${r.id}" data-nama="${escapeHtml(r.nama)}" data-tanggal="${escapeHtml(r.tanggal)}" title="Pilih untuk kirim gabungan" />`
       : '';
@@ -350,7 +352,6 @@ function renderPiketProblems(rows) {
         <div class="piket-problem-name">${escapeHtml(r.nama)}</div>
         <div class="piket-problem-date">${escapeHtml(r.tanggal)}</div>
         ${fineText}
-        ${dispenNote}
       </div>
       ${actions ? `<div class="piket-problem-actions">${actions}</div>` : ''}
     `;
