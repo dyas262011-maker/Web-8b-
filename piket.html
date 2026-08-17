@@ -3,9 +3,15 @@
   PIKET.HTML — SENGAJA TIDAK ADA DI MENU MANAPUN.
   Halaman ini cuma bisa dibuka lewat:
   1. Scan QR code yang ada di halaman Admin situs utama, atau
-  2. Ketik langsung URL-nya di browser (mis. https://domainmu.my.id/piket.html)
+  2. Ketik langsung URL-nya di browser (mis. https://star-area.my.id/piket.html)
   Tidak ada tombol/link ke halaman ini dari index.html, jadi pengunjung
   biasa tidak akan "tersasar" ke sini lewat navigasi normal.
+
+  [PENTING] Halaman ini SENGAJA TIDAK pakai kata sandi lagi (atas
+  permintaan) -- siapapun yang tahu/scan URL-nya langsung bisa masuk dan
+  ubah status piket. Keamanannya sekarang murni bergantung pada URL ini
+  tidak disebar sembarangan. Kalau nanti berubah pikiran dan mau pakai
+  password lagi, tinggal bilang.
   ═══════════════════════════════════════════════════════════════
 -->
 <!DOCTYPE html>
@@ -33,22 +39,7 @@
 
   <div class="container" style="padding-top:24px;">
 
-    <!-- GATE PASSWORD -->
-    <div class="reminder-gate" id="admin-gate">
-      <div class="reminder-gate-box">
-        <i class="fa-solid fa-lock reminder-gate-icon"></i>
-        <div class="reminder-gate-title">Akses Terbatas</div>
-        <p class="reminder-gate-text">Halaman ini khusus penanggung jawab piket. Masukkan kata sandi admin untuk melanjutkan.</p>
-        <input type="password" id="admin-pw-input" class="reminder-pw-input" placeholder="KATA SANDI" autocomplete="off" />
-        <button class="reminder-pw-btn" id="admin-pw-submit">
-          <i class="fa-solid fa-right-to-bracket"></i> Masuk
-        </button>
-        <p class="reminder-pw-error" id="admin-pw-error"></p>
-      </div>
-    </div>
-
-    <!-- FORM PIKET (tampil setelah login) -->
-    <div id="piket-app" style="display:none;">
+    <div id="piket-app">
 
       <div class="card">
         <div class="card-title"><i class="fa-solid fa-calendar-day"></i> Pilih Tanggal</div>
@@ -65,7 +56,6 @@
         Ketuk nama, lalu pilih status: <b>Piket</b> (putih, sudah piket normal), <b>Sakit</b> (kuning), <b>Dispen</b> (biru), atau <b>Tidak Piket/Kabur</b> (merah, kena denda). Tersimpan otomatis begitu dipilih.
       </p>
 
-      <button class="reminder-logout-btn" id="admin-logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Keluar</button>
     </div>
 
   </div>
@@ -82,6 +72,7 @@
 <script>
 // ═══════════════════════════════════════════════════
 // LOGIKA HALAMAN PIKET (mandiri, tidak bergantung pada script.js)
+// Tidak ada gerbang password di halaman ini (sengaja) -- langsung tampil.
 // ═══════════════════════════════════════════════════
 
 // Grid canvas dekorasi (dipertahankan biar konsisten sama situs utama)
@@ -89,20 +80,12 @@ const canvas = document.getElementById('grid-canvas'); const ctx = canvas.getCon
 function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;} resizeCanvas(); window.addEventListener('resize',resizeCanvas);
 function drawGrid(){ctx.clearRect(0,0,canvas.width,canvas.height);const size=38;ctx.strokeStyle='rgba(30,28,26,0.06)';ctx.lineWidth=1;const offset=gridOffset%size;for(let x=-size+offset;x<canvas.width+size;x+=size){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,canvas.height);ctx.stroke();}for(let y=-size+offset;y<canvas.height+size;y+=size){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(canvas.width,y);ctx.stroke();}gridOffset+=0.18;requestAnimationFrame(drawGrid);} drawGrid();
 
-// ═══ GATE PASSWORD ═══
-function initPiketGate() {
-  const authed = isAdminAuthed();
-  document.getElementById('admin-gate').style.display = authed ? 'none' : 'flex';
-  document.getElementById('piket-app').style.display = authed ? 'block' : 'none';
-  if (authed) {
-    // Halaman ini pendek/simpel, jadi kartu langsung ditampilkan tanpa
-    // animasi "muncul saat di-scroll" (beda dengan index.html yang pakai
-    // IntersectionObserver) -- ini yang kemarin bikin kartu keliatan kosong.
-    document.querySelectorAll('.card').forEach(c => c.classList.add('visible'));
-    const dateInput = document.getElementById('piket-admin-date');
-    if (!dateInput.value) dateInput.value = todayDateStr();
-    loadPiketAdminForDate(dateInput.value);
-  }
+// ═══ INIT (langsung tampil, tanpa cek password) ═══
+function initPiketPage() {
+  document.querySelectorAll('.card').forEach(c => c.classList.add('visible'));
+  const dateInput = document.getElementById('piket-admin-date');
+  if (!dateInput.value) dateInput.value = todayDateStr();
+  loadPiketAdminForDate(dateInput.value);
 }
 
 // ═══ ROSTER + STATUS ═══
@@ -157,32 +140,15 @@ async function setPiketStatus(name, status) {
 }
 
 // ═══ EVENTS ═══
-document.addEventListener('click', async (e) => {
-  if (e.target && e.target.id === 'admin-pw-submit') {
-    const input = document.getElementById('admin-pw-input');
-    const errEl = document.getElementById('admin-pw-error');
-    const hash = await sha256Hex(input.value);
-    if (hash === ADMIN_CONFIG.adminPasswordHash) {
-      sessionStorage.setItem('viiib-admin-auth', '1');
-      errEl.textContent = ''; input.value = '';
-      initPiketGate();
-    } else { errEl.textContent = 'Kata sandi salah.'; }
-    return;
-  }
-  const logoutBtn = e.target.closest && e.target.closest('#admin-logout-btn');
-  if (logoutBtn) { sessionStorage.removeItem('viiib-admin-auth'); initPiketGate(); return; }
-
+document.addEventListener('click', (e) => {
   const statusBtn = e.target.closest && e.target.closest('.piket-status-btn');
   if (statusBtn) { setPiketStatus(statusBtn.dataset.name, statusBtn.dataset.status); return; }
 });
 document.addEventListener('input', (e) => {
   if (e.target && e.target.id === 'piket-admin-date') loadPiketAdminForDate(e.target.value);
 });
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && e.target && e.target.id === 'admin-pw-input') document.getElementById('admin-pw-submit').click();
-});
 
-document.addEventListener('DOMContentLoaded', initPiketGate);
+document.addEventListener('DOMContentLoaded', initPiketPage);
 </script>
 </body>
 </html>
