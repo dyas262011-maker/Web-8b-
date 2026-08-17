@@ -1685,6 +1685,16 @@ body::before {
   transition: opacity 0.4s ease, transform 0.4s ease;
 }
 .piket-problem-card.visible { opacity: 1; transform: translateY(0); }
+.piket-kabur-check {
+  flex-shrink: 0; width: 20px; height: 20px; accent-color: var(--accent); cursor: pointer;
+}
+.piket-kabur-send-bar {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  margin-top: 12px; padding: 10px 14px; border: 1.5px dashed var(--accent);
+  background: var(--bg2); font-family: var(--font-mono); font-size: 0.7rem;
+  letter-spacing: 1px; text-transform: uppercase; color: var(--text);
+}
+.piket-kabur-send-bar .reminder-action-btn { flex: 0 0 auto; padding: 8px 14px; font-size: 0.66rem; }
 .piket-problem-badge {
   flex-shrink: 0; padding: 6px 10px; font-family: var(--font-mono); font-size: 0.6rem;
   letter-spacing: 1px; text-transform: uppercase; font-weight: 700;
