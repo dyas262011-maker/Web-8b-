@@ -317,14 +317,10 @@ async function loadPiketProblems() {
     wrap.innerHTML = `<p class="schedule-empty"><i class="fa-solid fa-triangle-exclamation"></i> ${t('label_gagal_memuat')}</p>`;
   }
 }
-let piketKaburSelected = {}; // key: id -> {nama, tanggal, id}
-
 function renderPiketProblems(rows) {
   const wrap = document.getElementById('piket-problem-list');
   if (!wrap) return;
   wrap.innerHTML = '';
-  piketKaburSelected = {};
-  updatePiketKaburSendBar();
   if (!rows || rows.length === 0) {
     wrap.innerHTML = `<p class="schedule-empty"><i class="fa-solid fa-circle-check"></i> ${t('label_piket_aman')}</p>`;
     return;
@@ -338,15 +334,11 @@ function renderPiketProblems(rows) {
     card.style.setProperty('--pk-color', meta.color);
     card.style.setProperty('--pk-text', meta.textColor);
     const fineText = r.status === 'kabur' ? `<span class="piket-fine">${t('label_denda')}${Number(PIKET_CONFIG.fineAmount||0).toLocaleString('id-ID')}</span>` : '';
-    const checkbox = (isAdmin && r.status === 'kabur')
-      ? `<input type="checkbox" class="piket-kabur-check" data-id="${r.id}" data-nama="${escapeHtml(r.nama)}" data-tanggal="${escapeHtml(r.tanggal)}" title="Pilih untuk kirim gabungan" />`
-      : '';
     let actions = '';
     if (isAdmin) {
       actions += `<button class="piket-resolve-btn" data-id="${r.id}">${t('btn_sudah_terlaksana')}</button>`;
     }
     card.innerHTML = `
-      ${checkbox}
       <div class="piket-problem-badge">${t(meta.labelKey)}</div>
       <div class="piket-problem-info">
         <div class="piket-problem-name">${escapeHtml(r.nama)}</div>
@@ -360,20 +352,6 @@ function renderPiketProblems(rows) {
   requestAnimationFrame(() => wrap.querySelectorAll('.piket-problem-card').forEach(el => el.classList.add('visible')));
 }
 
-function togglePiketKaburSelection(id, nama, tanggal, checked) {
-  if (checked) piketKaburSelected[id] = { nama, tanggal };
-  else delete piketKaburSelected[id];
-  updatePiketKaburSendBar();
-}
-function updatePiketKaburSendBar() {
-  const bar = document.getElementById('piket-kabur-send-bar');
-  if (!bar) return;
-  const count = Object.keys(piketKaburSelected).length;
-  bar.style.display = count > 0 ? 'flex' : 'none';
-  const countEl = document.getElementById('piket-kabur-send-count');
-  if (countEl) countEl.textContent = count;
-}
-
 // Emoji lewat kode Unicode (\u{...}), bukan di-paste langsung dari keyboard.
 const EMOJI = {
   megaphone: '\u{1F4E2}',
@@ -385,37 +363,6 @@ const EMOJI = {
   cap: '\u{1F393}',
   check: '\u{2705}',
 };
-
-function buildPiketKaburBatchMessage(entries) {
-  const fine = Number(PIKET_CONFIG.fineAmount || 0);
-  const lines = [];
-  lines.push(EMOJI.megaphone + ' PEMBERITAHUAN PIKET KELAS');
-  lines.push('');
-  lines.push('Yth. Bapak/Ibu Orang Tua/Wali,');
-  lines.push('');
-  lines.push(EMOJI.broom + ' Berdasarkan catatan piket kelas IXB SMPIT ALAMY, berikut daftar ananda yang tercatat tidak melaksanakan piket / tanpa keterangan:');
-  lines.push('');
-  entries.forEach((entry, i) => {
-    lines.push((i + 1) + '. ' + entry.nama + ' - ' + entry.tanggal);
-  });
-  lines.push('');
-  lines.push(EMOJI.money + ' Sesuai kesepakatan kelas, terdapat denda Rp' + fine.toLocaleString('id-ID') + ' per anak (total Rp' + (fine * entries.length).toLocaleString('id-ID') + ').');
-  lines.push('');
-  lines.push(EMOJI.pray + ' Mohon menjadi perhatian bersama. Terima kasih atas kerja samanya.');
-  lines.push('');
-  lines.push(EMOJI.cap + ' Wali Kelas IXB - SMPIT ALAMY');
-  return lines.join('\n');
-}
-async function sendPiketKaburBatchToGroup() {
-  const entries = Object.values(piketKaburSelected);
-  if (entries.length === 0) return;
-  const text = buildPiketKaburBatchMessage(entries);
-  const groupUrl = (CONFIG.waGroupOrtu && CONFIG.waGroupOrtu.trim()) || '';
-  try { await navigator.clipboard.writeText(text); }
-  catch (err) { console.warn('Gagal menyalin otomatis:', err); alert(text); }
-  if (!groupUrl) { alert(t('label_belum_ada_link_grup_ortu')); return; }
-  window.open(groupUrl, '_blank');
-}
 async function resolvePiketIssue(id) {
   try { await supaUpdate('piket_status', `?id=eq.${id}`, { resolved: true }); loadPiketProblems(); }
   catch (err) { console.warn(err); alert('Gagal update status.'); }
@@ -823,8 +770,6 @@ document.addEventListener('click', async (e) => {
   if (kasSendBtn) { sendKasNoticeToParents(kasSendBtn.dataset.nama, kasSendBtn.dataset.bulan, kasSendBtn.dataset.total); return; }
   if (resolveBtn) { resolvePiketIssue(resolveBtn.dataset.id); return; }
 
-  if (e.target && e.target.id === 'btn-kirim-piket-terpilih') { sendPiketKaburBatchToGroup(); return; }
-
   const kasStatusBtn = e.target.closest && e.target.closest('.piket-status-btn[data-kas-status]');
   if (kasStatusBtn) { setKasStatus(kasStatusBtn.dataset.name, kasStatusBtn.dataset.kasStatus); return; }
 
@@ -845,12 +790,6 @@ document.addEventListener('click', async (e) => {
 
 document.addEventListener('input', (e) => {
   if (e.target && e.target.id === 'kas-admin-month') loadKasForMonth(e.target.value);
-});
-
-document.addEventListener('change', (e) => {
-  if (e.target && e.target.classList.contains('piket-kabur-check')) {
-    togglePiketKaburSelection(e.target.dataset.id, e.target.dataset.nama, e.target.dataset.tanggal, e.target.checked);
-  }
 });
 
 document.addEventListener('keydown', (e) => {
