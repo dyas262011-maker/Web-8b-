@@ -314,10 +314,14 @@ async function loadPiketProblems() {
     wrap.innerHTML = `<p class="schedule-empty"><i class="fa-solid fa-triangle-exclamation"></i> ${t('label_gagal_memuat')}</p>`;
   }
 }
+let piketKaburSelected = {}; // key: id -> {nama, tanggal, id}
+
 function renderPiketProblems(rows) {
   const wrap = document.getElementById('piket-problem-list');
   if (!wrap) return;
   wrap.innerHTML = '';
+  piketKaburSelected = {};
+  updatePiketKaburSendBar();
   if (!rows || rows.length === 0) {
     wrap.innerHTML = `<p class="schedule-empty"><i class="fa-solid fa-circle-check"></i> ${t('label_piket_aman')}</p>`;
     return;
@@ -332,14 +336,15 @@ function renderPiketProblems(rows) {
     card.style.setProperty('--pk-text', meta.textColor);
     const fineText = r.status === 'kabur' ? `<span class="piket-fine">${t('label_denda')}${Number(PIKET_CONFIG.fineAmount||0).toLocaleString('id-ID')}</span>` : '';
     const dispenNote = r.status === 'dispen' ? `<div class="piket-dispen-note"><i class="fa-solid fa-note-sticky"></i> ${t('label_catatan_dispen')}</div>` : '';
+    const checkbox = (isAdmin && r.status === 'kabur')
+      ? `<input type="checkbox" class="piket-kabur-check" data-id="${r.id}" data-nama="${escapeHtml(r.nama)}" data-tanggal="${escapeHtml(r.tanggal)}" title="Pilih untuk kirim gabungan" />`
+      : '';
     let actions = '';
     if (isAdmin) {
       actions += `<button class="piket-resolve-btn" data-id="${r.id}">${t('btn_sudah_terlaksana')}</button>`;
-      if (r.status === 'kabur') {
-        actions += `<button class="piket-resolve-btn piket-send-group-btn" data-nama="${escapeHtml(r.nama)}" data-tanggal="${escapeHtml(r.tanggal)}"><i class="fa-brands fa-whatsapp"></i> ${t('btn_kirim_grup')}</button>`;
-      }
     }
     card.innerHTML = `
+      ${checkbox}
       <div class="piket-problem-badge">${t(meta.labelKey)}</div>
       <div class="piket-problem-info">
         <div class="piket-problem-name">${escapeHtml(r.nama)}</div>
@@ -353,24 +358,57 @@ function renderPiketProblems(rows) {
   });
   requestAnimationFrame(() => wrap.querySelectorAll('.piket-problem-card').forEach(el => el.classList.add('visible')));
 }
-function buildPiketKaburMessage(nama, tanggal) {
+
+function togglePiketKaburSelection(id, nama, tanggal, checked) {
+  if (checked) piketKaburSelected[id] = { nama, tanggal };
+  else delete piketKaburSelected[id];
+  updatePiketKaburSendBar();
+}
+function updatePiketKaburSendBar() {
+  const bar = document.getElementById('piket-kabur-send-bar');
+  if (!bar) return;
+  const count = Object.keys(piketKaburSelected).length;
+  bar.style.display = count > 0 ? 'flex' : 'none';
+  const countEl = document.getElementById('piket-kabur-send-count');
+  if (countEl) countEl.textContent = count;
+}
+
+// Emoji lewat kode Unicode (\u{...}), bukan di-paste langsung dari keyboard.
+const EMOJI = {
+  megaphone: '\u{1F4E2}',
+  broom: '\u{1F9F9}',
+  calendar: '\u{1F4C5}',
+  money: '\u{1F4B0}',
+  warning: '\u{26A0}\u{FE0F}',
+  pray: '\u{1F64F}',
+  cap: '\u{1F393}',
+  check: '\u{2705}',
+};
+
+function buildPiketKaburBatchMessage(entries) {
   const fine = Number(PIKET_CONFIG.fineAmount || 0);
   const lines = [];
-  lines.push('PEMBERITAHUAN PIKET KELAS');
+  lines.push(EMOJI.megaphone + ' PEMBERITAHUAN PIKET KELAS');
   lines.push('');
-  lines.push('Yth. Bapak/Ibu Orang Tua/Wali dari ananda ' + nama + ',');
+  lines.push('Yth. Bapak/Ibu Orang Tua/Wali,');
   lines.push('');
-  lines.push('Berdasarkan catatan piket kelas IXB SMPIT ALAMY, pada tanggal ' + tanggal + ' ananda tercatat tidak melaksanakan piket / tanpa keterangan.');
+  lines.push(EMOJI.broom + ' Berdasarkan catatan piket kelas IXB SMPIT ALAMY, berikut daftar ananda yang tercatat tidak melaksanakan piket / tanpa keterangan:');
   lines.push('');
-  lines.push('Sesuai kesepakatan kelas, terdapat denda sebesar Rp' + fine.toLocaleString('id-ID') + '.');
+  entries.forEach((entry, i) => {
+    lines.push((i + 1) + '. ' + entry.nama + ' - ' + entry.tanggal);
+  });
   lines.push('');
-  lines.push('Mohon menjadi perhatian bersama. Terima kasih atas kerja samanya.');
+  lines.push(EMOJI.money + ' Sesuai kesepakatan kelas, terdapat denda Rp' + fine.toLocaleString('id-ID') + ' per anak (total Rp' + (fine * entries.length).toLocaleString('id-ID') + ').');
   lines.push('');
-  lines.push('Wali Kelas IXB - SMPIT ALAMY');
+  lines.push(EMOJI.pray + ' Mohon menjadi perhatian bersama. Terima kasih atas kerja samanya.');
+  lines.push('');
+  lines.push(EMOJI.cap + ' Wali Kelas IXB - SMPIT ALAMY');
   return lines.join('\n');
 }
-async function sendPiketKaburToGroup(nama, tanggal) {
-  const text = buildPiketKaburMessage(nama, tanggal);
+async function sendPiketKaburBatchToGroup() {
+  const entries = Object.values(piketKaburSelected);
+  if (entries.length === 0) return;
+  const text = buildPiketKaburBatchMessage(entries);
   const groupUrl = (CONFIG.waGroupOrtu && CONFIG.waGroupOrtu.trim()) || '';
   try { await navigator.clipboard.writeText(text); }
   catch (err) { console.warn('Gagal menyalin otomatis:', err); alert(text); }
@@ -502,18 +540,18 @@ function renderKasArrears(arrears) {
 }
 function buildKasNoticeMessage(nama, bulanList, total) {
   const lines = [];
-  lines.push('PEMBERITAHUAN KAS KELAS');
+  lines.push(EMOJI.megaphone + ' PEMBERITAHUAN KAS KELAS');
   lines.push('');
   lines.push('Yth. Bapak/Ibu Orang Tua/Wali dari ananda ' + nama + ',');
   lines.push('');
-  lines.push('Berdasarkan catatan kas kelas IXB SMPIT ALAMY, ananda tercatat belum melunasi kas untuk bulan:');
+  lines.push(EMOJI.calendar + ' Berdasarkan catatan kas kelas IXB SMPIT ALAMY, ananda tercatat belum melunasi kas untuk bulan:');
   bulanList.forEach(b => lines.push('- ' + monthDisplayLabel(b)));
   lines.push('');
-  lines.push('Total tunggakan: Rp' + Number(total).toLocaleString('id-ID'));
+  lines.push(EMOJI.money + ' Total tunggakan: Rp' + Number(total).toLocaleString('id-ID'));
   lines.push('');
-  lines.push('Mohon kesediaannya untuk melunasi secepatnya. Terima kasih atas perhatian dan kerja samanya.');
+  lines.push(EMOJI.pray + ' Mohon kesediaannya untuk melunasi secepatnya. Terima kasih atas perhatian dan kerja samanya.');
   lines.push('');
-  lines.push('Wali Kelas IXB - SMPIT ALAMY');
+  lines.push(EMOJI.cap + ' Wali Kelas IXB - SMPIT ALAMY');
   return lines.join('\n');
 }
 async function sendKasNoticeToParents(nama, bulanStr, total) {
@@ -584,11 +622,11 @@ function removeKasManualEntry(idx) {
 
 function buildKasManualBatchMessage() {
   const lines = [];
-  lines.push('PEMBERITAHUAN KAS KELAS');
+  lines.push(EMOJI.megaphone + ' PEMBERITAHUAN KAS KELAS');
   lines.push('');
   lines.push('Yth. Bapak/Ibu Orang Tua/Wali,');
   lines.push('');
-  lines.push('Berdasarkan catatan kas kelas IXB SMPIT ALAMY, berikut daftar ananda yang masih memiliki tunggakan kas:');
+  lines.push(EMOJI.calendar + ' Berdasarkan catatan kas kelas IXB SMPIT ALAMY, berikut daftar ananda yang masih memiliki tunggakan kas:');
   lines.push('');
   let total = 0;
   kasManualEntries.forEach((entry, i) => {
@@ -596,11 +634,11 @@ function buildKasManualBatchMessage() {
     lines.push((i + 1) + '. ' + entry.nama + ' - Rp' + entry.jumlah.toLocaleString('id-ID'));
   });
   lines.push('');
-  lines.push('Total keseluruhan: Rp' + total.toLocaleString('id-ID'));
+  lines.push(EMOJI.money + ' Total keseluruhan: Rp' + total.toLocaleString('id-ID'));
   lines.push('');
-  lines.push('Mohon kesediaannya untuk melunasi secepatnya. Terima kasih atas perhatian dan kerja samanya.');
+  lines.push(EMOJI.pray + ' Mohon kesediaannya untuk melunasi secepatnya. Terima kasih atas perhatian dan kerja samanya.');
   lines.push('');
-  lines.push('Wali Kelas IXB - SMPIT ALAMY');
+  lines.push(EMOJI.cap + ' Wali Kelas IXB - SMPIT ALAMY');
   return lines.join('\n');
 }
 
@@ -688,6 +726,7 @@ async function deleteMemoryPhoto(id) {
 // TEMA / MUSIM (Kemerdekaan / Ramadhan / Biasa) — sinkron semua pengunjung
 // ═══════════════════════════════════════════════════
 let currentSeason = THEME_CONFIG.default;
+let musicFallbackTried = false;
 function applyThemeLocal(season) {
   currentSeason = season;
   document.documentElement.setAttribute('data-season', season);
@@ -696,15 +735,35 @@ function applyThemeLocal(season) {
   const src = document.getElementById('music-src');
   if (src && musicUrl && src.src !== musicUrl) {
     const wasPlaying = isPlaying;
+    musicFallbackTried = false; // tema baru dipilih, kasih kesempatan fallback baru kalau linknya mati
     src.src = musicUrl;
     const aud = document.getElementById('bg-music');
-    if (aud) { aud.load(); if (wasPlaying) aud.play().catch(() => {}); }
+    if (aud) {
+      aud.load();
+      if (wasPlaying) aud.play().catch(() => {});
+    }
   }
   renderThemeButtons();
   const countdownWrap = document.getElementById('ramadhan-countdown');
   if (countdownWrap) countdownWrap.style.display = (season === 'ramadhan') ? 'flex' : 'none';
   if (season === 'ramadhan') updateRamadhanCountdown();
 }
+// Kalau file musik tema (mis. hosting sementara yang kadaluwarsa) gagal
+// dimuat, otomatis balik ke musik "biasa" yang stabil supaya tidak diam
+// tanpa suara sama sekali. Cukup dipasang sekali saja.
+(function setupMusicFallback() {
+  const aud = document.getElementById('bg-music');
+  const src = document.getElementById('music-src');
+  if (!aud || !src) return;
+  aud.addEventListener('error', () => {
+    const normalUrl = (THEME_CONFIG.musics && THEME_CONFIG.musics.normal) || CONFIG.bgMusic;
+    if (musicFallbackTried || !normalUrl || src.src === normalUrl) return;
+    musicFallbackTried = true;
+    console.warn('Musik tema gagal dimuat (link mungkin sudah kadaluwarsa), pakai musik biasa sebagai cadangan.');
+    src.src = normalUrl;
+    aud.load();
+  }, true);
+})();
 function renderThemeButtons() {
   document.querySelectorAll('.theme-choice-btn').forEach(b => b.classList.toggle('active', b.dataset.season === currentSeason));
 }
@@ -760,10 +819,10 @@ document.addEventListener('click', async (e) => {
 
   const resolveBtn = e.target.closest && e.target.closest('.piket-resolve-btn');
   const kasSendBtn = e.target.closest && e.target.closest('.kas-send-btn');
-  const piketSendGroupBtn = e.target.closest && e.target.closest('.piket-send-group-btn');
   if (kasSendBtn) { sendKasNoticeToParents(kasSendBtn.dataset.nama, kasSendBtn.dataset.bulan, kasSendBtn.dataset.total); return; }
-  if (piketSendGroupBtn) { sendPiketKaburToGroup(piketSendGroupBtn.dataset.nama, piketSendGroupBtn.dataset.tanggal); return; }
   if (resolveBtn) { resolvePiketIssue(resolveBtn.dataset.id); return; }
+
+  if (e.target && e.target.id === 'btn-kirim-piket-terpilih') { sendPiketKaburBatchToGroup(); return; }
 
   const kasStatusBtn = e.target.closest && e.target.closest('.piket-status-btn[data-kas-status]');
   if (kasStatusBtn) { setKasStatus(kasStatusBtn.dataset.name, kasStatusBtn.dataset.kasStatus); return; }
@@ -785,6 +844,12 @@ document.addEventListener('click', async (e) => {
 
 document.addEventListener('input', (e) => {
   if (e.target && e.target.id === 'kas-admin-month') loadKasForMonth(e.target.value);
+});
+
+document.addEventListener('change', (e) => {
+  if (e.target && e.target.classList.contains('piket-kabur-check')) {
+    togglePiketKaburSelection(e.target.dataset.id, e.target.dataset.nama, e.target.dataset.tanggal, e.target.checked);
+  }
 });
 
 document.addEventListener('keydown', (e) => {
