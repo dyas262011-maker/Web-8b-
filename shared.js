@@ -54,10 +54,8 @@ async function supaDelete(table, query) {
 
 // ═══════ PIKET — konstanta & util tanggal bersama ═══════
 const PIKET_STATUS_META = {
-  piket:  { color: '#ffffff', textColor: '#333333', labelKey: 'piket_status_piket', label: 'Piket' },
-  sakit:  { color: '#f4d35e', textColor: '#5c4400', labelKey: 'piket_status_sakit', label: 'Sakit' },
-  dispen: { color: '#4da3ff', textColor: '#ffffff', labelKey: 'piket_status_dispen', label: 'Dispen' },
-  kabur:  { color: '#e5484d', textColor: '#ffffff', labelKey: 'piket_status_kabur', label: 'Tidak Piket / Kabur' },
+  piket: { color: '#ffffff', textColor: '#333333', labelKey: 'piket_status_piket', label: 'Piket' },
+  kabur: { color: '#e5484d', textColor: '#ffffff', labelKey: 'piket_status_kabur', label: 'Tidak Piket' },
 };
 
 function weekdayKeyFromDateStr(dateStr) {
