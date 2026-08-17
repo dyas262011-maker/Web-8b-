@@ -267,11 +267,8 @@ const LANG_STRINGS = {
     label_piket_aman: "Semua piket aman, tidak ada masalah.",
     btn_sudah_terlaksana: "Sudah Terlaksana",
     piket_status_piket: "Piket",
-    piket_status_sakit: "Sakit",
-    piket_status_dispen: "Dispen",
-    piket_status_kabur: "Tidak Piket / Kabur",
+    piket_status_kabur: "Tidak Piket",
     label_denda: "Denda Rp",
-    label_catatan_dispen: "Catatan: Harap dikerjakan lain hari!",
     btn_kirim_grup: "Kirim ke Grup",
     label_terpilih: "terpilih",
     // Admin
