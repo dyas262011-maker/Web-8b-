@@ -5,12 +5,7 @@
   1. Scan QR code yang ada di halaman Admin situs utama, atau
   2. Ketik langsung URL-nya di browser (mis. https://star-area.my.id/piket.html)
   Tidak ada tombol/link ke halaman ini dari index.html, jadi pengunjung
-  biasa tidak akan "tersasar" ke sini lewat navigasi normal.
-
-  [PENTING] -- siapapun yang tahu/scan URL-nya langsung bisa masuk dan
-  ubah status piket. Keamanannya sekarang murni bergantung pada URL ini
-  tidak disebar sembarangan. 
-  ═══════════════════════════════════════════════════════════════
+  biasa tidak akan "tersasar" ke sini lewat navigasi normal. ═══════════════════════════════════════════════════════════════
 -->
 <!DOCTYPE html>
 <html lang="id" data-theme="light">
@@ -227,6 +222,8 @@ function buildKaburBatchMessage(entries) {
   lines.push(EMOJI.pray + ' Mohon menjadi perhatian bersama. Terima kasih atas kerja samanya.');
   lines.push('');
   lines.push(EMOJI.cap + ' Wali Kelas IXB - SMPIT ALAMY');
+  lines.push('');
+  lines.push('Info lengkap: ' + announcementPageUrl());
   return lines.join('\n');
 }
 async function sendKaburBatchToGroup() {
