@@ -69,3 +69,10 @@ function todayDateStr() {
   const d = new Date();
   return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 }
+
+// Link ke halaman Pengumuman -- dipakai di bagian bawah pesan yang dikirim
+// ke grup WA, dideteksi otomatis dari domain situs yang sedang dibuka.
+function announcementPageUrl() {
+  try { return window.location.origin + '/index.html#announcement'; }
+  catch (e) { return ''; }
+}
