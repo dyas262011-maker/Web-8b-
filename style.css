@@ -1666,7 +1666,14 @@ body::before {
 .piket-admin-name {
   font-family: var(--font-display); font-weight: 700; letter-spacing: 1px;
   text-transform: uppercase; font-size: 0.88rem; color: var(--text);
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
 }
+.kas-name-del {
+  border: none; background: transparent; color: var(--muted);
+  font-size: 0.72rem; cursor: pointer; padding: 2px 4px; flex-shrink: 0;
+  text-transform: none; letter-spacing: 0; font-family: var(--font-body);
+}
+.kas-name-del:hover { color: #e5484d; }
 .piket-status-picker { display: flex; flex-wrap: wrap; gap: 6px; }
 .piket-status-btn {
   padding: 6px 12px; border: 1.5px solid var(--border);
@@ -1704,7 +1711,6 @@ body::before {
 .piket-problem-info { flex: 1; min-width: 0; }
 .piket-problem-name { font-family: var(--font-display); font-weight: 700; font-size: 0.9rem; letter-spacing: 1px; text-transform: uppercase; color: var(--text); }
 .piket-problem-date { font-family: var(--font-mono); font-size: 0.6rem; color: var(--muted); margin-top: 2px; }
-.piket-fine { display: block; font-family: var(--font-mono); font-size: 0.62rem; color: #e5484d; margin-top: 3px; font-weight: 700; }
 .piket-resolve-btn {
   flex-shrink: 0; padding: 8px 12px; border: 1.5px solid var(--border); background: var(--bg);
   color: var(--text); font-family: var(--font-mono); font-size: 0.58rem; letter-spacing: 1px;
