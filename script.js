@@ -186,6 +186,7 @@ function setupAdminApp() {
   switchAdminTab('pengumuman');
   renderThemeButtons();
   loadMemoriesAdminList();
+  initKasAdmin();
 }
 function switchAdminTab(tabKey) {
   document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tabKey));
@@ -364,6 +365,116 @@ async function resolvePiketIssue(id) {
   catch (err) { console.warn(err); alert('Gagal update status.'); }
 }
 
+// ═══════════════════════════════════════════════════
+// KAS — nama tersimpan (dari server, TIDAK hilang meski tab disembunyikan)
+// ═══════════════════════════════════════════════════
+function currentMonthStr() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+}
+function monthDisplayLabel(monthStr) {
+  if (!monthStr) return '';
+  const [y, m] = monthStr.split('-').map(Number);
+  const d = new Date(y, m - 1, 1);
+  return d.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+}
+
+let kasAdminMonth = '';
+let kasAdminData = {};
+
+function initKasAdmin() {
+  const input = document.getElementById('kas-admin-month');
+  if (!input) return;
+  if (!input.value) input.value = currentMonthStr();
+  loadKasForMonth(input.value);
+}
+async function loadKasKnownNames() {
+  // Nama yang ditampilkan = nama yang PERNAH ditambahkan admin sebelumnya
+  // (diambil dari semua baris kas_status yang pernah ada di server, supaya
+  // nama yang sudah dicatat TIDAK PERNAH hilang).
+  try {
+    const rows = await supaSelect('kas_status', '?select=nama');
+    return [...new Set((rows || []).map(r => r.nama))].sort((a, b) => a.localeCompare(b, 'id'));
+  } catch (err) {
+    console.warn('Gagal ambil daftar nama kas:', err);
+    return [];
+  }
+}
+async function loadKasForMonth(monthStr) {
+  kasAdminMonth = monthStr;
+  const wrap = document.getElementById('kas-admin-list');
+  if (!wrap) return;
+  wrap.innerHTML = `<p class="schedule-empty">${t('label_memuat')}</p>`;
+  const names = await loadKasKnownNames();
+  kasAdminData = {};
+  names.forEach(n => { kasAdminData[n] = 'belum'; });
+  try {
+    const rows = await supaSelect('kas_status', `?bulan=eq.${monthStr}&select=nama,status`);
+    rows.forEach(r => { if (kasAdminData.hasOwnProperty(r.nama)) kasAdminData[r.nama] = r.status; });
+  } catch (err) { console.warn(err); }
+  renderKasAdminList();
+}
+function renderKasAdminList() {
+  const wrap = document.getElementById('kas-admin-list');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  const names = Object.keys(kasAdminData);
+  if (names.length === 0) {
+    wrap.innerHTML = `<p class="schedule-empty"><i class="fa-solid fa-circle-info"></i> ${t('label_kas_belum_ada_nama')}</p>`;
+    return;
+  }
+  names.forEach((name, i) => {
+    const status = kasAdminData[name];
+    const row = document.createElement('div');
+    row.className = 'piket-admin-row';
+    row.style.transitionDelay = `${i * 0.03}s`;
+    row.innerHTML = `
+      <div class="piket-admin-name">${escapeHtml(name)} <button class="kas-name-del" data-name="${escapeHtml(name)}" title="Hapus dari daftar kas"><i class="fa-solid fa-trash"></i></button></div>
+      <div class="piket-status-picker">
+        <button class="piket-status-btn${status==='lunas'?' active':''}" data-name="${escapeHtml(name)}" data-kas-status="lunas" style="--pk-color:#ffffff;--pk-text:#333333;">${t('kas_status_lunas')}</button>
+        <button class="piket-status-btn${status==='belum'?' active':''}" data-name="${escapeHtml(name)}" data-kas-status="belum" style="--pk-color:#e5484d;--pk-text:#ffffff;">${t('kas_status_belum')}</button>
+      </div>`;
+    wrap.appendChild(row);
+  });
+  requestAnimationFrame(() => wrap.querySelectorAll('.piket-admin-row').forEach(el => el.classList.add('visible')));
+}
+async function setKasStatus(name, status) {
+  kasAdminData[name] = status;
+  renderKasAdminList();
+  try {
+    await supaUpsert('kas_status', [{ nama: name, bulan: kasAdminMonth, status }], 'nama,bulan');
+  } catch (err) {
+    console.warn('Gagal simpan status kas:', err);
+    alert('Gagal menyimpan ke server. Cek koneksi / setup Supabase.');
+  }
+}
+async function addKasName() {
+  const input = document.getElementById('kas-admin-name-input');
+  const name = input.value.trim();
+  if (!name) return;
+  if (kasAdminData.hasOwnProperty(name)) { input.value = ''; return; }
+  kasAdminData[name] = 'belum';
+  renderKasAdminList();
+  input.value = '';
+  try {
+    await supaUpsert('kas_status', [{ nama: name, bulan: kasAdminMonth, status: 'belum' }], 'nama,bulan');
+  } catch (err) {
+    console.warn('Gagal menambah nama kas:', err);
+    alert('Gagal menyimpan ke server. Cek koneksi / setup Supabase.');
+  }
+}
+async function removeKasName(name) {
+  if (!confirm('Hapus "' + name + '" dari daftar kas? Semua riwayat bulan-nya juga akan terhapus.')) return;
+  delete kasAdminData[name];
+  renderKasAdminList();
+  try {
+    await supaDelete('kas_status', `?nama=eq.${encodeURIComponent(name)}`);
+  } catch (err) {
+    console.warn('Gagal menghapus nama kas:', err);
+    alert('Gagal menghapus di server. Cek koneksi / setup Supabase.');
+  }
+}
+
 // ═══ KAS — komposer manual (admin ketik nama+jumlah, kirim jadi satu pesan) ═══
 let kasManualEntries = [];
 
@@ -432,6 +543,8 @@ function buildKasManualBatchMessage() {
   lines.push(EMOJI.pray + ' Mohon kesediaannya untuk melunasi secepatnya. Terima kasih atas perhatian dan kerja samanya.');
   lines.push('');
   lines.push(EMOJI.cap + ' Wali Kelas IXB - SMPIT ALAMY');
+  lines.push('');
+  lines.push('Info lengkap: ' + announcementPageUrl());
   return lines.join('\n');
 }
 
@@ -613,6 +726,13 @@ document.addEventListener('click', async (e) => {
   const resolveBtn = e.target.closest && e.target.closest('.piket-resolve-btn');
   if (resolveBtn) { resolvePiketIssue(resolveBtn.dataset.id); return; }
 
+  const kasStatusBtn = e.target.closest && e.target.closest('.piket-status-btn[data-kas-status]');
+  if (kasStatusBtn) { setKasStatus(kasStatusBtn.dataset.name, kasStatusBtn.dataset.kasStatus); return; }
+
+  if (e.target && e.target.id === 'btn-kas-add-name') { addKasName(); return; }
+  const kasDelNameBtn = e.target.closest && e.target.closest('.kas-name-del');
+  if (kasDelNameBtn) { removeKasName(kasDelNameBtn.dataset.name); return; }
+
   if (e.target && e.target.id === 'btn-kas-manual-add') { addKasManualEntry(); return; }
   const kasManualDelBtn = e.target.closest && e.target.closest('#kas-manual-list .reminder-row-del');
   if (kasManualDelBtn) { removeKasManualEntry(+kasManualDelBtn.dataset.idx); return; }
@@ -628,9 +748,16 @@ document.addEventListener('click', async (e) => {
   if (themeBtnEl) { setThemeGlobal(themeBtnEl.dataset.season); return; }
 });
 
+document.addEventListener('input', (e) => {
+  if (e.target && e.target.id === 'kas-admin-month') loadKasForMonth(e.target.value);
+});
+
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && e.target && e.target.id === 'admin-pw-input') {
     document.getElementById('admin-pw-submit').click();
+  }
+  if (e.key === 'Enter' && e.target && e.target.id === 'kas-admin-name-input') {
+    addKasName();
   }
 });
 
