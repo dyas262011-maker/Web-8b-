@@ -7,11 +7,9 @@
   Tidak ada tombol/link ke halaman ini dari index.html, jadi pengunjung
   biasa tidak akan "tersasar" ke sini lewat navigasi normal.
 
-  [PENTING] Halaman ini SENGAJA TIDAK pakai kata sandi lagi (atas
-  permintaan) -- siapapun yang tahu/scan URL-nya langsung bisa masuk dan
+  [PENTING] -- siapapun yang tahu/scan URL-nya langsung bisa masuk dan
   ubah status piket. Keamanannya sekarang murni bergantung pada URL ini
-  tidak disebar sembarangan. Kalau nanti berubah pikiran dan mau pakai
-  password lagi, tinggal bilang.
+  tidak disebar sembarangan. 
   ═══════════════════════════════════════════════════════════════
 -->
 <!DOCTYPE html>
@@ -53,7 +51,7 @@
 
       <p class="reminder-hint">
         <i class="fa-solid fa-circle-info"></i>
-        Ketuk nama, lalu pilih status: <b>Piket</b> (putih, sudah piket normal) atau <b>Tidak Piket</b> (merah, kena denda). Tersimpan otomatis begitu dipilih.
+        Ketuk nama, lalu pilih status: <b>Piket</b> (putih, sudah piket normal) atau <b>Tidak Piket</b> (merah). Tersimpan otomatis begitu dipilih.
       </p>
 
       <div class="card">
@@ -199,7 +197,6 @@ function renderKaburList(rows) {
       <div class="piket-problem-info">
         <div class="piket-problem-name">${escapeHtml(r.nama)}</div>
         <div class="piket-problem-date">${escapeHtml(r.tanggal)}</div>
-        <span class="piket-fine">Denda Rp${Number(PIKET_CONFIG.fineAmount||0).toLocaleString('id-ID')}</span>
       </div>`;
     wrap.appendChild(row);
   });
@@ -218,7 +215,6 @@ function updateKaburSendBar() {
   if (countEl) countEl.textContent = count;
 }
 function buildKaburBatchMessage(entries) {
-  const fine = Number(PIKET_CONFIG.fineAmount || 0);
   const lines = [];
   lines.push(EMOJI.megaphone + ' PEMBERITAHUAN PIKET KELAS');
   lines.push('');
@@ -227,8 +223,6 @@ function buildKaburBatchMessage(entries) {
   lines.push(EMOJI.broom + ' Berdasarkan catatan piket kelas IXB SMPIT ALAMY, berikut daftar ananda yang tercatat tidak melaksanakan piket / tanpa keterangan:');
   lines.push('');
   entries.forEach((entry, i) => { lines.push((i + 1) + '. ' + entry.nama + ' - ' + entry.tanggal); });
-  lines.push('');
-  lines.push(EMOJI.money + ' Sesuai kesepakatan kelas, terdapat denda Rp' + fine.toLocaleString('id-ID') + ' per anak (total Rp' + (fine * entries.length).toLocaleString('id-ID') + ').');
   lines.push('');
   lines.push(EMOJI.pray + ' Mohon menjadi perhatian bersama. Terima kasih atas kerja samanya.');
   lines.push('');
