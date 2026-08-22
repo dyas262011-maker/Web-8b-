@@ -186,12 +186,10 @@ function setupAdminApp() {
   switchAdminTab('pengumuman');
   renderThemeButtons();
   loadMemoriesAdminList();
-  initKasAdmin();
 }
 function switchAdminTab(tabKey) {
   document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tabKey));
   document.querySelectorAll('.admin-tab-panel').forEach(p => p.style.display = (p.dataset.panel === tabKey) ? 'block' : 'none');
-  if (tabKey === 'kas') loadKasArrears();
 }
 function renderQrAdmin() {
   const img = document.getElementById('admin-qr-img');
@@ -333,7 +331,6 @@ function renderPiketProblems(rows) {
     card.style.transitionDelay = `${i * 0.05}s`;
     card.style.setProperty('--pk-color', meta.color);
     card.style.setProperty('--pk-text', meta.textColor);
-    const fineText = r.status === 'kabur' ? `<span class="piket-fine">${t('label_denda')}${Number(PIKET_CONFIG.fineAmount||0).toLocaleString('id-ID')}</span>` : '';
     let actions = '';
     if (isAdmin) {
       actions += `<button class="piket-resolve-btn" data-id="${r.id}">${t('btn_sudah_terlaksana')}</button>`;
@@ -343,7 +340,6 @@ function renderPiketProblems(rows) {
       <div class="piket-problem-info">
         <div class="piket-problem-name">${escapeHtml(r.nama)}</div>
         <div class="piket-problem-date">${escapeHtml(r.tanggal)}</div>
-        ${fineText}
       </div>
       ${actions ? `<div class="piket-problem-actions">${actions}</div>` : ''}
     `;
@@ -366,157 +362,6 @@ const EMOJI = {
 async function resolvePiketIssue(id) {
   try { await supaUpdate('piket_status', `?id=eq.${id}`, { resolved: true }); loadPiketProblems(); }
   catch (err) { console.warn(err); alert('Gagal update status.'); }
-}
-
-// ═══════════════════════════════════════════════════
-// KAS KELAS — status bayar per bulan + ringkasan tunggakan
-// ═══════════════════════════════════════════════════
-function kasStudentNames() {
-  // Ambil nama siswa, buang entri wali kelas (nama diawali "PA ")
-  return STUDENTS.filter(s => !/^PA\s/i.test(s.name)).map(s => s.name);
-}
-function currentMonthStr() {
-  const d = new Date();
-  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
-}
-function monthDisplayLabel(monthStr) {
-  if (!monthStr) return '';
-  const [y, m] = monthStr.split('-').map(Number);
-  const d = new Date(y, m - 1, 1);
-  return d.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
-}
-
-let kasAdminMonth = '';
-let kasAdminData = {};
-
-function initKasAdmin() {
-  const input = document.getElementById('kas-admin-month');
-  if (!input) return;
-  if (!input.value) input.value = currentMonthStr();
-  loadKasForMonth(input.value);
-}
-async function loadKasForMonth(monthStr) {
-  kasAdminMonth = monthStr;
-  const wrap = document.getElementById('kas-admin-list');
-  if (!wrap) return;
-  const names = kasStudentNames();
-  kasAdminData = {};
-  names.forEach(n => { kasAdminData[n] = 'belum'; });
-  wrap.innerHTML = `<p class="schedule-empty">${t('label_memuat')}</p>`;
-  try {
-    const rows = await supaSelect('kas_status', `?bulan=eq.${monthStr}&select=nama,status`);
-    rows.forEach(r => { if (kasAdminData.hasOwnProperty(r.nama)) kasAdminData[r.nama] = r.status; });
-  } catch (err) { console.warn(err); }
-  renderKasAdminList();
-}
-function renderKasAdminList() {
-  const wrap = document.getElementById('kas-admin-list');
-  if (!wrap) return;
-  wrap.innerHTML = '';
-  Object.keys(kasAdminData).forEach((name, i) => {
-    const status = kasAdminData[name];
-    const row = document.createElement('div');
-    row.className = 'piket-admin-row';
-    row.style.transitionDelay = `${i * 0.03}s`;
-    row.innerHTML = `
-      <div class="piket-admin-name">${escapeHtml(name)}</div>
-      <div class="piket-status-picker">
-        <button class="piket-status-btn${status==='lunas'?' active':''}" data-name="${escapeHtml(name)}" data-kas-status="lunas" style="--pk-color:#ffffff;--pk-text:#333333;">${t('kas_status_lunas')}</button>
-        <button class="piket-status-btn${status==='belum'?' active':''}" data-name="${escapeHtml(name)}" data-kas-status="belum" style="--pk-color:#e5484d;--pk-text:#ffffff;">${t('kas_status_belum')}</button>
-      </div>`;
-    wrap.appendChild(row);
-  });
-  requestAnimationFrame(() => wrap.querySelectorAll('.piket-admin-row').forEach(el => el.classList.add('visible')));
-}
-async function setKasStatus(name, status) {
-  kasAdminData[name] = status;
-  renderKasAdminList();
-  try {
-    await supaUpsert('kas_status', [{ nama: name, bulan: kasAdminMonth, status }], 'nama,bulan');
-  } catch (err) {
-    console.warn('Gagal simpan status kas:', err);
-    alert('Gagal menyimpan ke server. Cek koneksi / setup Supabase.');
-  }
-}
-
-async function loadKasArrears() {
-  const wrap = document.getElementById('kas-arrears-list');
-  if (!wrap) return;
-  wrap.innerHTML = `<p class="schedule-empty">${t('label_memuat')}</p>`;
-  try {
-    const rows = await supaSelect('kas_status', "?status=eq.belum&select=nama,bulan&order=bulan.asc");
-    const byName = {};
-    (rows || []).forEach(r => { (byName[r.nama] = byName[r.nama] || []).push(r.bulan); });
-    const arrears = Object.keys(byName)
-      .map(nama => ({ nama, bulanBelum: byName[nama] }))
-      .filter(x => x.bulanBelum.length >= (KAS_CONFIG.tunggakThreshold || 2))
-      .sort((a, b) => b.bulanBelum.length - a.bulanBelum.length);
-    renderKasArrears(arrears);
-  } catch (err) {
-    console.warn(err);
-    wrap.innerHTML = `<p class="schedule-empty">${t('label_gagal_memuat')}</p>`;
-  }
-}
-function renderKasArrears(arrears) {
-  const wrap = document.getElementById('kas-arrears-list');
-  if (!wrap) return;
-  wrap.innerHTML = '';
-  if (!arrears || arrears.length === 0) {
-    wrap.innerHTML = `<p class="schedule-empty"><i class="fa-solid fa-circle-check"></i> ${t('label_semua_lunas')}</p>`;
-    return;
-  }
-  arrears.forEach((item, i) => {
-    const total = item.bulanBelum.length * (KAS_CONFIG.monthlyAmount || 0);
-    const card = document.createElement('div');
-    card.className = 'piket-problem-card';
-    card.style.transitionDelay = `${i * 0.05}s`;
-    card.style.setProperty('--pk-color', '#e5484d');
-    card.style.setProperty('--pk-text', '#ffffff');
-    card.innerHTML = `
-      <div class="piket-problem-badge">${item.bulanBelum.length} ${t('label_menunggak_bulan')}</div>
-      <div class="piket-problem-info">
-        <div class="piket-problem-name">${escapeHtml(item.nama)}</div>
-        <div class="piket-problem-date">${item.bulanBelum.map(monthDisplayLabel).join(', ')}</div>
-        <span class="piket-fine">Rp${total.toLocaleString('id-ID')}</span>
-      </div>
-      <button class="piket-resolve-btn kas-send-btn" data-nama="${escapeHtml(item.nama)}" data-bulan="${escapeHtml(item.bulanBelum.join('|'))}" data-total="${total}">
-        <i class="fa-brands fa-whatsapp"></i> ${t('btn_kirim_grup_ortu')}
-      </button>`;
-    wrap.appendChild(card);
-  });
-  requestAnimationFrame(() => wrap.querySelectorAll('.piket-problem-card').forEach(el => el.classList.add('visible')));
-}
-function buildKasNoticeMessage(nama, bulanList, total) {
-  const lines = [];
-  lines.push(EMOJI.megaphone + ' PEMBERITAHUAN KAS KELAS');
-  lines.push('');
-  lines.push('Yth. Bapak/Ibu Orang Tua/Wali dari ananda ' + nama + ',');
-  lines.push('');
-  lines.push(EMOJI.calendar + ' Berdasarkan catatan kas kelas IXB SMPIT ALAMY, ananda tercatat belum melunasi kas untuk bulan:');
-  bulanList.forEach(b => lines.push('- ' + monthDisplayLabel(b)));
-  lines.push('');
-  lines.push(EMOJI.money + ' Total tunggakan: Rp' + Number(total).toLocaleString('id-ID'));
-  lines.push('');
-  lines.push(EMOJI.pray + ' Mohon kesediaannya untuk melunasi secepatnya. Terima kasih atas perhatian dan kerja samanya.');
-  lines.push('');
-  lines.push(EMOJI.cap + ' Wali Kelas IXB - SMPIT ALAMY');
-  return lines.join('\n');
-}
-async function sendKasNoticeToParents(nama, bulanStr, total) {
-  const bulanList = bulanStr.split('|').filter(Boolean);
-  const text = buildKasNoticeMessage(nama, bulanList, total);
-  const groupUrl = (CONFIG.waGroupOrtu && CONFIG.waGroupOrtu.trim()) || '';
-  try {
-    await navigator.clipboard.writeText(text);
-  } catch (err) {
-    console.warn('Gagal menyalin otomatis:', err);
-    alert(text); // fallback: tampilkan teksnya biar bisa disalin manual
-  }
-  if (!groupUrl) {
-    alert(t('label_belum_ada_link_grup_ortu'));
-    return;
-  }
-  window.open(groupUrl, '_blank');
 }
 
 // ═══ KAS — komposer manual (admin ketik nama+jumlah, kirim jadi satu pesan) ═══
@@ -766,12 +611,7 @@ document.addEventListener('click', async (e) => {
   if (delAnnBtn) { deleteAnnouncement(delAnnBtn.dataset.id); return; }
 
   const resolveBtn = e.target.closest && e.target.closest('.piket-resolve-btn');
-  const kasSendBtn = e.target.closest && e.target.closest('.kas-send-btn');
-  if (kasSendBtn) { sendKasNoticeToParents(kasSendBtn.dataset.nama, kasSendBtn.dataset.bulan, kasSendBtn.dataset.total); return; }
   if (resolveBtn) { resolvePiketIssue(resolveBtn.dataset.id); return; }
-
-  const kasStatusBtn = e.target.closest && e.target.closest('.piket-status-btn[data-kas-status]');
-  if (kasStatusBtn) { setKasStatus(kasStatusBtn.dataset.name, kasStatusBtn.dataset.kasStatus); return; }
 
   if (e.target && e.target.id === 'btn-kas-manual-add') { addKasManualEntry(); return; }
   const kasManualDelBtn = e.target.closest && e.target.closest('#kas-manual-list .reminder-row-del');
@@ -786,10 +626,6 @@ document.addEventListener('click', async (e) => {
 
   const themeBtnEl = e.target.closest && e.target.closest('.theme-choice-btn');
   if (themeBtnEl) { setThemeGlobal(themeBtnEl.dataset.season); return; }
-});
-
-document.addEventListener('input', (e) => {
-  if (e.target && e.target.id === 'kas-admin-month') loadKasForMonth(e.target.value);
 });
 
 document.addEventListener('keydown', (e) => {
