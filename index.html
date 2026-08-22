@@ -398,11 +398,15 @@
         </div>
         <div class="card">
           <div class="card-title"><i class="fa-solid fa-coins"></i> <span data-i18n="label_kelola_kas">Kelola Kas</span></div>
+          <p class="reminder-hint" style="margin-top:0;">
+            <i class="fa-solid fa-circle-info"></i>
+            <span data-i18n="label_kas_data_aman">Nama yang sudah pernah kamu tambahkan tetap tersimpan otomatis dari server -- tidak hilang meski tab ini sempat disembunyikan.</span>
+          </p>
+          <div class="kas-manual-form" style="margin-bottom:12px;">
+            <input type="text" id="kas-admin-name-input" class="reminder-input" data-i18n-placeholder="placeholder_nama_siswa" placeholder="Nama siswa" />
+            <button class="reminder-add-btn" id="btn-kas-add-name"><i class="fa-solid fa-plus"></i> <span data-i18n="btn_tambah_nama">Tambah Nama</span></button>
+          </div>
           <div id="kas-admin-list"></div>
-        </div>
-        <div class="card">
-          <div class="card-title"><i class="fa-solid fa-triangle-exclamation"></i> <span data-i18n="label_ringkasan_tunggakan">Ringkasan Tunggakan</span></div>
-          <div id="kas-arrears-list"></div>
         </div>
 
         <div class="card">
