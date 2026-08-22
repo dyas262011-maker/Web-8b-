@@ -130,7 +130,6 @@ const SUPABASE_CONFIG = {
 // STUDENTS supaya rapi, tapi boleh beda kalau perlu). Kosongkan array kalau
 // hari itu tidak ada piket (mis. hari libur sekolah).
 const PIKET_CONFIG = {
-  fineAmount: 50000, // denda untuk status "Tidak Piket / Kabur" (dalam Rupiah)
   roster: {
     senin: [
       "Fauzan Khodhi Latif",
@@ -268,7 +267,6 @@ const LANG_STRINGS = {
     btn_sudah_terlaksana: "Sudah Terlaksana",
     piket_status_piket: "Piket",
     piket_status_kabur: "Tidak Piket",
-    label_denda: "Denda Rp",
     btn_kirim_grup: "Kirim ke Grup",
     label_terpilih: "terpilih",
     // Admin
@@ -303,13 +301,6 @@ const LANG_STRINGS = {
     label_gagal_memuat: "Gagal memuat data.",
     // Kas
     admin_tab_kas: "Kas",
-    label_kelola_kas: "Kelola Kas",
-    label_pilih_bulan: "Pilih Bulan",
-    kas_status_lunas: "Lunas",
-    kas_status_belum: "Belum Bayar",
-    label_ringkasan_tunggakan: "Ringkasan Tunggakan",
-    label_semua_lunas: "Semua siswa lunas, tidak ada tunggakan.",
-    label_menunggak_bulan: "bulan belum lunas",
     btn_kirim_grup_ortu: "Kirim ke Grup Ortu",
     btn_tersalin: "Tersalin, buka grup...",
     label_belum_ada_link_grup_ortu: "Link grup WA orang tua belum diisi di config.js (CONFIG.waGroupOrtu).",
