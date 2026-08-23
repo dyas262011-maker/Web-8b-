@@ -274,6 +274,11 @@
       <div id="piket-problem-list"></div>
     </div>
 
+    <div class="card">
+      <div class="card-title"><i class="fa-solid fa-coins"></i> <span data-i18n="label_kas_menunggak">Kas Menunggak</span></div>
+      <div id="kas-tunggakan-public-list"></div>
+    </div>
+
     <div class="section-sep" style="margin-top:22px;"><span data-i18n="label_pengumuman">Pengumuman</span></div>
     <div id="announcement-list"></div>
 
@@ -393,27 +398,10 @@
       <!-- TAB: KAS -->
       <div class="admin-tab-panel" data-panel="kas" style="display:none;">
         <div class="card">
-          <div class="card-title"><i class="fa-solid fa-calendar-day"></i> <span data-i18n="label_pilih_bulan">Pilih Bulan</span></div>
-          <input type="month" id="kas-admin-month" class="reminder-input" />
-        </div>
-        <div class="card">
-          <div class="card-title"><i class="fa-solid fa-coins"></i> <span data-i18n="label_kelola_kas">Kelola Kas</span></div>
-          <p class="reminder-hint" style="margin-top:0;">
-            <i class="fa-solid fa-circle-info"></i>
-            <span data-i18n="label_kas_data_aman">Nama yang sudah pernah kamu tambahkan tetap tersimpan otomatis dari server -- tidak hilang meski tab ini sempat disembunyikan.</span>
-          </p>
-          <div class="kas-manual-form" style="margin-bottom:12px;">
-            <input type="text" id="kas-admin-name-input" class="reminder-input" data-i18n-placeholder="placeholder_nama_siswa" placeholder="Nama siswa" />
-            <button class="reminder-add-btn" id="btn-kas-add-name"><i class="fa-solid fa-plus"></i> <span data-i18n="btn_tambah_nama">Tambah Nama</span></button>
-          </div>
-          <div id="kas-admin-list"></div>
-        </div>
-
-        <div class="card">
           <div class="card-title"><i class="fa-solid fa-pen"></i> <span data-i18n="label_buat_pemberitahuan_manual">Buat Pemberitahuan Tunggakan (Manual)</span></div>
           <p class="reminder-hint" style="margin-top:0;">
             <i class="fa-solid fa-circle-info"></i>
-            <span data-i18n="label_kas_manual_hint">Ketik nama & jumlah yang belum dibayar satu-satu, tambahkan ke daftar. Setelah semua terkumpul, kirim jadi SATU pesan ke grup orang tua sekaligus.</span>
+            <span data-i18n="label_kas_manual_hint">Ketik nama & jumlah yang belum dibayar satu-satu, tambahkan ke daftar. Tersimpan otomatis ke server dan tampil di halaman Pengumuman, jadi tidak hilang meski logout/reload. Setelah semua terkumpul, kirim jadi SATU pesan ke grup orang tua sekaligus.</span>
           </p>
           <div class="kas-manual-form">
             <input type="text" id="kas-manual-nama" class="reminder-input" data-i18n-placeholder="placeholder_nama_siswa" placeholder="Nama siswa" />
