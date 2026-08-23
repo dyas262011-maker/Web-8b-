@@ -158,7 +158,7 @@ function goPage(pageId, skipHash){
   currentPage=pageId;
   if(!skipHash) { try { history.replaceState(null, '', '#'+pageId); } catch(e) {} }
   if(pageId==='students')buildStudentList();
-  if(pageId==='announcement'){ loadAnnouncements(); loadPiketProblems(); }
+  if(pageId==='announcement'){ loadAnnouncements(); loadPiketProblems(); loadKasTunggakanPublic(); }
   if(pageId==='memories')buildPhotoGrid();
   if(pageId==='admin')initAdminPage();
 }
@@ -186,7 +186,7 @@ function setupAdminApp() {
   switchAdminTab('pengumuman');
   renderThemeButtons();
   loadMemoriesAdminList();
-  initKasAdmin();
+  loadKasManualEntries();
 }
 function switchAdminTab(tabKey) {
   document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tabKey));
@@ -366,117 +366,25 @@ async function resolvePiketIssue(id) {
 }
 
 // ═══════════════════════════════════════════════════
-// KAS — nama tersimpan (dari server, TIDAK hilang meski tab disembunyikan)
+// KAS — komposer manual, TERSIMPAN KE SERVER (bukan cuma di memori).
+// Nama+jumlah yang admin tambahkan langsung masuk Supabase, jadi TIDAK
+// hilang saat reload/relog, dan otomatis tampil juga di halaman Pengumuman
+// (publik) sampai admin menghapusnya (mis. setelah lunas).
 // ═══════════════════════════════════════════════════
-function currentMonthStr() {
-  const d = new Date();
-  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
-}
-function monthDisplayLabel(monthStr) {
-  if (!monthStr) return '';
-  const [y, m] = monthStr.split('-').map(Number);
-  const d = new Date(y, m - 1, 1);
-  return d.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
-}
+let kasManualEntries = []; // [{id, nama, jumlah}] -- id dari Supabase
 
-let kasAdminMonth = '';
-let kasAdminData = {};
-
-function initKasAdmin() {
-  const input = document.getElementById('kas-admin-month');
-  if (!input) return;
-  if (!input.value) input.value = currentMonthStr();
-  loadKasForMonth(input.value);
-}
-async function loadKasKnownNames() {
-  // Nama yang ditampilkan = nama yang PERNAH ditambahkan admin sebelumnya
-  // (diambil dari semua baris kas_status yang pernah ada di server, supaya
-  // nama yang sudah dicatat TIDAK PERNAH hilang).
+async function loadKasManualEntries() {
+  const wrap = document.getElementById('kas-manual-list');
+  if (wrap) wrap.innerHTML = `<p class="schedule-empty">${t('label_memuat')}</p>`;
   try {
-    const rows = await supaSelect('kas_status', '?select=nama');
-    return [...new Set((rows || []).map(r => r.nama))].sort((a, b) => a.localeCompare(b, 'id'));
+    const rows = await supaSelect('kas_tunggakan', '?select=*&order=created_at.asc');
+    kasManualEntries = (rows || []).map(r => ({ id: r.id, nama: r.nama, jumlah: r.jumlah }));
   } catch (err) {
-    console.warn('Gagal ambil daftar nama kas:', err);
-    return [];
+    console.warn('Gagal memuat data kas tunggakan:', err);
+    kasManualEntries = [];
   }
+  renderKasManualList();
 }
-async function loadKasForMonth(monthStr) {
-  kasAdminMonth = monthStr;
-  const wrap = document.getElementById('kas-admin-list');
-  if (!wrap) return;
-  wrap.innerHTML = `<p class="schedule-empty">${t('label_memuat')}</p>`;
-  const names = await loadKasKnownNames();
-  kasAdminData = {};
-  names.forEach(n => { kasAdminData[n] = 'belum'; });
-  try {
-    const rows = await supaSelect('kas_status', `?bulan=eq.${monthStr}&select=nama,status`);
-    rows.forEach(r => { if (kasAdminData.hasOwnProperty(r.nama)) kasAdminData[r.nama] = r.status; });
-  } catch (err) { console.warn(err); }
-  renderKasAdminList();
-}
-function renderKasAdminList() {
-  const wrap = document.getElementById('kas-admin-list');
-  if (!wrap) return;
-  wrap.innerHTML = '';
-  const names = Object.keys(kasAdminData);
-  if (names.length === 0) {
-    wrap.innerHTML = `<p class="schedule-empty"><i class="fa-solid fa-circle-info"></i> ${t('label_kas_belum_ada_nama')}</p>`;
-    return;
-  }
-  names.forEach((name, i) => {
-    const status = kasAdminData[name];
-    const row = document.createElement('div');
-    row.className = 'piket-admin-row';
-    row.style.transitionDelay = `${i * 0.03}s`;
-    row.innerHTML = `
-      <div class="piket-admin-name">${escapeHtml(name)} <button class="kas-name-del" data-name="${escapeHtml(name)}" title="Hapus dari daftar kas"><i class="fa-solid fa-trash"></i></button></div>
-      <div class="piket-status-picker">
-        <button class="piket-status-btn${status==='lunas'?' active':''}" data-name="${escapeHtml(name)}" data-kas-status="lunas" style="--pk-color:#ffffff;--pk-text:#333333;">${t('kas_status_lunas')}</button>
-        <button class="piket-status-btn${status==='belum'?' active':''}" data-name="${escapeHtml(name)}" data-kas-status="belum" style="--pk-color:#e5484d;--pk-text:#ffffff;">${t('kas_status_belum')}</button>
-      </div>`;
-    wrap.appendChild(row);
-  });
-  requestAnimationFrame(() => wrap.querySelectorAll('.piket-admin-row').forEach(el => el.classList.add('visible')));
-}
-async function setKasStatus(name, status) {
-  kasAdminData[name] = status;
-  renderKasAdminList();
-  try {
-    await supaUpsert('kas_status', [{ nama: name, bulan: kasAdminMonth, status }], 'nama,bulan');
-  } catch (err) {
-    console.warn('Gagal simpan status kas:', err);
-    alert('Gagal menyimpan ke server. Cek koneksi / setup Supabase.');
-  }
-}
-async function addKasName() {
-  const input = document.getElementById('kas-admin-name-input');
-  const name = input.value.trim();
-  if (!name) return;
-  if (kasAdminData.hasOwnProperty(name)) { input.value = ''; return; }
-  kasAdminData[name] = 'belum';
-  renderKasAdminList();
-  input.value = '';
-  try {
-    await supaUpsert('kas_status', [{ nama: name, bulan: kasAdminMonth, status: 'belum' }], 'nama,bulan');
-  } catch (err) {
-    console.warn('Gagal menambah nama kas:', err);
-    alert('Gagal menyimpan ke server. Cek koneksi / setup Supabase.');
-  }
-}
-async function removeKasName(name) {
-  if (!confirm('Hapus "' + name + '" dari daftar kas? Semua riwayat bulan-nya juga akan terhapus.')) return;
-  delete kasAdminData[name];
-  renderKasAdminList();
-  try {
-    await supaDelete('kas_status', `?nama=eq.${encodeURIComponent(name)}`);
-  } catch (err) {
-    console.warn('Gagal menghapus nama kas:', err);
-    alert('Gagal menghapus di server. Cek koneksi / setup Supabase.');
-  }
-}
-
-// ═══ KAS — komposer manual (admin ketik nama+jumlah, kirim jadi satu pesan) ═══
-let kasManualEntries = [];
 
 function renderKasManualList() {
   const wrap = document.getElementById('kas-manual-list');
@@ -485,12 +393,13 @@ function renderKasManualList() {
   if (!wrap) return;
   wrap.innerHTML = '';
   if (kasManualEntries.length === 0) {
-    totalEl.style.display = 'none';
-    sendBtn.style.display = 'none';
+    wrap.innerHTML = `<p class="schedule-empty">${t('label_kas_belum_ada_nama')}</p>`;
+    if (totalEl) totalEl.style.display = 'none';
+    if (sendBtn) sendBtn.style.display = 'none';
     return;
   }
   let total = 0;
-  kasManualEntries.forEach((entry, idx) => {
+  kasManualEntries.forEach((entry) => {
     total += entry.jumlah;
     const row = document.createElement('div');
     row.className = 'memories-admin-row';
@@ -499,29 +408,43 @@ function renderKasManualList() {
         <div class="piket-admin-name" style="font-size:0.8rem;">${escapeHtml(entry.nama)}</div>
         <div class="piket-problem-date">Rp${entry.jumlah.toLocaleString('id-ID')}</div>
       </div>
-      <button class="reminder-row-del" data-idx="${idx}" title="Hapus"><i class="fa-solid fa-xmark"></i></button>`;
+      <button class="reminder-row-del" data-id="${entry.id}" title="Hapus"><i class="fa-solid fa-xmark"></i></button>`;
     wrap.appendChild(row);
   });
-  totalEl.style.display = 'block';
-  totalEl.textContent = 'Total: Rp' + total.toLocaleString('id-ID') + ' (' + kasManualEntries.length + ' siswa)';
-  sendBtn.style.display = 'flex';
+  if (totalEl) {
+    totalEl.style.display = 'block';
+    totalEl.textContent = 'Total: Rp' + total.toLocaleString('id-ID') + ' (' + kasManualEntries.length + ' siswa)';
+  }
+  if (sendBtn) sendBtn.style.display = 'flex';
 }
 
-function addKasManualEntry() {
+async function addKasManualEntry() {
   const namaEl = document.getElementById('kas-manual-nama');
   const jumlahEl = document.getElementById('kas-manual-jumlah');
   const nama = namaEl.value.trim();
   const jumlah = parseInt(jumlahEl.value, 10);
   if (!nama || !jumlah || jumlah <= 0) { alert('Isi nama dan jumlah yang valid dulu.'); return; }
-  kasManualEntries.push({ nama, jumlah });
   namaEl.value = ''; jumlahEl.value = '';
   namaEl.focus();
-  renderKasManualList();
+  try {
+    await supaInsert('kas_tunggakan', [{ nama, jumlah }]);
+    await loadKasManualEntries();
+    loadKasTunggakanPublic(); // sinkron ke tampilan publik kalau lagi kebuka
+  } catch (err) {
+    console.warn('Gagal menyimpan tunggakan:', err);
+    alert('Gagal menyimpan ke server. Cek koneksi / setup Supabase (kas_tunggakan).');
+  }
 }
 
-function removeKasManualEntry(idx) {
-  kasManualEntries.splice(idx, 1);
-  renderKasManualList();
+async function removeKasManualEntry(id) {
+  try {
+    await supaDelete('kas_tunggakan', `?id=eq.${id}`);
+    await loadKasManualEntries();
+    loadKasTunggakanPublic();
+  } catch (err) {
+    console.warn('Gagal menghapus tunggakan:', err);
+    alert('Gagal menghapus di server.');
+  }
 }
 
 function buildKasManualBatchMessage() {
@@ -556,6 +479,56 @@ async function sendKasManualBatch() {
   catch (err) { console.warn('Gagal menyalin otomatis:', err); alert(text); }
   if (!groupUrl) { alert(t('label_belum_ada_link_grup_ortu')); return; }
   window.open(groupUrl, '_blank');
+}
+
+// ═══ Tampilan PUBLIK di halaman Pengumuman ═══
+async function loadKasTunggakanPublic() {
+  const wrap = document.getElementById('kas-tunggakan-public-list');
+  if (!wrap) return;
+  wrap.innerHTML = `<p class="schedule-empty">${t('label_memuat')}</p>`;
+  try {
+    const rows = await supaSelect('kas_tunggakan', '?select=*&order=created_at.asc');
+    renderKasTunggakanPublic(rows);
+  } catch (err) {
+    console.warn(err);
+    wrap.innerHTML = `<p class="schedule-empty"><i class="fa-solid fa-triangle-exclamation"></i> ${t('label_gagal_memuat')}</p>`;
+  }
+}
+function renderKasTunggakanPublic(rows) {
+  const wrap = document.getElementById('kas-tunggakan-public-list');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  if (!rows || rows.length === 0) {
+    wrap.innerHTML = `<p class="schedule-empty"><i class="fa-solid fa-circle-check"></i> ${t('label_semua_lunas')}</p>`;
+    return;
+  }
+  const isAdmin = isAdminAuthed();
+  rows.forEach((r, i) => {
+    const card = document.createElement('div');
+    card.className = 'piket-problem-card';
+    card.style.transitionDelay = `${i * 0.05}s`;
+    card.style.setProperty('--pk-color', '#e5484d');
+    card.style.setProperty('--pk-text', '#ffffff');
+    card.innerHTML = `
+      <div class="piket-problem-badge">${t('kas_status_belum')}</div>
+      <div class="piket-problem-info">
+        <div class="piket-problem-name">${escapeHtml(r.nama)}</div>
+        <div class="piket-problem-date">Rp${Number(r.jumlah||0).toLocaleString('id-ID')}</div>
+      </div>
+      ${isAdmin ? `<button class="piket-resolve-btn kas-public-resolve-btn" data-id="${r.id}">${t('btn_sudah_lunas')}</button>` : ''}
+    `;
+    wrap.appendChild(card);
+  });
+  requestAnimationFrame(() => wrap.querySelectorAll('.piket-problem-card').forEach(el => el.classList.add('visible')));
+}
+async function resolveKasTunggakan(id) {
+  try {
+    await supaDelete('kas_tunggakan', `?id=eq.${id}`);
+    loadKasTunggakanPublic();
+  } catch (err) {
+    console.warn(err);
+    alert('Gagal menghapus.');
+  }
 }
 
 // ═══════════════════════════════════════════════════
@@ -726,16 +699,12 @@ document.addEventListener('click', async (e) => {
   const resolveBtn = e.target.closest && e.target.closest('.piket-resolve-btn');
   if (resolveBtn) { resolvePiketIssue(resolveBtn.dataset.id); return; }
 
-  const kasStatusBtn = e.target.closest && e.target.closest('.piket-status-btn[data-kas-status]');
-  if (kasStatusBtn) { setKasStatus(kasStatusBtn.dataset.name, kasStatusBtn.dataset.kasStatus); return; }
-
-  if (e.target && e.target.id === 'btn-kas-add-name') { addKasName(); return; }
-  const kasDelNameBtn = e.target.closest && e.target.closest('.kas-name-del');
-  if (kasDelNameBtn) { removeKasName(kasDelNameBtn.dataset.name); return; }
+  const kasResolveBtn = e.target.closest && e.target.closest('.kas-public-resolve-btn');
+  if (kasResolveBtn) { resolveKasTunggakan(kasResolveBtn.dataset.id); return; }
 
   if (e.target && e.target.id === 'btn-kas-manual-add') { addKasManualEntry(); return; }
   const kasManualDelBtn = e.target.closest && e.target.closest('#kas-manual-list .reminder-row-del');
-  if (kasManualDelBtn) { removeKasManualEntry(+kasManualDelBtn.dataset.idx); return; }
+  if (kasManualDelBtn) { removeKasManualEntry(kasManualDelBtn.dataset.id); return; }
   if (e.target && e.target.id === 'btn-kas-manual-send') { sendKasManualBatch(); return; }
 
   if (e.target && e.target.id === 'btn-download-qr') { downloadQrImage(); return; }
@@ -748,16 +717,9 @@ document.addEventListener('click', async (e) => {
   if (themeBtnEl) { setThemeGlobal(themeBtnEl.dataset.season); return; }
 });
 
-document.addEventListener('input', (e) => {
-  if (e.target && e.target.id === 'kas-admin-month') loadKasForMonth(e.target.value);
-});
-
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && e.target && e.target.id === 'admin-pw-input') {
     document.getElementById('admin-pw-submit').click();
-  }
-  if (e.key === 'Enter' && e.target && e.target.id === 'kas-admin-name-input') {
-    addKasName();
   }
 });
 
