@@ -158,7 +158,7 @@ function goPage(pageId, skipHash){
   currentPage=pageId;
   if(!skipHash) { try { history.replaceState(null, '', '#'+pageId); } catch(e) {} }
   if(pageId==='students')buildStudentList();
-  if(pageId==='announcement'){ loadAnnouncements(); loadPiketProblems(); loadKasTunggakanPublic(); }
+  if(pageId==='announcement'){ loadAnnouncements(); loadPiketProblems(); loadKasTunggakanPublic(); loadKasMembersPublic(); }
   if(pageId==='memories')buildPhotoGrid();
   if(pageId==='admin')initAdminPage();
 }
@@ -187,6 +187,7 @@ function setupAdminApp() {
   renderThemeButtons();
   loadMemoriesAdminList();
   loadKasManualEntries();
+  loadKasMembersAdmin();
 }
 function switchAdminTab(tabKey) {
   document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tabKey));
@@ -532,6 +533,126 @@ async function resolveKasTunggakan(id) {
 }
 
 // ═══════════════════════════════════════════════════
+// MEMBER KAS — bebas bayar kas sampai tanggal tertentu, ada lencana
+// Mahkota (membership terbesar) & Berlian (sisanya). Emoji lewat kode
+// Unicode (\u{...}), bukan di-paste langsung.
+// ═══════════════════════════════════════════════════
+const KAS_MEMBER_TIER_META = {
+  mahkota: { emoji: '\u{1F451}', labelKey: 'kas_tier_mahkota', label: 'Mahkota', color: '#ffd166', textColor: '#5c4400' },
+  berlian: { emoji: '\u{1F48E}', labelKey: 'kas_tier_berlian', label: 'Berlian', color: '#4da3ff', textColor: '#ffffff' },
+};
+const KAS_MEMBER_TIER_ORDER = ['mahkota', 'berlian'];
+
+function sortKasMembers(rows) {
+  return (rows || []).slice().sort((a, b) => {
+    const pa = KAS_MEMBER_TIER_ORDER.indexOf(a.tier), pb = KAS_MEMBER_TIER_ORDER.indexOf(b.tier);
+    return (pa === -1 ? 99 : pa) - (pb === -1 ? 99 : pb);
+  });
+}
+
+async function loadKasMembersAdmin() {
+  const wrap = document.getElementById('kas-member-list');
+  if (!wrap) return;
+  wrap.innerHTML = `<p class="schedule-empty">${t('label_memuat')}</p>`;
+  try {
+    const rows = await supaSelect('kas_member', '?select=*&order=created_at.asc');
+    renderKasMembersAdmin(sortKasMembers(rows));
+  } catch (err) {
+    console.warn(err);
+    wrap.innerHTML = `<p class="schedule-empty">${t('label_gagal_memuat')}</p>`;
+  }
+}
+function renderKasMembersAdmin(rows) {
+  const wrap = document.getElementById('kas-member-list');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  if (!rows || rows.length === 0) {
+    wrap.innerHTML = `<p class="schedule-empty">${t('label_kas_member_kosong')}</p>`;
+    return;
+  }
+  rows.forEach(r => {
+    const meta = KAS_MEMBER_TIER_META[r.tier] || KAS_MEMBER_TIER_META.berlian;
+    const row = document.createElement('div');
+    row.className = 'memories-admin-row';
+    row.innerHTML = `
+      <div style="flex:1;">
+        <div class="piket-admin-name" style="font-size:0.8rem;">${meta.emoji} ${escapeHtml(r.nama)}</div>
+        <div class="piket-problem-date">${t(meta.labelKey)} &middot; ${t('label_berlaku_sampai')} ${escapeHtml(r.berlaku_sampai)}</div>
+      </div>
+      <button class="reminder-row-del" data-id="${r.id}" title="Hapus"><i class="fa-solid fa-xmark"></i></button>`;
+    wrap.appendChild(row);
+  });
+}
+async function addKasMember() {
+  const namaEl = document.getElementById('kas-member-nama');
+  const tierEl = document.getElementById('kas-member-tier');
+  const tanggalEl = document.getElementById('kas-member-tanggal');
+  const nama = namaEl.value.trim();
+  const tier = tierEl.value;
+  const tanggal = tanggalEl.value;
+  if (!nama || !tanggal) { alert('Isi nama dan tanggal berlaku dulu.'); return; }
+  try {
+    await supaInsert('kas_member', [{ nama, tier, berlaku_sampai: tanggal }]);
+    namaEl.value = ''; tanggalEl.value = '';
+    loadKasMembersAdmin();
+    loadKasMembersPublic();
+  } catch (err) {
+    console.warn('Gagal menyimpan member kas:', err);
+    alert('Gagal menyimpan ke server. Cek koneksi / setup Supabase (kas_member).');
+  }
+}
+async function removeKasMember(id) {
+  try {
+    await supaDelete('kas_member', `?id=eq.${id}`);
+    loadKasMembersAdmin();
+    loadKasMembersPublic();
+  } catch (err) {
+    console.warn('Gagal menghapus member kas:', err);
+    alert('Gagal menghapus di server.');
+  }
+}
+
+async function loadKasMembersPublic() {
+  const wrap = document.getElementById('kas-member-public-list');
+  if (!wrap) return;
+  wrap.innerHTML = `<p class="schedule-empty">${t('label_memuat')}</p>`;
+  try {
+    const rows = await supaSelect('kas_member', '?select=*&order=created_at.asc');
+    renderKasMembersPublic(sortKasMembers(rows));
+  } catch (err) {
+    console.warn(err);
+    wrap.innerHTML = `<p class="schedule-empty"><i class="fa-solid fa-triangle-exclamation"></i> ${t('label_gagal_memuat')}</p>`;
+  }
+}
+function renderKasMembersPublic(rows) {
+  const wrap = document.getElementById('kas-member-public-list');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  if (!rows || rows.length === 0) {
+    wrap.innerHTML = `<p class="schedule-empty">${t('label_kas_member_kosong')}</p>`;
+    return;
+  }
+  rows.forEach((r, i) => {
+    const meta = KAS_MEMBER_TIER_META[r.tier] || KAS_MEMBER_TIER_META.berlian;
+    const card = document.createElement('div');
+    card.className = 'kas-member-card';
+    card.style.transitionDelay = `${i * 0.05}s`;
+    card.style.setProperty('--km-color', meta.color);
+    card.style.setProperty('--km-text', meta.textColor);
+    card.innerHTML = `
+      <div class="kas-member-badge">${meta.emoji}</div>
+      <div class="kas-member-info">
+        <div class="kas-member-name">${escapeHtml(r.nama)}</div>
+        <div class="kas-member-tier">${t(meta.labelKey)}</div>
+        <div class="kas-member-date">${t('label_berlaku_sampai')} ${escapeHtml(r.berlaku_sampai)}</div>
+      </div>
+    `;
+    wrap.appendChild(card);
+  });
+  requestAnimationFrame(() => wrap.querySelectorAll('.kas-member-card').forEach(el => el.classList.add('visible')));
+}
+
+// ═══════════════════════════════════════════════════
 // KENANGAN — foto dari Supabase (+ seed dari config.js kalau kosong)
 // ═══════════════════════════════════════════════════
 async function fetchMemoriesPhotos() {
@@ -701,6 +822,10 @@ document.addEventListener('click', async (e) => {
 
   const kasResolveBtn = e.target.closest && e.target.closest('.kas-public-resolve-btn');
   if (kasResolveBtn) { resolveKasTunggakan(kasResolveBtn.dataset.id); return; }
+
+  if (e.target && e.target.id === 'btn-kas-member-add') { addKasMember(); return; }
+  const kasMemberDelBtn = e.target.closest && e.target.closest('#kas-member-list .reminder-row-del');
+  if (kasMemberDelBtn) { removeKasMember(kasMemberDelBtn.dataset.id); return; }
 
   if (e.target && e.target.id === 'btn-kas-manual-add') { addKasManualEntry(); return; }
   const kasManualDelBtn = e.target.closest && e.target.closest('#kas-manual-list .reminder-row-del');
