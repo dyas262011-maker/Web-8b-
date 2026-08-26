@@ -275,6 +275,11 @@
     </div>
 
     <div class="card">
+      <div class="card-title"><i class="fa-solid fa-crown"></i> <span data-i18n="label_member_kas">Member Kas</span></div>
+      <div id="kas-member-public-list"></div>
+    </div>
+
+    <div class="card">
       <div class="card-title"><i class="fa-solid fa-coins"></i> <span data-i18n="label_kas_menunggak">Kas Menunggak</span></div>
       <div id="kas-tunggakan-public-list"></div>
     </div>
@@ -397,6 +402,24 @@
 
       <!-- TAB: KAS -->
       <div class="admin-tab-panel" data-panel="kas" style="display:none;">
+        <div class="card">
+          <div class="card-title"><i class="fa-solid fa-crown"></i> <span data-i18n="label_kelola_member_kas">Kelola Member Kas</span></div>
+          <p class="reminder-hint" style="margin-top:0;">
+            <i class="fa-solid fa-circle-info"></i>
+            <span data-i18n="label_kas_member_hint">Nama di sini bebas bayar kas sampai tanggal yang ditentukan. Tier "Mahkota" untuk membership terbesar, "Berlian" untuk sisanya. Tampil otomatis di halaman Pengumuman.</span>
+          </p>
+          <div class="kas-manual-form">
+            <input type="text" id="kas-member-nama" class="reminder-input" data-i18n-placeholder="placeholder_nama_siswa" placeholder="Nama siswa" />
+            <select id="kas-member-tier" class="reminder-input">
+              <option value="mahkota">&#x1F451; Mahkota</option>
+              <option value="berlian" selected>&#x1F48E; Berlian</option>
+            </select>
+            <input type="date" id="kas-member-tanggal" class="reminder-input" />
+            <button class="reminder-add-btn" id="btn-kas-member-add"><i class="fa-solid fa-plus"></i> <span data-i18n="btn_tambah_member">Tambah Member</span></button>
+          </div>
+          <div id="kas-member-list" style="margin-top:10px;"></div>
+        </div>
+
         <div class="card">
           <div class="card-title"><i class="fa-solid fa-pen"></i> <span data-i18n="label_buat_pemberitahuan_manual">Buat Pemberitahuan Tunggakan (Manual)</span></div>
           <p class="reminder-hint" style="margin-top:0;">
