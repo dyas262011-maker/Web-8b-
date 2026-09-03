@@ -1696,29 +1696,34 @@ body::before {
 /* ===== MEMBER KAS ===== */
 .kas-member-card {
   display: flex; align-items: center; gap: 14px; padding: 12px 14px;
-  border: 1.5px solid var(--border); margin-bottom: 8px; background: var(--surface);
+  border: 1.5px solid var(--km-border, var(--border)); border-left-width: 4px;
+  margin-bottom: 8px; background: var(--surface);
   opacity: 0; transform: translateY(10px);
   transition: opacity 0.4s ease, transform 0.4s ease, box-shadow 0.15s;
 }
 .kas-member-card.visible { opacity: 1; transform: translateY(0); }
 .kas-member-card:hover { box-shadow: var(--shadow); }
 .kas-member-badge {
-  flex-shrink: 0; width: 44px; height: 44px; border-radius: 50%;
+  flex-shrink: 0; width: 48px; height: 48px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-size: 1.4rem; background: var(--km-color, var(--accent));
-  border: 2px solid var(--border);
+  font-size: 1.5rem; border: 2px solid var(--border);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25), inset 0 1px 2px rgba(255,255,255,0.5);
+  position: relative; overflow: hidden;
+  animation: kasMemberGlow 2.4s ease-in-out infinite;
+}
+.kas-member-badge--sm { width: 34px; height: 34px; font-size: 1.05rem; border-width: 1.5px; }
+@keyframes kasMemberGlow {
+  0%, 100% { filter: brightness(1); }
+  50%      { filter: brightness(1.18); }
 }
 .kas-member-info { flex: 1; min-width: 0; }
 .kas-member-name {
   font-family: var(--font-display); font-weight: 800; letter-spacing: 1px;
   text-transform: uppercase; font-size: 0.92rem; color: var(--text);
 }
-.kas-member-tier {
-  font-family: var(--font-mono); font-size: 0.6rem; letter-spacing: 1.5px;
-  text-transform: uppercase; color: var(--accent); margin-top: 2px; font-weight: 700;
-}
 .kas-member-date {
-  font-family: var(--font-mono); font-size: 0.6rem; color: var(--muted); margin-top: 2px;
+  font-family: var(--font-mono); font-size: 0.62rem; color: var(--accent); margin-top: 2px; font-weight: 700;
+  letter-spacing: 0.5px;
 }
 .piket-kabur-check {
   flex-shrink: 0; width: 20px; height: 20px; accent-color: var(--accent); cursor: pointer;
