@@ -92,6 +92,10 @@
       <i class="fa-solid fa-bullhorn"></i>
       <span data-i18n="nav_announcement">Pengumuman</span>
     </button>
+    <button class="nav-item" onclick="goPage('kasmember')" id="nav-btn-kasmember">
+      <i class="fa-solid fa-crown"></i>
+      <span data-i18n="nav_kasmember">Member Kas</span>
+    </button>
     <button class="nav-item" onclick="goPage('memories')" id="nav-btn-memories">
       <i class="fa-solid fa-camera-retro"></i>
       <span data-i18n="nav_memories">Kenangan</span>
@@ -111,6 +115,7 @@
   <span class="dot active" onclick="goPage('home')" title="Beranda"></span>
   <span class="dot" onclick="goPage('students')" title="Absensi"></span>
   <span class="dot" onclick="goPage('announcement')" title="Pengumuman"></span>
+  <span class="dot" onclick="goPage('kasmember')" title="Member Kas"></span>
   <span class="dot" onclick="goPage('memories')" title="Kenangan"></span>
   <span class="dot" onclick="goPage('admin')" title="Admin"></span>
 </div>
@@ -275,11 +280,6 @@
     </div>
 
     <div class="card">
-      <div class="card-title"><i class="fa-solid fa-crown"></i> <span data-i18n="label_member_kas">Member Kas</span></div>
-      <div id="kas-member-public-list"></div>
-    </div>
-
-    <div class="card">
       <div class="card-title"><i class="fa-solid fa-coins"></i> <span data-i18n="label_kas_menunggak">Kas Menunggak</span></div>
       <div id="kas-tunggakan-public-list"></div>
     </div>
@@ -287,6 +287,30 @@
     <div class="section-sep" style="margin-top:22px;"><span data-i18n="label_pengumuman">Pengumuman</span></div>
     <div id="announcement-list"></div>
 
+  </div>
+  <footer>
+    <i class="fa-solid fa-circle" style="opacity:0.35;margin-right:8px;"></i>
+    SMPIT ALAMY · IXB · ANGKATAN 12
+    <i class="fa-solid fa-circle" style="opacity:0.35;margin-left:8px;"></i>
+    <br>
+    <a href="https://alstecu24.vercel.app" target="_blank" class="dev-link" rel="noopener">
+      <i class="fa-solid fa-code"></i> <span data-i18n="label_developer">developer</span>
+    </a>
+  </footer>
+</div>
+
+<!-- ═══════════════════════════════════════
+     HALAMAN — MEMBER KAS (publik, halaman tersendiri)
+═══════════════════════════════════════ -->
+<div class="page" id="page-kasmember">
+  <div class="page-header">
+    <h2 class="page-title" data-i18n="label_member_kas">Member Kas</h2>
+    <p class="page-subtitle" data-i18n="label_member_kas_subtitle">Bebas kas untuk sementara waktu</p>
+  </div>
+  <div class="container" style="padding-top:24px;">
+    <div class="card">
+      <div id="kas-member-public-list"></div>
+    </div>
   </div>
   <footer>
     <i class="fa-solid fa-circle" style="opacity:0.35;margin-right:8px;"></i>
@@ -414,7 +438,7 @@
               <option value="mahkota">&#x1F451; Mahkota</option>
               <option value="berlian" selected>&#x1F48E; Berlian</option>
             </select>
-            <input type="date" id="kas-member-tanggal" class="reminder-input" />
+            <input type="number" id="kas-member-hari" class="reminder-input" data-i18n-placeholder="placeholder_jumlah_hari" placeholder="Berapa hari bebas kas" min="1" step="1" />
             <button class="reminder-add-btn" id="btn-kas-member-add"><i class="fa-solid fa-plus"></i> <span data-i18n="btn_tambah_member">Tambah Member</span></button>
           </div>
           <div id="kas-member-list" style="margin-top:10px;"></div>
