@@ -134,7 +134,7 @@ document.addEventListener('click',e=>{if(fabOpen&&!fabWrap.contains(e.target)){f
 
 // ═══════ PAGE NAVIGATION ═══════
 const pageNavWrap=document.getElementById('pageNavWrap');let pageNavOpen=false;let currentPage='home';
-const PAGE_ORDER=['home','students','announcement','memories','admin'];
+const PAGE_ORDER=['home','students','announcement','kasmember','memories','admin'];
 function togglePageNav(){pageNavOpen=!pageNavOpen;pageNavWrap.classList.toggle('open',pageNavOpen);}
 document.addEventListener('click',e=>{if(pageNavOpen&&!pageNavWrap.contains(e.target)){pageNavOpen=false;pageNavWrap.classList.remove('open');}});
 
@@ -158,7 +158,8 @@ function goPage(pageId, skipHash){
   currentPage=pageId;
   if(!skipHash) { try { history.replaceState(null, '', '#'+pageId); } catch(e) {} }
   if(pageId==='students')buildStudentList();
-  if(pageId==='announcement'){ loadAnnouncements(); loadPiketProblems(); loadKasTunggakanPublic(); loadKasMembersPublic(); }
+  if(pageId==='announcement'){ loadAnnouncements(); loadPiketProblems(); loadKasTunggakanPublic(); }
+  if(pageId==='kasmember') loadKasMembersPublic();
   if(pageId==='memories')buildPhotoGrid();
   if(pageId==='admin')initAdminPage();
 }
@@ -533,13 +534,14 @@ async function resolveKasTunggakan(id) {
 }
 
 // ═══════════════════════════════════════════════════
-// MEMBER KAS — bebas bayar kas sampai tanggal tertentu, ada lencana
-// Mahkota (membership terbesar) & Berlian (sisanya). Emoji lewat kode
-// Unicode (\u{...}), bukan di-paste langsung.
+// MEMBER KAS — bebas bayar kas untuk N hari (dihitung otomatis dari
+// tanggal hari ini), otomatis hilang dari daftar begitu waktunya habis.
+// Cuma emoji sebagai lencana (tanpa teks "Mahkota"/"Berlian"). Emoji
+// lewat kode Unicode (\u{...}), bukan di-paste langsung.
 // ═══════════════════════════════════════════════════
 const KAS_MEMBER_TIER_META = {
-  mahkota: { emoji: '\u{1F451}', labelKey: 'kas_tier_mahkota', label: 'Mahkota', color: '#ffd166', textColor: '#5c4400' },
-  berlian: { emoji: '\u{1F48E}', labelKey: 'kas_tier_berlian', label: 'Berlian', color: '#4da3ff', textColor: '#ffffff' },
+  mahkota: { emoji: '\u{1F451}', gradient: 'linear-gradient(135deg, #fff3b0 0%, #ffd166 45%, #ff9a3c 100%)', border: '#c98a12' },
+  berlian: { emoji: '\u{1F48E}', gradient: 'linear-gradient(135deg, #dff6ff 0%, #4da3ff 45%, #1a6fcf 100%)', border: '#1156a3' },
 };
 const KAS_MEMBER_TIER_ORDER = ['mahkota', 'berlian'];
 
@@ -549,13 +551,29 @@ function sortKasMembers(rows) {
     return (pa === -1 ? 99 : pa) - (pb === -1 ? 99 : pb);
   });
 }
+function addDaysToToday(days) {
+  const d = new Date();
+  d.setDate(d.getDate() + Number(days));
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+function daysRemaining(dateStr) {
+  const target = new Date(dateStr + 'T00:00:00');
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  return Math.ceil((target - now) / 86400000);
+}
+function daysRemainingLabel(dateStr) {
+  const n = daysRemaining(dateStr);
+  if (n <= 0) return t('label_hari_terakhir');
+  return n + ' ' + t('label_sisa_hari');
+}
 
 async function loadKasMembersAdmin() {
   const wrap = document.getElementById('kas-member-list');
   if (!wrap) return;
   wrap.innerHTML = `<p class="schedule-empty">${t('label_memuat')}</p>`;
   try {
-    const rows = await supaSelect('kas_member', '?select=*&order=created_at.asc');
+    const rows = await supaSelect('kas_member', `?berlaku_sampai=gte.${todayDateStr()}&select=*&order=created_at.asc`);
     renderKasMembersAdmin(sortKasMembers(rows));
   } catch (err) {
     console.warn(err);
@@ -575,9 +593,10 @@ function renderKasMembersAdmin(rows) {
     const row = document.createElement('div');
     row.className = 'memories-admin-row';
     row.innerHTML = `
+      <div class="kas-member-badge kas-member-badge--sm" style="background:${meta.gradient};border-color:${meta.border};">${meta.emoji}</div>
       <div style="flex:1;">
-        <div class="piket-admin-name" style="font-size:0.8rem;">${meta.emoji} ${escapeHtml(r.nama)}</div>
-        <div class="piket-problem-date">${t(meta.labelKey)} &middot; ${t('label_berlaku_sampai')} ${escapeHtml(r.berlaku_sampai)}</div>
+        <div class="piket-admin-name" style="font-size:0.8rem;">${escapeHtml(r.nama)}</div>
+        <div class="piket-problem-date">${daysRemainingLabel(r.berlaku_sampai)}</div>
       </div>
       <button class="reminder-row-del" data-id="${r.id}" title="Hapus"><i class="fa-solid fa-xmark"></i></button>`;
     wrap.appendChild(row);
@@ -586,14 +605,15 @@ function renderKasMembersAdmin(rows) {
 async function addKasMember() {
   const namaEl = document.getElementById('kas-member-nama');
   const tierEl = document.getElementById('kas-member-tier');
-  const tanggalEl = document.getElementById('kas-member-tanggal');
+  const hariEl = document.getElementById('kas-member-hari');
   const nama = namaEl.value.trim();
   const tier = tierEl.value;
-  const tanggal = tanggalEl.value;
-  if (!nama || !tanggal) { alert('Isi nama dan tanggal berlaku dulu.'); return; }
+  const hari = parseInt(hariEl.value, 10);
+  if (!nama || !hari || hari <= 0) { alert('Isi nama dan jumlah hari yang valid dulu.'); return; }
+  const berlakuSampai = addDaysToToday(hari);
   try {
-    await supaInsert('kas_member', [{ nama, tier, berlaku_sampai: tanggal }]);
-    namaEl.value = ''; tanggalEl.value = '';
+    await supaInsert('kas_member', [{ nama, tier, berlaku_sampai: berlakuSampai }]);
+    namaEl.value = ''; hariEl.value = '';
     loadKasMembersAdmin();
     loadKasMembersPublic();
   } catch (err) {
@@ -617,7 +637,9 @@ async function loadKasMembersPublic() {
   if (!wrap) return;
   wrap.innerHTML = `<p class="schedule-empty">${t('label_memuat')}</p>`;
   try {
-    const rows = await supaSelect('kas_member', '?select=*&order=created_at.asc');
+    // Cuma yang belum lewat tanggal berlakunya -- yang sudah lewat otomatis
+    // tidak ikut tampil (tidak perlu dihapus manual).
+    const rows = await supaSelect('kas_member', `?berlaku_sampai=gte.${todayDateStr()}&select=*&order=created_at.asc`);
     renderKasMembersPublic(sortKasMembers(rows));
   } catch (err) {
     console.warn(err);
@@ -637,14 +659,12 @@ function renderKasMembersPublic(rows) {
     const card = document.createElement('div');
     card.className = 'kas-member-card';
     card.style.transitionDelay = `${i * 0.05}s`;
-    card.style.setProperty('--km-color', meta.color);
-    card.style.setProperty('--km-text', meta.textColor);
+    card.style.setProperty('--km-border', meta.border);
     card.innerHTML = `
-      <div class="kas-member-badge">${meta.emoji}</div>
+      <div class="kas-member-badge" style="background:${meta.gradient};border-color:${meta.border};">${meta.emoji}</div>
       <div class="kas-member-info">
         <div class="kas-member-name">${escapeHtml(r.nama)}</div>
-        <div class="kas-member-tier">${t(meta.labelKey)}</div>
-        <div class="kas-member-date">${t('label_berlaku_sampai')} ${escapeHtml(r.berlaku_sampai)}</div>
+        <div class="kas-member-date">${daysRemainingLabel(r.berlaku_sampai)}</div>
       </div>
     `;
     wrap.appendChild(card);
@@ -845,6 +865,9 @@ document.addEventListener('click', async (e) => {
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && e.target && e.target.id === 'admin-pw-input') {
     document.getElementById('admin-pw-submit').click();
+  }
+  if (e.key === 'Enter' && e.target && e.target.id === 'kas-member-hari') {
+    addKasMember();
   }
 });
 
