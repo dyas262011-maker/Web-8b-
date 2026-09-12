@@ -20,6 +20,9 @@
   --font-display: 'Barlow Condensed', sans-serif;
   --font-mono:    'IBM Plex Mono', monospace;
   --font-body:    'Noto Sans', sans-serif;
+  /* Gradasi warna-warni yang dipakai di seluruh situs (tombol, indikator
+     halaman aktif, garis bawah judul, dll) -- otomatis ganti tiap tema. */
+  --gradient-accent: linear-gradient(120deg, #ff6b6b, #ffd166, #06d6a0, #4da3ff, #7b61ff, #ff6b6b);
 }
 
 [data-theme="dark"] {
@@ -33,6 +36,18 @@
   --accent2:   #ffd166;
   --shadow:    3px 3px 0px #b8283a;
   --shadow-lg: 5px 5px 0px #b8283a;
+}
+
+[data-season="ramadhan"] {
+  --gradient-accent: linear-gradient(120deg, #3fdc8e, #ffd166, #1cc8ff, #0f7a4a, #ffd166, #3fdc8e);
+}
+[data-season="normal"] {
+  --gradient-accent: linear-gradient(120deg, #4da3ff, #7b61ff, #ff6b9d, #ffd166, #1cc8ff, #4da3ff);
+}
+
+@keyframes gradientShimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
 }
 
 /* ===== RESET ===== */
@@ -394,9 +409,12 @@ body::before {
 }
 
 .fab-wrap.open .fab-main {
-  background: var(--accent);
+  background-image: var(--gradient-accent);
+  background-size: 300% 300%;
+  animation: gradientShimmer 5s ease-in-out infinite;
   color: #fff;
-  border-color: var(--accent);
+  border-color: var(--border);
+  text-shadow: 0 1px 3px rgba(0,0,0,0.4);
 }
 
 /* Music equalizer bars */
@@ -469,13 +487,22 @@ body::before {
 
 .nav-item i { font-size: 11px; }
 
-.nav-item:hover,
-.nav-item.active {
+.nav-item:hover {
   background: var(--accent);
   color: #fff;
   border-color: var(--accent);
   box-shadow: 3px 3px 0px rgba(26,111,207,0.4);
   transform: translate(-2px, -2px);
+}
+.nav-item.active {
+  background-image: var(--gradient-accent);
+  background-size: 300% 300%;
+  animation: gradientShimmer 5s ease-in-out infinite;
+  color: #fff;
+  border-color: var(--border);
+  box-shadow: 3px 3px 0px rgba(26,111,207,0.4);
+  transform: translate(-2px, -2px);
+  text-shadow: 0 1px 3px rgba(0,0,0,0.4);
 }
 
 .nav-item:active {
@@ -538,8 +565,10 @@ body::before {
 }
 
 .dot.active {
-  background: var(--accent);
-  border-color: var(--accent);
+  background-image: var(--gradient-accent);
+  background-size: 300% 300%;
+  animation: gradientShimmer 5s ease-in-out infinite;
+  border-color: var(--border);
   width: 20px;
   border-radius: 4px;
 }
@@ -757,6 +786,16 @@ body::before {
   padding-bottom: 10px;
   border-bottom: 1px solid var(--border);
   opacity: 0.9;
+  position: relative;
+}
+.card-title::after {
+  content: '';
+  position: absolute;
+  left: 0; bottom: -1.5px;
+  width: 46px; height: 3px;
+  background-image: var(--gradient-accent);
+  background-size: 300% 300%;
+  animation: gradientShimmer 5s ease-in-out infinite;
 }
 
 .card-title i { font-size: 12px; color: var(--accent); transition: transform 0.3s ease; }
@@ -1387,8 +1426,11 @@ body::before {
   padding: 13px;
   margin-bottom: 12px;
   border: 2px solid var(--border);
-  background: var(--accent);
+  background-image: var(--gradient-accent);
+  background-size: 300% 300%;
+  animation: gradientShimmer 5s ease-in-out infinite;
   color: #fff;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.4);
   font-family: var(--font-display);
   font-weight: 700;
   letter-spacing: 2px;
@@ -1400,14 +1442,15 @@ body::before {
   justify-content: center;
   gap: 8px;
   box-shadow: var(--shadow-lg);
-  transition: transform 0.15s, box-shadow 0.15s, background 0.2s;
+  transition: transform 0.15s, box-shadow 0.15s;
 }
 .reminder-save-btn:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0px var(--border); }
 .reminder-save-btn:active { transform: translate(2px, 2px); box-shadow: none; }
 .reminder-save-btn.is-saving {
-  animation: saveBtnPulse 0.7s ease-in-out infinite;
+  animation: saveBtnPulse 0.7s ease-in-out infinite, gradientShimmer 5s ease-in-out infinite;
 }
 .reminder-save-btn.is-saved {
+  background-image: none;
   background: #1f9d55;
   border-color: #1f9d55;
   animation: saveBtnPop 0.4s ease;
@@ -1523,7 +1566,11 @@ body::before {
 }
 .reminder-action-btn:hover { transform: translate(-2px,-2px); box-shadow: var(--shadow-lg); }
 .reminder-action-btn:active { transform: translate(2px,2px); box-shadow: none; }
-.reminder-action-btn--accent { background: var(--accent); color: #fff; border-color: var(--accent); }
+.reminder-action-btn--accent {
+  background-image: var(--gradient-accent); background-size: 300% 300%;
+  animation: gradientShimmer 5s ease-in-out infinite;
+  color: #fff; border-color: var(--border); text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+}
 
 .reminder-hint {
   margin-top: 12px;
@@ -1709,13 +1756,39 @@ body::before {
   font-size: 1.5rem; border: 2px solid var(--border);
   box-shadow: 0 2px 6px rgba(0,0,0,0.25), inset 0 1px 2px rgba(255,255,255,0.5);
   position: relative; overflow: hidden;
-  animation: kasMemberGlow 2.4s ease-in-out infinite;
+  background-size: 300% 300%;
+  animation: kasMemberGlow 2.4s ease-in-out infinite, kasMemberShimmer 5s ease-in-out infinite;
 }
 .kas-member-badge--sm { width: 34px; height: 34px; font-size: 1.05rem; border-width: 1.5px; }
 @keyframes kasMemberGlow {
   0%, 100% { filter: brightness(1); }
   50%      { filter: brightness(1.18); }
 }
+@keyframes kasMemberShimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
+
+/* Warna-warni per lencana, otomatis ikut tema aktif */
+.kas-member-badge--mahkota {
+  background-image: linear-gradient(120deg, #fff3b0, #ffd166, #ff9a3c, #ff6b6b, #ffd166, #fff3b0);
+}
+.kas-member-badge--berlian {
+  background-image: linear-gradient(120deg, #dff6ff, #4da3ff, #7b61ff, #1cc8ff, #4da3ff, #dff6ff);
+}
+[data-season="ramadhan"] .kas-member-badge--mahkota {
+  background-image: linear-gradient(120deg, #fff3b0, #ffd166, #3fdc8e, #0f7a4a, #ffd166, #fff3b0);
+}
+[data-season="ramadhan"] .kas-member-badge--berlian {
+  background-image: linear-gradient(120deg, #d9fff0, #3fdc8e, #1cc8ff, #0b5d3b, #3fdc8e, #d9fff0);
+}
+[data-season="normal"] .kas-member-badge--mahkota {
+  background-image: linear-gradient(120deg, #fff3b0, #ffd166, #ff6b9d, #7b61ff, #ffd166, #fff3b0);
+}
+[data-season="normal"] .kas-member-badge--berlian {
+  background-image: linear-gradient(120deg, #dff6ff, #4da3ff, #7b61ff, #1cc8ff, #4da3ff, #dff6ff);
+}
+
 .kas-member-info { flex: 1; min-width: 0; }
 .kas-member-name {
   font-family: var(--font-display); font-weight: 800; letter-spacing: 1px;
@@ -1777,7 +1850,11 @@ body::before {
   display: flex; align-items: center; justify-content: center; gap: 5px; transition: all 0.15s;
 }
 .admin-tab-btn:hover { background: var(--bg2); color: var(--text); }
-.admin-tab-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: var(--shadow); }
+.admin-tab-btn.active {
+  background-image: var(--gradient-accent); background-size: 300% 300%;
+  animation: gradientShimmer 5s ease-in-out infinite;
+  color: #fff; border-color: var(--border); box-shadow: var(--shadow); text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+}
 
 /* ===== TEMA & MUSIK ===== */
 .theme-choice-row { display: flex; flex-direction: column; gap: 8px; }
@@ -1787,7 +1864,11 @@ body::before {
   cursor: pointer; transition: all 0.15s; text-align: left;
 }
 .theme-choice-btn:hover { transform: translate(-2px, -2px); box-shadow: var(--shadow); }
-.theme-choice-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: var(--shadow-lg); }
+.theme-choice-btn.active {
+  background-image: var(--gradient-accent); background-size: 300% 300%;
+  animation: gradientShimmer 5s ease-in-out infinite;
+  color: #fff; border-color: var(--border); box-shadow: var(--shadow-lg); text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+}
 
 /* ===== QR ADMIN ===== */
 .admin-qr-card { text-align: center; }
