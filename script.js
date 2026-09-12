@@ -1,8 +1,7 @@
 // ═══════════════════════════════════════════════════
 // SCRIPT.JS — LOGIKA HALAMAN UTAMA (index.html)
 // Data ada di config.js, helper bersama ada di shared.js.
-// Fitur "Kelola Piket" (isi status per anak) HANYA ada di piket.html
-// yang cuma bisa diakses lewat scan QR -- lihat komentar di file itu.
+// 
 // ═══════════════════════════════════════════════════
 
 // ═══════ BAHASA ═══════
